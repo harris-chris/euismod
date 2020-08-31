@@ -1,4 +1,4 @@
-package petri
+package sportarray
 
 import shapeless.{HList, ::, HNil}
 import shapeless.{Coproduct, Inl}

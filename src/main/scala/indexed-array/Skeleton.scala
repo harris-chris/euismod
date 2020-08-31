@@ -1,4 +1,4 @@
-package petriarray
+package sportarray
 
 import scala.collection.mutable.HashMap
 
