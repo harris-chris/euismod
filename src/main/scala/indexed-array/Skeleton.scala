@@ -3,7 +3,7 @@ package sportarray
 import scala.collection.mutable.HashMap
 import com.github.nscala_time.time.Imports._
 
-import sportdate.{IsSportDateInstances, IsSportDateSyntax}
+import sportdate.{IsSportDate, IsSportDateInstances, IsSportDateSyntax, SportDate}
 
 object Skeleton {
 
@@ -15,15 +15,24 @@ object Skeleton {
   trait ValuesData extends DataType { type ElemT = Double }
   trait PricesData extends DataType { type ElemT = Double }
 
-  trait IsIdxElem
+  trait IsIdxElem[A]
 
-  import sportdate.{IsSportDate => IsDate}
-  type Date = IsDate[DateTime] with IsIdxElem
+  trait IsDate[A] extends IsSportDate[A] with IsIdxElem[A]
+
+  implicit def dateIsIdxElem(a: DateTime) = new IsIdxElem[DateTime] {}
+  implicit def securityIsIdxElem(a: IsSecurity) = new IsIdxElem[IsSecurity] {}
+
+  object Date {
+    def YMD(y: Int, m: Int, d: Int): DateTime =
+      (new DateTime)
+        .withYear(y).withMonthOfYear(m).withDayOfMonth(d)
+        .withTimeAtStartOfDay() 
+  }
 
   import ArrayDefs.{IsBaseArr}
   import ArrayDefs.{IsDatum, Is1dIndexArr, Is2dIndexArr}
-  type PricesTs = Is1dIndexArr[Date, PricesData]
-  type HoldingsTs[T <: DataType] = Is2dIndexArr[Date, IsSecurity, T]
+  type PricesTs = Is1dIndexArr[IsDate[_], PricesData]
+  type HoldingsTs[T <: DataType] = Is2dIndexArr[IsDate[_], IsSecurity, T]
   type PositionsTs = HoldingsTs[PositionsData]
 
   trait SecurityName
@@ -32,7 +41,7 @@ object Skeleton {
     val name: SecurityName
   }
 
-  trait IsSecurity extends IsIdxElem {
+  trait IsSecurity extends IsIdxElem[IsSecurity] {
     val metadata: IsMetadata
   }
 
@@ -45,12 +54,12 @@ object Skeleton {
   }
 
   trait IsTsChange[T] {
-    def isValidRoll(d: Date): Boolean
+    def isValidRoll(d: DateTime): Boolean
     val delta: IsDelta[T]
   }
 
   trait IsRebal {
-    def triggersOn(d: Option[Date]): Option[Date]
+    def triggersOn(d: Option[DateTime]): Option[DateTime]
     def getEffects(rs: Rebalances): (PositionsTs, List[IsRebal])
   }
 

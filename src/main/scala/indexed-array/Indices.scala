@@ -1,20 +1,19 @@
 package sportarray
 
 import sportdate.{IsSportDateInstances, IsSportDateSyntax}
-import sportdate.{IsSportDate => IsDate}
-import Skeleton.{IsIdxElem, IsSecurity, Date}
+import Skeleton.{IsIdxElem, IsSecurity, IsDate}
 
 object IndicesObj {
 
-  trait IsIndex[ElemT <: IsIdxElem] {
+  trait IsIndex[ElemT <: IsIdxElem[_]] {
     val vals: List[ElemT]
     def indexOf(at: ElemT): Option[Int]
   }
 
   case class DateIndex(
-    val vals: List[Date]
-  ) extends IsIndex[Date] {
-    def indexOf(at: Date): Option[Int] = vals.indexOf(at) match {
+    val vals: List[IsDate[_]]
+  ) extends IsIndex[IsDate[_]] {
+    def indexOf(at: IsDate[_]): Option[Int] = vals.indexOf(at) match {
       case -1 => None
       case n => Some(n)
     }
