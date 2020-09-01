@@ -1,7 +1,8 @@
-package petri
+package sportarray
 
-import DateObj.Date
-import Skeleton.{IsIdxElem, IsDate, IsSecurity}
+import sportdate.{IsSportDateInstances, IsSportDateSyntax}
+import sportdate.{IsSportDate => IsDate}
+import Skeleton.{IsIdxElem, IsSecurity, Date}
 
 object IndicesObj {
 
@@ -11,9 +12,9 @@ object IndicesObj {
   }
 
   case class DateIndex(
-    val vals: List[IsDate[Date]]
-  ) extends IsIndex[IsDate[Date]] {
-    def indexOf(at: IsDate[Date]): Option[Int] = vals.indexOf(at) match {
+    val vals: List[Date]
+  ) extends IsIndex[Date] {
+    def indexOf(at: Date): Option[Int] = vals.indexOf(at) match {
       case -1 => None
       case n => Some(n)
     }

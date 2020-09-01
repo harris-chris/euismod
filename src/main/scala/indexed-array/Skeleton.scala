@@ -1,6 +1,9 @@
 package sportarray
 
 import scala.collection.mutable.HashMap
+import com.github.nscala_time.time.Imports._
+
+import sportdate.{IsSportDateInstances, IsSportDateSyntax}
 
 object Skeleton {
 
@@ -14,16 +17,13 @@ object Skeleton {
 
   trait IsIdxElem
 
-  trait IsDate[A] extends IsIdxElem{
-    def advanceBDay: A
-    def toBDay: A
-  }
+  import sportdate.{IsSportDate => IsDate}
+  type Date = IsDate[DateTime] with IsIdxElem
 
-  import DateObj.Date
   import ArrayDefs.{IsBaseArr}
   import ArrayDefs.{IsDatum, Is1dIndexArr, Is2dIndexArr}
-  type PricesTs = Is1dIndexArr[IsDate[Date], PricesData]
-  type HoldingsTs[T <: DataType] = Is2dIndexArr[IsDate[Date], IsSecurity, T]
+  type PricesTs = Is1dIndexArr[Date, PricesData]
+  type HoldingsTs[T <: DataType] = Is2dIndexArr[Date, IsSecurity, T]
   type PositionsTs = HoldingsTs[PositionsData]
 
   trait SecurityName

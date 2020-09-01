@@ -1,0 +1,276 @@
+{
+    "version": "1.4.0",
+    "project": {
+        "name": "SportArray-test",
+        "directory": "/data/vap/sport-array",
+        "workspaceDir": "/data/vap/sport-array",
+        "sources": [
+            "/data/vap/sport-array/src/test/scala-2.13",
+            "/data/vap/sport-array/src/test/scala",
+            "/data/vap/sport-array/src/test/java",
+            "/data/vap/sport-array/target/scala-2.13/src_managed/test"
+        ],
+        "dependencies": [
+            "SportDate",
+            "SportArray"
+        ],
+        "classpath": [
+            "/data/vap/sport-array/.bloop/SportArray/scala-2.13/classes",
+            "/data/vap/sport-array/.bloop/SportDate/scala-2.13/classes",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.2/scala-library-2.13.2.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.1/scalatest_2.13-3.1.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/nscala-time/nscala-time_2.13/2.24.0/nscala-time_2.13-2.24.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.1/scalactic_2.13-3.1.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/joda-time/joda-time/2.10.6/joda-time-2.10.6.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/joda/joda-convert/2.2.1/joda-convert-2.2.1.jar"
+        ],
+        "out": "/data/vap/sport-array/.bloop/SportArray",
+        "classesDir": "/data/vap/sport-array/.bloop/SportArray/scala-2.13/test-classes",
+        "resources": [
+            "/data/vap/sport-array/src/test/resources",
+            "/data/vap/sport-array/target/scala-2.13/resource_managed/test"
+        ],
+        "scala": {
+            "organization": "org.scala-lang",
+            "name": "scala-compiler",
+            "version": "2.13.2",
+            "options": [
+                
+            ],
+            "jars": [
+                "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2.jar",
+                "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.2/scala-library-2.13.2.jar",
+                "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2.jar",
+                "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline/3.14.1/jline-3.14.1.jar",
+                "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.3.1/jna-5.3.1.jar"
+            ],
+            "analysis": "/data/vap/sport-array/target/streams/test/bloopAnalysisOut/_global/streams/inc_compile_2.13.zip",
+            "setup": {
+                "order": "mixed",
+                "addLibraryToBootClasspath": true,
+                "addCompilerToClasspath": false,
+                "addExtraJarsToClasspath": false,
+                "manageBootClasspath": true,
+                "filterLibraryFromClasspath": true
+            }
+        },
+        "java": {
+            "options": [
+                
+            ]
+        },
+        "test": {
+            "frameworks": [
+                {
+                    "names": [
+                        "org.scalacheck.ScalaCheckFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "org.specs2.runner.Specs2Framework",
+                        "org.specs2.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "org.specs.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "org.scalatest.tools.Framework",
+                        "org.scalatest.tools.ScalaTestFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "com.novocode.junit.JUnitFramework"
+                    ]
+                }
+            ],
+            "options": {
+                "excludes": [
+                    
+                ],
+                "arguments": [
+                    
+                ]
+            }
+        },
+        "platform": {
+            "name": "jvm",
+            "config": {
+                "home": "/usr/lib/jvm/java-11-openjdk",
+                "options": [
+                    "-Duser.dir=/data/vap/sport-array"
+                ]
+            },
+            "mainClass": [
+                
+            ]
+        },
+        "resolution": {
+            "modules": [
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-library",
+                    "version": "2.13.2",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-library",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.2/scala-library-2.13.2.jar"
+                        },
+                        {
+                            "name": "scala-library",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.2/scala-library-2.13.2-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scalatest",
+                    "name": "scalatest_2.13",
+                    "version": "3.1.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scalatest_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.1/scalatest_2.13-3.1.1.jar"
+                        },
+                        {
+                            "name": "scalatest_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.1/scalatest_2.13-3.1.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.github.nscala-time",
+                    "name": "nscala-time_2.13",
+                    "version": "2.24.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "nscala-time_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/nscala-time/nscala-time_2.13/2.24.0/nscala-time_2.13-2.24.0.jar"
+                        },
+                        {
+                            "name": "nscala-time_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/nscala-time/nscala-time_2.13/2.24.0/nscala-time_2.13-2.24.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scalactic",
+                    "name": "scalactic_2.13",
+                    "version": "3.1.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scalactic_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.1/scalactic_2.13-3.1.1.jar"
+                        },
+                        {
+                            "name": "scalactic_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.1/scalactic_2.13-3.1.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-reflect",
+                    "version": "2.13.2",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-reflect",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2.jar"
+                        },
+                        {
+                            "name": "scala-reflect",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang.modules",
+                    "name": "scala-xml_2.13",
+                    "version": "1.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-xml_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0.jar"
+                        },
+                        {
+                            "name": "scala-xml_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "joda-time",
+                    "name": "joda-time",
+                    "version": "2.10.6",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "joda-time",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/joda-time/joda-time/2.10.6/joda-time-2.10.6.jar"
+                        },
+                        {
+                            "name": "joda-time",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/joda-time/joda-time/2.10.6/joda-time-2.10.6-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.joda",
+                    "name": "joda-convert",
+                    "version": "2.2.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "joda-convert",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/joda/joda-convert/2.2.1/joda-convert-2.2.1.jar"
+                        },
+                        {
+                            "name": "joda-convert",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/joda/joda-convert/2.2.1/joda-convert-2.2.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-library",
+                    "version": "2.13.2",
+                    "configurations": "optional",
+                    "artifacts": [
+                        {
+                            "name": "scala-library",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.2/scala-library-2.13.2.jar"
+                        },
+                        {
+                            "name": "scala-library",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.2/scala-library-2.13.2-sources.jar"
+                        }
+                    ]
+                }
+            ]
+        },
+        "tags": [
+            "test"
+        ]
+    }
+}

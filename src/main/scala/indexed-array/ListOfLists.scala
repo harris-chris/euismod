@@ -1,7 +1,6 @@
 package sportarray
 
 import ArrayDefs._
-import DateObj.Date
 import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
 import Skeleton.{IsIdxElem}
 import IndicesObj._
@@ -30,12 +29,12 @@ object ListOfListsObj {
   )(implicit ev: Numeric[DataT#ElemT]) extends Is2dIndexArr[I0, I1, DataT] {
     //def addDelta(delta: SelfMinus1T): Self = ???
     def getDim0Slice(loc: I0): Option[Is1dIndexArr[I1, DataT]] = 
-      indices(0).indexOf(loc).map(i => 
-        Arr1d[I1, DataT](indices(1) :: HNil, data(i))
+      indices._1.indexOf(loc).map(i => 
+        Arr1d[I1, DataT]((indices._2), data(i))
       )
     def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]] = 
-      indices(1).indexOf(loc).map(i => 
-        Arr1d[I0, DataT](indices(0) :: HNil, data(i))
+      indices._2.indexOf(loc).map(i => 
+        Arr1d[I0, DataT]((indices._1), data(i))
       )
   }
 }
