@@ -1,8 +1,5 @@
 package sportarray
 
-import shapeless.{HList, ::, HNil}
-import shapeless.{Coproduct, Inl}
-
 import ArrayDefs._
 import DateObj.Date
 import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
@@ -19,7 +16,7 @@ object ListOfListsObj {
   }
   
   case class Arr1d[I0 <: IsIdxElem, DataT <: DataType] (
-    indices: IsIndex[I0] :: HNil,
+    indices: (IsIndex[I0]),
     data: List[DataT#ElemT],
   )(implicit ev: Numeric[DataT#ElemT]) extends Is1dIndexArr[I0, DataT] {
     def addDelta(delta: Self): Self = ??? 
@@ -28,7 +25,7 @@ object ListOfListsObj {
   }
 
   case class Arr2d[I0 <: IsIdxElem, I1 <: IsIdxElem, DataT <: DataType] (
-    indices: IsIndex[I0] :: IsIndex[I1] :: HNil,
+    indices: (IsIndex[I0], IsIndex[I1]),
     data: List[List[DataT#ElemT]],
   )(implicit ev: Numeric[DataT#ElemT]) extends Is2dIndexArr[I0, I1, DataT] {
     //def addDelta(delta: SelfMinus1T): Self = ???

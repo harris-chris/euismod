@@ -4,7 +4,7 @@ import scala.sys.process._
 ThisBuild / scalaVersion     := "2.13.2"
 ThisBuild / version          := "0.1.0"
 
-lazy val SportDate = ProjectRef(
+lazy val sportDate = ProjectRef(
   uri("ssh://git@github.com/chrisharriscjh/sport-date.git#master"), "SportDate"
 )
 
@@ -12,7 +12,7 @@ lazy val SportArray = (project in file("."))
   .settings(
     libraryDependencies += scalaTest % Test
   )
-  .dependsOn(SportDate)
+  .dependsOn(sportDate)
 
 def removegit = Command.command("removegit"){state =>
   val home = sys.env("HOME")

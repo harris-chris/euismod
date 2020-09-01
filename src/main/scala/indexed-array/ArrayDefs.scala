@@ -1,8 +1,5 @@
 package sportarray
 
-import shapeless.{HList, ::, HNil}
-import shapeless.{Coproduct, :+:, CNil}
-
 import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
 import Skeleton.IsIdxElem
 import IndicesObj.{IsIndex}
@@ -18,13 +15,13 @@ object ArrayDefs {
 
   trait Is1dIndexArr[I0 <: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
     type Self = Is1dIndexArr[I0, DataT]
-    val indices: IsIndex[I0] :: HNil
+    val indices: (IsIndex[I0])
     def loc(at: I0): Option[IsDatum[I0, DataT]]
   }
 
   trait Is2dIndexArr[I0 <: IsIdxElem, I1 <: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
     type Self = Is2dIndexArr[I0, I1, DataT]
-    val indices: IsIndex[I0] :: IsIndex[I1] :: HNil
+    val indices: (IsIndex[I0], IsIndex[I1])
     def getDim0Slice(loc: I0): Option[Is1dIndexArr[I1, DataT]]
     def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]]
     //def addDelta(delta: SelfMinus1T): Self
@@ -53,7 +50,7 @@ object ArrayDefs {
     I0 <: IsIdxElem, I1 <: IsIdxElem, I2 <: IsIdxElem, DataT <: DataType
   ] extends IsBaseArr[DataT] {
     type Self = Is3dIndexArr[I0, I1, I2, DataT]
-    val indices: IsIndex[I0] :: IsIndex[I1] :: IsIndex[I2] :: HNil
+    val indices: (IsIndex[I0], IsIndex[I1], IsIndex[I2])
     //def addDelta(delta: SelfMinus1d[I0, I1]): Self
     //def addDelta(delta: SelfMinus1d[I0, I2]): Self
     //def addDelta(delta: SelfMinus1d[I1, I2]): Self
