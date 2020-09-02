@@ -25,11 +25,22 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   )
   type Dim0T = Composite
   val dim0 = Index(
-    Composite("c0"), Composite("c1"), Composite("c2"), Composite("c3"), Composite("c4")
+    Composite("c0"), Composite("c1")
   )
   val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
-  val values2d = List(values1d.map(_ + 1), values1d.map(_ + 2), values1d.map(_ + 3))
-
+  val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))
+  val values3d = List(
+    List(
+      List(0.1, 0.2, 0.3, 0.4, 0.5),
+      List(1.1, 1.2, 1.3, 1.4, 1.5),
+      List(2.1, 2.2, 2.3, 2.4, 2.5),
+    ),
+    List(
+      List(3.1, 3.2, 3.3, 3.4, 3.5),
+      List(4.1, 4.2, 4.3, 4.4, 4.5),
+      List(5.1, 5.2, 5.3, 5.4, 5.5),
+    ),
+  )
   "Datum" should "store ref and value" in {
     assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).ref == SportDate.YMD(2020,8,1))
     assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).value == 0.1)
@@ -47,6 +58,27 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     )
     assert(
       arr2d.loc(dim2.vals(1)) == Some(Arr1d[Dim1T, PositionsData](dim1, values2d.map(_(1))))
+    )
+  }
+  "Arr3d" should "return a correct Arr2d with .loc" in {
+    val arr3d = Arr3d[Dim0T, Dim1T, Dim2T, PositionsData]((dim0, dim1, dim2), values3d)
+    val dim0sliceat0 = values3d(0)
+    assert(
+      arr3d.loc(dim0.vals(0)) == Some(Arr2d[Dim1T, Dim2T, PositionsData]((dim1, dim2), dim0sliceat0))
+    )
+    val dim1sliceat1 = List(
+      List(1.1, 1.2, 1.3, 1.4, 1.5),
+      List(4.1, 4.2, 4.3, 4.4, 4.5),
+    )
+    assert(
+      arr3d.loc(dim1.vals(1)) == Some(Arr2d[Dim0T, Dim2T, PositionsData]((dim0, dim2), dim1sliceat1))
+    )
+    val dim2sliceat2 = List(
+      List(0.3, 1.3, 2.3),
+      List(3.3, 4.3, 5.3),
+    )
+    assert(
+      arr3d.loc(dim2.vals(2)) == Some(Arr2d[Dim0T, Dim1T, PositionsData]((dim0, dim1), dim2sliceat2))
     )
   }
 }

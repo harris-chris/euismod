@@ -38,4 +38,23 @@ object ListOfListsObj {
         Arr1d[I0, DataT]((indices._1), data.map(_(i)))
       )
   }
+
+  case class Arr3d[I0: IsIdxElem, I1: IsIdxElem, I2: IsIdxElem, DataT <: DataType] (
+    indices: (Index[I0], Index[I1], Index[I2]),
+    data: List[List[List[DataT#ElemT]]],
+  )(implicit ev: Numeric[DataT#ElemT]) extends Is3dIndexArr[I0, I1, I2, DataT] {
+    //def addDelta(delta: SelfMinus1T): Self = ???
+    def getDim0Slice(loc: I0): Option[Is2dIndexArr[I1, I2, DataT]] = 
+      indices._1.indexOf(loc).map(i => 
+        Arr2d[I1, I2, DataT]((indices._2, indices._3), data(i))
+      )
+    def getDim1Slice(loc: I1): Option[Is2dIndexArr[I0, I2, DataT]] = 
+      indices._2.indexOf(loc).map(i => 
+        Arr2d[I0, I2, DataT]((indices._1, indices._3), data.map(_(i)))
+      )
+    def getDim2Slice(loc: I2): Option[Is2dIndexArr[I0, I1, DataT]] = 
+      indices._3.indexOf(loc).map(i => 
+        Arr2d[I0, I1, DataT]((indices._1, indices._2), data.map(l1 => l1.map(_(i))))
+        )
+  }
 }
