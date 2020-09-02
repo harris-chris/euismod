@@ -7,7 +7,7 @@ import com.github.nscala_time.time.Imports._
 import sportdate.SportDate
 import sportdate.{IsSportDateInstances, IsSportDateSyntax}
 
-import Skeleton.{PositionsData, IsIdxElemImplicits, DateType}
+import Skeleton.{PositionsData, IsIdxElemImplicits, DateType, Element, Composite}
 import Skeleton.IsIdxElemImplicits._
 import Skeleton.IsIdxElem
 import IndicesObj._
@@ -15,18 +15,38 @@ import IndicesObj._
 import ListOfListsObj._
 
 class ArraySpec extends AnyFlatSpec with Matchers {
-  val datesIndex = DateIndex(
-    List(
-      SportDate.YMD(2020,8,1), SportDate.YMD(2020,8,2), SportDate.YMD(2020,8,3), SportDate.YMD(2020,8,4)
-  ))
-  val values1d = List(0.1, 0.2, 0.3, 0.4)
+  type Dim2T = DateType
+  val dim2 = Index(
+    SportDate.YMD(2020,8,1), SportDate.YMD(2020,8,2), SportDate.YMD(2020,8,3), SportDate.YMD(2020,8,4)
+  )
+  type Dim1T = Element
+  val dim1 = Index(
+    Element("e0"), Element("e1"), Element("e2")
+  )
+  type Dim0T = Composite
+  val dim0 = Index(
+    Composite("c0"), Composite("c1"), Composite("c2"), Composite("c3"), Composite("c4")
+  )
+  val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
+  val values2d = List(values1d.map(_ + 1), values1d.map(_ + 2), values1d.map(_ + 3))
 
   "Datum" should "store ref and value" in {
-    assert(Datum[DateType, PositionsData](SportDate.YMD(2020,8,1), 0.1).ref == SportDate.YMD(2020,8,1))
-    assert(Datum[DateType, PositionsData](SportDate.YMD(2020,8,1), 0.1).value == 0.1)
+    assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).ref == SportDate.YMD(2020,8,1))
+    assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).value == 0.1)
   }
-  "Arr1d" should "return correct values using .loc" in {
-    val arr1d = Arr1d[DateType, PositionsData](datesIndex, values1d)
-    assert(arr1d.loc(datesIndex.vals(2)) == Some(0.3))
+  "Arr1d" should "return correct Datum with .loc" in {
+    val arr1d = Arr1d[Dim2T, PositionsData](dim2, values1d)
+    assert(
+      arr1d.loc(dim2.vals(2)) == Some(Datum[Dim2T, PositionsData](dim2.vals(2), values1d(2)))
+    )
+  }
+  "Arr2d" should "return a correct Arr1d with .loc" in {
+    val arr2d = Arr2d[Dim1T, Dim2T, PositionsData]((dim1, dim2), values2d)
+    assert(
+      arr2d.loc(dim1.vals(2)) == Some(Arr1d[Dim2T, PositionsData](dim2, values2d(2)))
+    )
+    assert(
+      arr2d.loc(dim2.vals(1)) == Some(Arr1d[Dim1T, PositionsData](dim1, values2d.map(_(1))))
+    )
   }
 }

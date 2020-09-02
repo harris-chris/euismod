@@ -9,8 +9,8 @@ import sportdate.IsSportDateSyntax._
 
 object Skeleton {
 
-  type DateType = DateTime
 
+  // Define your DataTypes here - these are the types of value used in the body of the array
   sealed trait DataType {
     type ElemT 
   }
@@ -19,51 +19,16 @@ object Skeleton {
   trait ValuesData extends DataType { type ElemT = Double }
   trait PricesData extends DataType { type ElemT = Double }
 
+  // IsIdxElem is a trait which defines whether a particular type can be used for an index
   trait IsIdxElem[A]
+  // We are using DateTime (imported from nscala_time) as our date type throughout
+  type DateType = DateTime
+  // A couple of other example index types
+  case class Element(name: String)
+  case class Composite(name: String)
   object IsIdxElemImplicits {
-    implicit val securityIsIdxElem = new IsIdxElem[IsSecurity] {}
     implicit val dateTimeIsIdxElem = new IsIdxElem[DateType] {}
-  }
-
-  import ArrayDefs.{IsBaseArr}
-  import ArrayDefs.{IsDatum, Is1dIndexArr, Is2dIndexArr}
-  type PricesTs = Is1dIndexArr[DateType, PricesData]
-  type HoldingsTs[T <: DataType] = Is2dIndexArr[DateType, IsSecurity, T]
-  type PositionsTs = HoldingsTs[PositionsData]
-
-  trait SecurityName
-  
-  trait IsMetadata {
-    val name: SecurityName
-  }
-
-  trait IsSecurity extends IsIdxElem[IsSecurity] {
-    val metadata: IsMetadata
-  }
-
-  trait HasPrice {
-    val priceTs: PricesTs 
-  }
-
-  trait IsDelta[T] {
-    val deltas: HashMap[IsSecurity, T]
-  }
-
-  trait IsTsChange[T] {
-    def isValidRoll(d: DateType): Boolean
-    val delta: IsDelta[T]
-  }
-
-  trait IsRebal {
-    def triggersOn(d: Option[DateType]): Option[DateType]
-    def getEffects(rs: Rebalances): (PositionsTs, List[IsRebal])
-  }
-
-  trait Rebalances extends IsSecurity {
-    def addRebalance(r: IsRebal): Rebalances
-  }
-
-  trait IsComposite {
-    val positionsTs: PositionsTs
+    implicit val elementIsIdxElem = new IsIdxElem[Element] {}
+    implicit val compositeIsIdxElem = new IsIdxElem[Composite] {}
   }
 }
