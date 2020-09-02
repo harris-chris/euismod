@@ -4,6 +4,8 @@ import scala.collection.mutable.HashMap
 import com.github.nscala_time.time.Imports._
 
 import sportdate.{IsSportDate, IsSportDateInstances, IsSportDateSyntax, SportDate}
+import sportdate.IsSportDateInstances._
+import sportdate.IsSportDateSyntax._
 
 object Skeleton {
 
@@ -16,17 +18,10 @@ object Skeleton {
   trait PricesData extends DataType { type ElemT = Double }
 
   trait IsIdxElem[A]
-
   trait IsDate[A] extends IsSportDate[A] with IsIdxElem[A]
-
-  implicit def dateIsIdxElem(a: DateTime) = new IsIdxElem[DateTime] {}
-  implicit def securityIsIdxElem(a: IsSecurity) = new IsIdxElem[IsSecurity] {}
-
-  object Date {
-    def YMD(y: Int, m: Int, d: Int): DateTime =
-      (new DateTime)
-        .withYear(y).withMonthOfYear(m).withDayOfMonth(d)
-        .withTimeAtStartOfDay() 
+  object IsIdxElemImplicits {
+    implicit val securityIsIdxElem = new IsIdxElem[IsSecurity] {}
+    implicit val dateTimeIsIdxElem = new IsIdxElem[DateTime] {}
   }
 
   import ArrayDefs.{IsBaseArr}

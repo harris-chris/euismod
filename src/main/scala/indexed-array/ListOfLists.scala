@@ -7,14 +7,14 @@ import IndicesObj._
 
 object ListOfListsObj {
 
-  case class Datum[I0 <: IsIdxElem[_], DataT <: DataType] (
+  case class Datum[I0: IsIdxElem, DataT <: DataType] (
     ref: I0,
     value: DataT#ElemT,
   )(implicit ev: Numeric[DataT#ElemT]) extends IsDatum[I0, DataT] {
     import ev._ 
   }
   
-  case class Arr1d[I0 <: IsIdxElem[_], DataT <: DataType] (
+  case class Arr1d[I0: IsIdxElem, DataT <: DataType] (
     indices: (IsIndex[I0]),
     data: List[DataT#ElemT],
   )(implicit ev: Numeric[DataT#ElemT]) extends Is1dIndexArr[I0, DataT] {
@@ -23,7 +23,7 @@ object ListOfListsObj {
     def loc(at: I0): Option[Datum[I0, DataT]] = ???
   }
 
-  case class Arr2d[I0 <: IsIdxElem[_], I1 <: IsIdxElem[_], DataT <: DataType] (
+  case class Arr2d[I0: IsIdxElem, I1: IsIdxElem, DataT <: DataType] (
     indices: (IsIndex[I0], IsIndex[I1]),
     data: List[List[DataT#ElemT]],
   )(implicit ev: Numeric[DataT#ElemT]) extends Is2dIndexArr[I0, I1, DataT] {

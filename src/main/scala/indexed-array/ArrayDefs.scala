@@ -8,18 +8,18 @@ object ArrayDefs {
 
   sealed trait IsBaseArr[DataT <: DataType] { }
 
-  trait IsDatum[I0 <: IsIdxElem[_], DataT <: DataType] extends IsBaseArr[DataT] {
+  abstract class IsDatum[I0: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
     val ref: I0
     val value: DataT#ElemT
   }
 
-  trait Is1dIndexArr[I0 <: IsIdxElem[_], DataT <: DataType] extends IsBaseArr[DataT] {
+  abstract class Is1dIndexArr[I0: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
     type Self = Is1dIndexArr[I0, DataT]
     val indices: (IsIndex[I0])
     def loc(at: I0): Option[IsDatum[I0, DataT]]
   }
 
-  trait Is2dIndexArr[I0 <: IsIdxElem[_], I1 <: IsIdxElem[_], DataT <: DataType] extends IsBaseArr[DataT] {
+  abstract class Is2dIndexArr[I0: IsIdxElem, I1: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
     type Self = Is2dIndexArr[I0, I1, DataT]
     val indices: (IsIndex[I0], IsIndex[I1])
     def getDim0Slice(loc: I0): Option[Is1dIndexArr[I1, DataT]]
@@ -28,16 +28,16 @@ object ArrayDefs {
     def loc[I](i: I)(implicit tc: LocTC2d[I]): tc.Out = tc(i)
 
     trait LocTC2d[I] {
-      type B <: IsIdxElem[_]
-      type Out = LocTC2d.MkOut[B]
+      type Im1
+      type Out = LocTC2d.MkOut[Im1]
       def apply(i: I): Out
     }
     object LocTC2d {
-      type MkOut[B <: IsIdxElem[_]] = Option[Is1dIndexArr[B, DataT]]
+      type MkOut[Im1] = Option[Is1dIndexArr[Im1, DataT]]
 
-      type Aux[I, B0 <: IsIdxElem[_]] = LocTC2d[I] { type B = B0 }
-      def instance[I, B0 <: IsIdxElem[_]](f: I => MkOut[B0]): Aux[I, B0] = new LocTC2d[I] {
-        override type B = B0
+      type Aux[I, Im1In] = LocTC2d[I] { type Im1 = Im1In }
+      def instance[I, Im1In](f: I => MkOut[Im1In]): Aux[I, Im1In] = new LocTC2d[I] {
+        override type Im1 = Im1In
         override def apply(i: I): Out = f(i)
       }
     
@@ -46,8 +46,8 @@ object ArrayDefs {
     }
   }
 
-  trait Is3dIndexArr[
-    I0 <: IsIdxElem[_], I1 <: IsIdxElem[_], I2 <: IsIdxElem[_], DataT <: DataType
+  abstract class Is3dIndexArr[
+    I0: IsIdxElem, I1: IsIdxElem, I2: IsIdxElem, DataT <: DataType
   ] extends IsBaseArr[DataT] {
     type Self = Is3dIndexArr[I0, I1, I2, DataT]
     val indices: (IsIndex[I0], IsIndex[I1], IsIndex[I2])
@@ -60,16 +60,16 @@ object ArrayDefs {
     def loc[I](i: I)(implicit tc: LocTC3d[I]): tc.Out = tc(i)
 
     trait LocTC3d[I] {
-      type B <: IsIdxElem[_]
-      type C <: IsIdxElem[_]
+      type B
+      type C
       type Out = LocTC3d.MkOut[B, C]
       def apply(i: I): Out
     }
     object LocTC3d {
-      type MkOut[B <: IsIdxElem[_], C <: IsIdxElem[_]] = Option[Is2dIndexArr[B, C, DataT]]
+      type MkOut[B, C] = Option[Is2dIndexArr[B, C, DataT]]
 
-      type Aux[I, B0 <: IsIdxElem[_], C0 <: IsIdxElem[_]] = LocTC3d[I] { type B = B0; type C = C0 }
-      def instance[I, B0 <: IsIdxElem[_], C0 <: IsIdxElem[_]](f: I => MkOut[B0, C0]): Aux[I, B0, C0] = new LocTC3d[I] {
+      type Aux[I, B0, C0] = LocTC3d[I] { type B = B0; type C = C0 }
+      def instance[I, B0, C0](f: I => MkOut[B0, C0]): Aux[I, B0, C0] = new LocTC3d[I] {
         override type B = B0
         override type C = C0
         override def apply(i: I): Out = f(i)
