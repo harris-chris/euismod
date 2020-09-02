@@ -20,7 +20,8 @@ object ListOfListsObj {
   )(implicit ev: Numeric[DataT#ElemT]) extends Is1dIndexArr[I0, DataT] {
     def addDelta(delta: Self): Self = ??? 
     def addDeltaFrom(delta: Datum[I0, DataT]): Self = ??? 
-    def loc(at: I0): Option[Datum[I0, DataT]] = ???
+    def loc(at: I0): Option[Datum[I0, DataT]] = 
+      indices.indexOf(at).map(i => Datum(indices.vals(i), data(i)))
   }
 
   case class Arr2d[I0: IsIdxElem, I1: IsIdxElem, DataT <: DataType] (
@@ -34,7 +35,7 @@ object ListOfListsObj {
       )
     def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]] = 
       indices._2.indexOf(loc).map(i => 
-        Arr1d[I0, DataT]((indices._1), data(i))
+        Arr1d[I0, DataT]((indices._1), data.map(_(i)))
       )
   }
 }

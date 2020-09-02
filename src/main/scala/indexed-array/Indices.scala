@@ -1,20 +1,20 @@
 package sportarray
 
 import sportdate.{IsSportDateInstances, IsSportDateSyntax}
-import Skeleton.{IsIdxElem, IsSecurity, IsDate}
+import Skeleton.{IsIdxElem, IsSecurity, DateType}
 import Skeleton.IsIdxElemImplicits._
 
 object IndicesObj {
 
   abstract class IsIndex[ElemT: IsIdxElem] {
-    val vals: List[ElemT]
+    def vals: List[ElemT]
     def indexOf(at: ElemT): Option[Int]
   }
 
-  case class DateIndex[A: IsDate](
-    val vals: List[A]
-  ) extends IsIndex[A] {
-    def indexOf(at: A): Option[Int] = vals.indexOf(at) match {
+  case class DateIndex(
+    val vals: List[DateType]
+  ) extends IsIndex[DateType] {
+    def indexOf(at: DateType): Option[Int] = vals.indexOf(at) match {
       case -1 => None
       case n => Some(n)
     }

@@ -9,6 +9,8 @@ import sportdate.IsSportDateSyntax._
 
 object Skeleton {
 
+  type DateType = DateTime
+
   sealed trait DataType {
     type ElemT 
   }
@@ -18,16 +20,15 @@ object Skeleton {
   trait PricesData extends DataType { type ElemT = Double }
 
   trait IsIdxElem[A]
-  trait IsDate[A] extends IsSportDate[A] with IsIdxElem[A]
   object IsIdxElemImplicits {
     implicit val securityIsIdxElem = new IsIdxElem[IsSecurity] {}
-    implicit val dateTimeIsIdxElem = new IsIdxElem[DateTime] {}
+    implicit val dateTimeIsIdxElem = new IsIdxElem[DateType] {}
   }
 
   import ArrayDefs.{IsBaseArr}
   import ArrayDefs.{IsDatum, Is1dIndexArr, Is2dIndexArr}
-  type PricesTs = Is1dIndexArr[IsDate[_], PricesData]
-  type HoldingsTs[T <: DataType] = Is2dIndexArr[IsDate[_], IsSecurity, T]
+  type PricesTs = Is1dIndexArr[DateType, PricesData]
+  type HoldingsTs[T <: DataType] = Is2dIndexArr[DateType, IsSecurity, T]
   type PositionsTs = HoldingsTs[PositionsData]
 
   trait SecurityName
@@ -49,12 +50,12 @@ object Skeleton {
   }
 
   trait IsTsChange[T] {
-    def isValidRoll(d: DateTime): Boolean
+    def isValidRoll(d: DateType): Boolean
     val delta: IsDelta[T]
   }
 
   trait IsRebal {
-    def triggersOn(d: Option[DateTime]): Option[DateTime]
+    def triggersOn(d: Option[DateType]): Option[DateType]
     def getEffects(rs: Rebalances): (PositionsTs, List[IsRebal])
   }
 
