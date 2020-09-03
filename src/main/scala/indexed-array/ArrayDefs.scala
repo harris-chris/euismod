@@ -8,30 +8,52 @@ object ArrayDefs {
 
   sealed trait IsBaseArr[DataT <: DataType] { }
 
-  abstract class IsDatum[I0: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
-    val ref: I0
-    val value: DataT#ElemT
+  abstract class IsDatum[DataT <: DataType] {
+    def get: DataT#ElemT
+    def set[INew: IsIdxElem](ref: INew): Is1dIndexArr[INew, DataT]
   }
 
   abstract class Is1dIndexArr[I0: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
-    type Self
+    type Self = Is1dIndexArr[I0, DataT]
     val indices: (Index[I0])
-    def apply(i: Int): IsDatum[I0, DataT]
+    def get(i: Int): IsDatum[DataT]
+    def set[INew: IsIdxElem](ref: INew): Is2dIndexArr[INew, I0, DataT]    
+    def length: Int
+
     def ++(a: Self): Self
 
-    def loc(at: I0): Option[IsDatum[I0, DataT]] = indices.indexOf(at).map(this(_))
+    //def :+(ref: I0, datum: DataT#ElemT): Self
+    //def addDim[INew: IsIdxElem](ref: INew): Is2dIndexArr[INew, I0, DataT]
+
+    def loc(at: I0): Option[IsDatum[DataT]] = indices.indexOf(at).map(this.get(_))
   }
 
   abstract class Is2dIndexArr[I0: IsIdxElem, I1: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
-    type Self = Is2dIndexArr[I0, I1, DataT]
     val indices: (Index[I0], Index[I1])
-    def apply(i: Int): Is1dIndexArr[I1, DataT]
-    def ++(a: Is2dIndexArr[I0, I1, DataT]): Is2dIndexArr[I0, I1, DataT] 
+    def get(i: Int): Is1dIndexArr[I1, DataT]
+    //def set(i: Int): Is1dIndexArr[I1, DataT]
+    def ++(a: Is2dIndexArr[I0, I1, DataT]): Is2dIndexArr[I0, I1, DataT]
+    def :+(ref: I0, data: Is1dIndexArr[I1, DataT]): Is2dIndexArr[I0, I1, DataT]
+    def length: Int
+
+    //def map(f: Is1dIndexArr[I1, DataT] => DataT#ElemT): Is1dIndexArr[I0, DataT] = 
+      //Range(0, this.length, 1).map(i => f(this(i)))
 
     def getDim0Slice(loc: I0): Option[Is1dIndexArr[I1, DataT]] = 
-      indices._1.indexOf(loc).map(this(_))
-    def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]] =
-      ???
+      indices._1.indexOf(loc).map(this.get(_))
+    def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]] = {
+      indices._2.indexOf(loc).map(
+        iloc => {
+          val arrs: Seq[Is1dIndexArr[I0, DataT]] = Range(0, this.length, 1).map(
+            i => {
+              val d: Is1dIndexArr[I0, DataT] = this.get(i).get(iloc).set(indices._1(i))
+              d
+            }
+          )
+          arrs.reduce(_ ++ _)
+        }
+      )
+    }
 
     def loc[I](i: I)(implicit tc: LocTC2d[I]): tc.Out = tc(i)
 
