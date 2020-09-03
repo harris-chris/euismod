@@ -14,17 +14,25 @@ object ArrayDefs {
   }
 
   abstract class Is1dIndexArr[I0: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
-    type Self = Is1dIndexArr[I0, DataT]
+    type Self
     val indices: (Index[I0])
-    def loc(at: I0): Option[IsDatum[I0, DataT]]
+    def apply(i: Int): IsDatum[I0, DataT]
+    def ++(a: Self): Self
+
+    def loc(at: I0): Option[IsDatum[I0, DataT]] = indices.indexOf(at).map(this(_))
   }
 
   abstract class Is2dIndexArr[I0: IsIdxElem, I1: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
     type Self = Is2dIndexArr[I0, I1, DataT]
     val indices: (Index[I0], Index[I1])
-    def getDim0Slice(loc: I0): Option[Is1dIndexArr[I1, DataT]]
-    def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]]
-    //def addDelta(delta: SelfMinus1T): Self
+    def apply(i: Int): Is1dIndexArr[I1, DataT]
+    def ++(a: Is2dIndexArr[I0, I1, DataT]): Is2dIndexArr[I0, I1, DataT] 
+
+    def getDim0Slice(loc: I0): Option[Is1dIndexArr[I1, DataT]] = 
+      indices._1.indexOf(loc).map(this(_))
+    def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]] =
+      ???
+
     def loc[I](i: I)(implicit tc: LocTC2d[I]): tc.Out = tc(i)
 
     trait LocTC2d[I] {
@@ -51,9 +59,6 @@ object ArrayDefs {
   ] extends IsBaseArr[DataT] {
     type Self = Is3dIndexArr[I0, I1, I2, DataT]
     val indices: (Index[I0], Index[I1], Index[I2])
-    //def addDelta(delta: SelfMinus1d[I0, I1]): Self
-    //def addDelta(delta: SelfMinus1d[I0, I2]): Self
-    //def addDelta(delta: SelfMinus1d[I1, I2]): Self
     def getDim0Slice(loc: I0): Option[Is2dIndexArr[I1, I2, DataT]]
     def getDim1Slice(loc: I1): Option[Is2dIndexArr[I0, I2, DataT]]
     def getDim2Slice(loc: I2): Option[Is2dIndexArr[I0, I1, DataT]]

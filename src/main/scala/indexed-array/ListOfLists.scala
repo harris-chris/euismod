@@ -18,25 +18,27 @@ object ListOfListsObj {
     indices: (Index[I0]),
     data: List[DataT#ElemT],
   )(implicit ev: Numeric[DataT#ElemT]) extends Is1dIndexArr[I0, DataT] {
-    def addDelta(delta: Self): Self = ??? 
-    def addDeltaFrom(delta: Datum[I0, DataT]): Self = ??? 
-    def loc(at: I0): Option[Datum[I0, DataT]] = 
-      indices.indexOf(at).map(i => Datum(indices.vals(i), data(i)))
+    type Self = Arr1d[I0, DataT]
+    def apply(i: Int): IsDatum[I0, DataT] = 
+      Datum(indices(i), data(i))
+    def ++(a: Self): Self = 
+      Arr1d(this.indices ++ a.indices, this.data ++ a.data)
   }
 
   case class Arr2d[I0: IsIdxElem, I1: IsIdxElem, DataT <: DataType] (
     indices: (Index[I0], Index[I1]),
     data: List[List[DataT#ElemT]],
   )(implicit ev: Numeric[DataT#ElemT]) extends Is2dIndexArr[I0, I1, DataT] {
-    //def addDelta(delta: SelfMinus1T): Self = ???
-    def getDim0Slice(loc: I0): Option[Is1dIndexArr[I1, DataT]] = 
-      indices._1.indexOf(loc).map(i => 
-        Arr1d[I1, DataT]((indices._2), data(i))
-      )
-    def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]] = 
-      indices._2.indexOf(loc).map(i => 
-        Arr1d[I0, DataT]((indices._1), data.map(_(i)))
-      )
+    def apply(i: Int): Is1dIndexArr[I1, DataT] = 
+      Arr1d(indices._2, data(i))
+    //def getDim0Slice(loc: I0): Option[Is1dIndexArr[I1, DataT]] = 
+      //indices._1.indexOf(loc).map(i => 
+        //Arr1d[I1, DataT]((indices._2), data(i))
+      //)
+    //def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]] = 
+      //indices._2.indexOf(loc).map(i => 
+        //Arr1d[I0, DataT]((indices._1), data.map(_(i)))
+      //)
   }
 
   case class Arr3d[I0: IsIdxElem, I1: IsIdxElem, I2: IsIdxElem, DataT <: DataType] (

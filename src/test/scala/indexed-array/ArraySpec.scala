@@ -45,6 +45,10 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).ref == SportDate.YMD(2020,8,1))
     assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).value == 0.1)
   }
+  "Arr1d" should "return correct Datum with .apply" in {
+    val arr1d = Arr1d[Dim2T, PositionsData](dim2, values1d)
+    assert(arr1d(2) == Datum[Dim2T, PositionsData](dim2(2), values1d(2)))
+  }
   "Arr1d" should "return correct Datum with .loc" in {
     val arr1d = Arr1d[Dim2T, PositionsData](dim2, values1d)
     assert(
