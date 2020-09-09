@@ -42,8 +42,8 @@ println(gramsOfPowdersIAlsoWillBuy.loc("2020-01-01", "Salt")) // 130, of course
 val moarOranges = numbersOfFruitIIntendToBuy.setLoc(("2020-01-02", "Orange"), 30)
 // addition is handled automatically...
 val doubleThatFruitOrder = numbersOfFruitIIntendToBuy + numbersOfFruitIIntendToBuy 
-// but in a DataType-aware way; the following will produce a compile error
-val dontMixYourUnits = numbersOfFruitIIntendToBuy + gramsOfPowdersIAlsoWillBuy
+// but in a UnitType-aware way; the following will produce a compile error
+val neverMixYourUnits = numbersOfFruitIIntendToBuy + gramsOfPowdersIAlsoWillBuy
 // thanks to the marvels of typing, arithmetic between array types can be handled automatically
 trait Euros extends UnitType { type ElemT = Double }
 case class SingleIndexedList[T <: UnitType, Idx0](
