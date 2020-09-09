@@ -1,7 +1,9 @@
 Sport-array is a typeclass wrapper to provide a standardized, indexed, typed interface over any array-like data structure.
-*standardized* - a consistent API is provided regardless of the underlying type.  
-*indexed* - indices are stored for the array axes, providing a Pandas Dataframe-like interface
-*typed* - the data type, index type, and dimensionality of the array is known at all times, allowing us to prevent mistakes at compile-time (eg, adding percentage weights to absolute numbers).
+_**standardized**_ - a consistent API is provided regardless of the underlying type.  
+
+_**indexed**_ - indices are stored for the array axes, providing a Pandas Dataframe-like interface
+
+_**typed**_ - the data type, index type, and dimensionality of the array is known at all times, allowing us to prevent mistakes at compile-time (eg, adding percentage weights to absolute numbers).
 
 The package's prelude includes typeclasses for array types: `Is1dIndexArr`, `Is2dIndexArr`, up to 5 dimensions.
 
