@@ -1,4 +1,5 @@
 Sport-array is a typeclass wrapper to provide a standardized, indexed, typed interface over any array-like data structure.
+
 _**standardized**_ - a consistent API is provided regardless of the underlying type.  
 
 _**indexed**_ - indices are stored for the array axes, providing a Pandas Dataframe-like interface
