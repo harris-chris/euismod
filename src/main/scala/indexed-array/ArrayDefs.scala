@@ -4,23 +4,87 @@ import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
 import Skeleton.IsIdxElem
 import IndicesObj.Index
 
+import java.time.LocalDate
+
+object test {
+
+  sealed trait UnitType {
+    type ElemT 
+  }
+  
+  /// HERE 
+
+  //import sportarray._
+  
+  // the DataType trait is to ensure we do not do operations on non-compatible arrays 
+  //import sportarray.UnitType
+  trait Numbers extends UnitType { type ElemT = Int }
+  trait Grams extends UnitType { type ElemT = Int }
+
+  case class ListOfListsWithIndices[T <: UnitType, Idx0, Idx1](
+    values: List[List[T#ElemT]],
+    indices: (List[Idx0], List[Idx1]),
+  ) 
+
+  val numbersOfFruitIIntendToBuy = ListOfListsWithIndices[Numbers, LocalDate, String](
+    values=List(List(0, 1, 0), List(1, 0, 2)),
+    indices=(
+      List(LocalDate.of(2021,1,1), LocalDate.of(2020,1,2)), 
+      List("Apple", "Orange", "Tomato, technically"),
+    )
+  )
+
+  case class ArrayOfArrayWithIndices[T <: UnitType, Idx0, Idx1](
+    values: Array[Array[T#ElemT]],
+    indices: (List[Idx0], List[Idx1]),
+  )
+
+  val gramsOfPowdersIAlsoWillBuy = ArrayOfArrayWithIndices[Grams, LocalDate, String](
+    values=Array(Array(100, 130, 150), Array(210, 0, 50)),
+    indices=(
+      List(LocalDate.of(2021,1,1), LocalDate.of(2020,1,2)), 
+      List("Sugar", "Salt", "Sumac"),
+    )
+  )
+
+  // consistent setter, getter and other functions are provided automatically
+  println(gramsOfPowdersIAlsoWillBuy.loc("2020-01-01", "Salt")) // 130, of course
+  val moarOranges = numbersOfFruitIIntendToBuy.setLoc(("2020-01-02", "Orange"), 30)
+  // addition is handled automatically...
+  val doubleThatFruitOrder = numbersOfFruitIIntendToBuy + numbersOfFruitIIntendToBuy 
+  // but in a DataType-aware way; the following will produce a compile error
+  val dontMixYourUnits = numbersOfFruitIIntendToBuy + gramsOfPowdersIAlsoWillBuy
+  // thanks to the marvels of typing, arithmetic between array types can be handled automatically
+  trait Euros extends UnitType { type ElemT = Double }
+  case class SingleIndexedList[T <: UnitType, Idx0](
+    values: List[T#ElemT],
+    indices: List[Idx0],
+  )
+  val eurosPerGram = SingleIndexedList[Euros, String](
+    values=List(0.01, 0.015, 0.02, 2400.0),
+    indices=List("Sugar", "Salt", "Sumac", "Radium"),
+  )
+  val totalCostOfMyPowders = gramsOfPowdersIAlsoWillBuy * eurosPerGram
+}
+
+
 object ArrayDefs {
 
   sealed trait IsBaseArr[DataT <: DataType] { }
 
-  abstract class IsDatum[DataT <: DataType] {
+  abstract class IsDatum[A, DataT <: DataType] {
     def get: DataT#ElemT
     def set[INew: IsIdxElem](ref: INew): Is1dIndexArr[INew, DataT]
   }
 
-  abstract class Is1dIndexArr[I0: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
-    type Self = Is1dIndexArr[I0, DataT]
+  abstract class Is1dIndexArr[A, I0: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
+    type Self = Is1dIndexArr[A, I0, DataT]
     val indices: (Index[I0])
-    def get(i: Int): IsDatum[DataT]
+    def get(i: Int): IsDatum[A, DataT]
     def set[INew: IsIdxElem](ref: INew): Is2dIndexArr[INew, I0, DataT]    
     def length: Int
 
-    def ++(a: Self): Self
+    def ++[O](self: Self, other: O)(implicit tcO: Is1dIndexArr[O, I0, DataT]): Self
 
     //def :+(ref: I0, datum: DataT#ElemT): Self
     //def addDim[INew: IsIdxElem](ref: INew): Is2dIndexArr[INew, I0, DataT]

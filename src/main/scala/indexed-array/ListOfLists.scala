@@ -20,7 +20,6 @@ object ListOfListsObj {
     indices: (Index[I0]),
     data: List[DataT#ElemT],
   )(implicit ev: Numeric[DataT#ElemT]) extends Is1dIndexArr[I0, DataT] {
-    override type Self = Arr1d[I0, DataT] 
     def get(i: Int): IsDatum[DataT] = 
       Datum(data(i))
     def set[INew: IsIdxElem](ref: INew): Is2dIndexArr[INew, I0, DataT] = ???
