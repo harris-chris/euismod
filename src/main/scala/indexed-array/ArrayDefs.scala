@@ -14,10 +14,10 @@ object test {
   
   /// HERE 
 
-  //import sportarray._
   
   // the DataType trait is to ensure we do not do operations on non-compatible arrays 
   //import sportarray.UnitType
+  //import sportarray._
   trait Numbers extends UnitType { type ElemT = Int }
   trait Grams extends UnitType { type ElemT = Int }
 
@@ -67,109 +67,142 @@ object test {
   val totalCostOfMyPowders = gramsOfPowdersIAlsoWillBuy * eurosPerGram
 }
 
+object ArrayDefs extends App {
 
-object ArrayDefs {
+  abstract class Is1dVec[A, N, I0, T: Numeric] {
+    type Self = A
+    def name(self: A): N
+    def indices(self: A): (List[I0])
+    def getElem(self: A, i: Int): T
+    def iloc[R](self: A, r: R)(implicit 
+      iLocTc: Is1dVec[A, N, I0, T]#ILocTC[R]
+    ): iLocTc.Out = iLocTc.iloc(self, r)
+    def :+:[B, Out](self: A, other: B)(implicit 
+      bIs1d: Is1dVec[B, N, I0, T], 
+      outIs2d: Is2dVec[Out, N, I0, T, A]
+    ): Out
 
-  sealed trait IsBaseArr[DataT <: DataType] { }
-
-  abstract class IsDatum[A, DataT <: DataType] {
-    def get: DataT#ElemT
-    def set[INew: IsIdxElem](ref: INew): Is1dIndexArr[INew, DataT]
+    abstract class ILocTC[R] {
+      type Out
+      def iloc(self: A, ref: R): Out 
+    }
+    object ILocTC {
+      implicit def iLocTCForInt[OutT] = new ILocTC[Int] { 
+        type Out = T
+        def iloc(self: A, ref: Int) = getElem(self, ref)
+      }
+      implicit def iLocTCForList[OutT] = new ILocTC[List[Int]] { 
+        type Out = List[T]
+        def iloc(self: A, ref: List[Int]) = ref.map(getElem(self, _))
+      }
+    }
   }
 
-  abstract class Is1dIndexArr[A, I0: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
-    type Self = Is1dIndexArr[A, I0, DataT]
-    val indices: (Index[I0])
-    def get(i: Int): IsDatum[A, DataT]
-    def set[INew: IsIdxElem](ref: INew): Is2dIndexArr[INew, I0, DataT]    
-    def length: Int
-
-    def ++[O](self: Self, other: O)(implicit tcO: Is1dIndexArr[O, I0, DataT]): Self
-
-    //def :+(ref: I0, datum: DataT#ElemT): Self
-    //def addDim[INew: IsIdxElem](ref: INew): Is2dIndexArr[INew, I0, DataT]
-
-    def loc(at: I0): Option[IsDatum[DataT]] = indices.indexOf(at).map(this.get(_))
+  trait TC[S, R] {
+    def iloc(self: S, ref: R): Int 
+  }
+  object TC {
+    implicit def TCForInt[S] = new TC[S, Int] { 
+      def iloc(self: S, ref: Int) = 3 
+    }
   }
 
-  abstract class Is2dIndexArr[I0: IsIdxElem, I1: IsIdxElem, DataT <: DataType] extends IsBaseArr[DataT] {
-    val indices: (Index[I0], Index[I1])
-    def get(i: Int): Is1dIndexArr[I1, DataT]
-    //def set(i: Int): Is1dIndexArr[I1, DataT]
-    def ++(a: Is2dIndexArr[I0, I1, DataT]): Is2dIndexArr[I0, I1, DataT]
-    def :+(ref: I0, data: Is1dIndexArr[I1, DataT]): Is2dIndexArr[I0, I1, DataT]
-    def length: Int
-
-    //def map(f: Is1dIndexArr[I1, DataT] => DataT#ElemT): Is1dIndexArr[I0, DataT] = 
-      //Range(0, this.length, 1).map(i => f(this(i)))
-
-    def getDim0Slice(loc: I0): Option[Is1dIndexArr[I1, DataT]] = 
-      indices._1.indexOf(loc).map(this.get(_))
-    def getDim1Slice(loc: I1): Option[Is1dIndexArr[I0, DataT]] = {
-      indices._2.indexOf(loc).map(
-        iloc => {
-          val arrs: Seq[Is1dIndexArr[I0, DataT]] = Range(0, this.length, 1).map(
-            i => {
-              val d: Is1dIndexArr[I0, DataT] = this.get(i).get(iloc).set(indices._1(i))
-              d
-            }
-          )
-          arrs.reduce(_ ++ _)
-        }
-      )
+  implicit def indexedListIs1dVec[I0, N, T: Numeric]: Is1dVec[IndexedList[N, I0, T], N, I0, T] = 
+    new Is1dVec[IndexedList[N, I0, T], N, I0, T] {
+      def name(self: Self) = self.name
+      def indices(self: Self) = self.indices
+      def getElem(self: Self, i: Int) = self.data(i)
     }
 
-    def loc[I](i: I)(implicit tc: LocTC2d[I]): tc.Out = tc(i)
+  implicit class Is1dVecOps[A, N, I0, T](value: A)(implicit tc1d: Is1dVec[A, N, I0, T]) {
+    def name: N = tc1d.name(value)
+    def indices: List[I0] = tc1d.indices(value)
+    def getElem(i: Int) = tc1d.getElem(value, i)
+    def iloc[R](r: R)(implicit iLocTc: tc1d.ILocTC[R]): iLocTc.Out
+    def :+:[B, Out](other: B)(implicit 
+      bIs1d: Is1dVec[B, N, I0, T],
+      outIs2d: Is2dVec[Out, N, I0, T, A]
+    ): Out = tc1d.:+:(value, other)
+  }
 
-    trait LocTC2d[I] {
-      type Im1
-      type Out = LocTC2d.MkOut[Im1]
+  abstract class Is2dVec[A, I0, I1, T: Numeric, M1](implicit tCm1: Is1dVec[M1, I0, I1, T]) {
+    type Self = A
+    type Minus1 = M1
+    def indices(self: Self): (List[I0], List[I1])
+    def getElem(self: A, i: Int): M1
+    def loc[I](self: A, at: I)(implicit get2dTC: Get2dTC[I]): get2dTC.Out = ???
+    def iloc[R](self: A, ref: R)(implicit iloctc: ILocTC[R, M1, I1, T]): iloctc.Out = iloctc.iloc(self, ref)
+    //def ++[B, BI0, BI1](self: A, other: B)(implicit bIs2d: Is2dVec[B, BI0, BI1, T, _]): Self
+
+    abstract class ILocTC[R, Out, OutI0, OutT] {
+      type Out
+      def iloc(self: A, ref: R): Out 
+    }
+    object ILocTC {
+      implicit def iLocTCForInt[Out, OutI0, OutT] = new ILocTC[Int, Out, OutI0, OutT] { 
+        type Out = M1
+        def iloc(self: A, ref: Int): Out = getElem(self, ref)
+      }
+      implicit def iLocTCForIntInt[Out, OutI0, OutT] = new ILocTC[(Int, Int), Out, OutI0, OutT] { 
+        type Out = A
+        def iloc(self: A, ref: (Int, Int)): A = getElem(self, ref._1).:+:(getElem(self, ref._2))
+      }
+    }
+
+    trait Get2dTC[I] {
+      type DM1
+      type Out = Get2dTC.MkOut[DM1]
       def apply(i: I): Out
     }
-    object LocTC2d {
-      type MkOut[Im1] = Option[Is1dIndexArr[Im1, DataT]]
-
-      type Aux[I, Im1In] = LocTC2d[I] { type Im1 = Im1In }
-      def instance[I, Im1In](f: I => MkOut[Im1In]): Aux[I, Im1In] = new LocTC2d[I] {
-        override type Im1 = Im1In
+    object Get2dTC {
+      type Aux[I, DM1i] = Get2dTC[I] { type DM1 = DM1i }
+      type MkOut[DM1] = Option[Is1dVec[A, I, DM1, T]]
+      def instance[I, DM1i](f: I => MkOut[DM1i]): Aux[I, DM1i] = new Get2dTC[I] {
+        override type DM1 = DM1i
         override def apply(i: I): Out = f(i)
       }
     
-      implicit val I0Type: Aux[I0, I1] = instance(i => getDim0Slice(i))
-      implicit val I1Type: Aux[I1, I0] = instance(i => getDim1Slice(i))
+      //implicit val I0Type: Aux[I0, I1] = instance(i => i.iloc(i))
+      //implicit val I1Type: Aux[I1, I0] = instance(i => getDim1Slice(i))
     }
   }
-
-  abstract class Is3dIndexArr[
-    I0: IsIdxElem, I1: IsIdxElem, I2: IsIdxElem, DataT <: DataType
-  ] extends IsBaseArr[DataT] {
-    type Self = Is3dIndexArr[I0, I1, I2, DataT]
-    val indices: (Index[I0], Index[I1], Index[I2])
-    def getDim0Slice(loc: I0): Option[Is2dIndexArr[I1, I2, DataT]]
-    def getDim1Slice(loc: I1): Option[Is2dIndexArr[I0, I2, DataT]]
-    def getDim2Slice(loc: I2): Option[Is2dIndexArr[I0, I1, DataT]]
-    def loc[I](i: I)(implicit tc: LocTC3d[I]): tc.Out = tc(i)
-
-    trait LocTC3d[I] {
-      type B
-      type C
-      type Out = LocTC3d.MkOut[B, C]
-      def apply(i: I): Out
+  //object Is2dVec {
+    //type Aux[A, I0, I1, T, M1] = Is2dVec[A, I0, I1, T, M1] { type Out = O }
+  //}
+  // give this typeclass method syntax
+  implicit class Is2dVecOps[A, I0, I1, T, M1](value: A)(implicit 
+    tc2d: Is2dVec[A, I0, I1, T, M1], tc1d: Is1dVec[M1, I0, I1, T]) {
+      def getElem(i: Int) = tc2d.getElem(value, i)
     }
-    object LocTC3d {
-      type MkOut[B, C] = Option[Is2dIndexArr[B, C, DataT]]
 
-      type Aux[I, B0, C0] = LocTC3d[I] { type B = B0; type C = C0 }
-      def instance[I, B0, C0](f: I => MkOut[B0, C0]): Aux[I, B0, C0] = new LocTC3d[I] {
-        override type B = B0
-        override type C = C0
-        override def apply(i: I): Out = f(i)
-      }
-    
-      implicit val I0Type: Aux[I0, I1, I2] = instance(i => getDim0Slice(i))
-      implicit val I1Type: Aux[I1, I0, I2] = instance(i => getDim1Slice(i))
-      implicit val I2Type: Aux[I2, I0, I1] = instance(i => getDim2Slice(i))
+  case class IndexedList[N, I0, T: Numeric](
+    name: N,
+    indices: List[I0],
+    data: List[T]
+  )
+
+  case class IndexedListOfLists[I0, I1, T: Numeric](
+    indices: (List[I0], List[I1]),
+    data: List[List[T]],
+  )
+
+  implicit def listOfListsIs2dVec[I0, I1, T: Numeric] = 
+    new Is2dVec[IndexedListOfLists[I0, I1, T], I0, I1, T, IndexedList[I0, I1, T]] {
+      def getElem(self: IndexedListOfLists[I0, I1, T], i: Int): IndexedList[I0, I1, T] = 
+        IndexedList[I0, I1, T](self.indices._1(i), self.indices._2, self.data(i))
+      def indices(self: Self) = self.indices
     }
-  }
+
+  val arr1d = IndexedList[Char, Int, Double](
+    '0', List(0,1,2), List(0.1, 1.1, 2.1)
+  )
+  assert(arr1d.getElem(1) == 1.1)
+  assert(arr1d.iloc(0) == 0.1)
+  println(implicitly[Is1dVec[IndexedList[Char, Int, Double], Char, Int, Double]]) 
+  val arr2d = IndexedListOfLists[Char, Int, Double](
+    (List('0', '1'), List(0,1,2)), List(List(0.1, 1.1, 2.1), List(0.2, 1.2, 2.2))
+  )
+  assert(arr2d.getElem(0) == arr1d)
+  assert(listOfListsIs2dVec[Int, Int, Double].iloc(arr2d, (0, 2)) == 2.1)
 }
 
