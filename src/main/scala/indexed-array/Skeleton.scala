@@ -12,12 +12,12 @@ object Skeleton {
 
   // Define your DataTypes here - these are the types of value used in the body of the array
   sealed trait DataType {
-    type ElemT 
+    type T 
   }
-  trait PositionsData extends DataType { type ElemT = Double }
-  trait WeightsData extends DataType { type ElemT = Double }
-  trait ValuesData extends DataType { type ElemT = Double }
-  trait PricesData extends DataType { type ElemT = Double }
+  trait PositionsData extends DataType { type T = Double }
+  trait WeightsData extends DataType { type T = Double }
+  trait ValuesData extends DataType { type T = Double }
+  trait PricesData extends DataType { type T = Double }
 
   // IsIdxElem is a trait which defines whether a particular type can be used for an index
   trait IsIdxElem[A]

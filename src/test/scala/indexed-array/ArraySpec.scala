@@ -15,17 +15,17 @@ import IndicesObj._
 import ListOfListsObj._
 
 class ArraySpec extends AnyFlatSpec with Matchers {
-  type Dim2T = DateType
-  val dim2 = Index(
-    SportDate.YMD(2020,8,1), SportDate.YMD(2020,8,2), SportDate.YMD(2020,8,3), SportDate.YMD(2020,8,4)
+  type Dim0T = Composite
+  val dim0 = Index(
+    Composite("c0"), Composite("c1")
   )
   type Dim1T = Element
   val dim1 = Index(
     Element("e0"), Element("e1"), Element("e2")
   )
-  type Dim0T = Composite
-  val dim0 = Index(
-    Composite("c0"), Composite("c1")
+  type Dim2T = DateType
+  val dim2 = Index(
+    SportDate.YMD(2020,8,1), SportDate.YMD(2020,8,2), SportDate.YMD(2020,8,3), SportDate.YMD(2020,8,4)
   )
   val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
   val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))
@@ -41,13 +41,13 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       List(5.1, 5.2, 5.3, 5.4, 5.5),
     ),
   )
-  "Datum" should "store ref and value" in {
-    assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).ref == SportDate.YMD(2020,8,1))
-    assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).value == 0.1)
-  }
-  "Arr1d" should "return correct Datum with .apply" in {
-    val arr1d = Arr1d[Dim2T, PositionsData](dim2, values1d)
-    assert(arr1d(2) == Datum[Dim2T, PositionsData](dim2(2), values1d(2)))
+  //"Datum" should "store ref and value" in {
+    //assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).ref == SportDate.YMD(2020,8,1))
+    //assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).value == 0.1)
+  //}
+  "Arr1d" should "return correct datum with .getElem" in {
+    val arr1d = List1d[Dim2T, PositionsData](dim2, values1d)
+    assert(arr1d.getElem(2) == values1d(2))
   }
   "Arr1d" should "return correct Datum with .loc" in {
     val arr1d = Arr1d[Dim2T, PositionsData](dim2, values1d)
