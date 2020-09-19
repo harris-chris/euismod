@@ -12,57 +12,57 @@ object test {
     type ElemT 
   }
   
-  /// HERE 
+  /// here 
 
   
-  // the DataType trait is to ensure we do not do operations on non-compatible arrays 
-  //import sportarray.UnitType
+  // the datatype trait is to ensure we do not do operations on non-compatible arrays 
+  //import sportarray.unittype
   //import sportarray._
-  trait Numbers extends UnitType { type ElemT = Int }
-  trait Grams extends UnitType { type ElemT = Int }
+  //trait numbers extends unittype { type elemt = int }
+  //trait grams extends unittype { type elemt = int }
 
-  case class ListOfListsWithIndices[T <: UnitType, Idx0, Idx1](
-    values: List[List[T#ElemT]],
-    indices: (List[Idx0], List[Idx1]),
-  ) 
+  //case class listoflistswithindices[t <: unittype, idx0, idx1](
+    //values: list[list[t#elemt]],
+    //indices: (list[idx0], list[idx1]),
+  //) 
 
-  val numbersOfFruitIIntendToBuy = ListOfListsWithIndices[Numbers, LocalDate, String](
-    values=List(List(0, 1, 0), List(1, 0, 2)),
-    indices=(
-      List(LocalDate.of(2021,1,1), LocalDate.of(2020,1,2)), 
-      List("Apple", "Orange", "Tomato, technically"),
-    )
-  )
+  //val numbersoffruitiintendtobuy = listoflistswithindices[numbers, localdate, string](
+    //values=list(list(0, 1, 0), list(1, 0, 2)),
+    //indices=(
+      //list(localdate.of(2021,1,1), localdate.of(2020,1,2)), 
+      //list("apple", "orange", "tomato, technically"),
+    //)
+  //)
 
-  case class ArrayOfArrayWithIndices[T <: UnitType, Idx0, Idx1](
-    values: Array[Array[T#ElemT]],
-    indices: (List[Idx0], List[Idx1]),
-  )
+  //case class arrayofarraywithindices[t <: unittype, idx0, idx1](
+    //values: array[array[t#elemt]],
+    //indices: (list[idx0], list[idx1]),
+  //)
 
-  val gramsOfPowdersIAlsoWillBuy = ArrayOfArrayWithIndices[Grams, LocalDate, String](
-    values=Array(Array(100, 130, 150), Array(210, 0, 50)),
-    indices=(
-      List(LocalDate.of(2021,1,1), LocalDate.of(2020,1,2)), 
-      List("Sugar", "Salt", "Sumac"),
-    )
-  )
+  //val gramsofpowdersialsowillbuy = arrayofarraywithindices[grams, localdate, string](
+    //values=array(array(100, 130, 150), array(210, 0, 50)),
+    //indices=(
+      //list(localdate.of(2021,1,1), localdate.of(2020,1,2)), 
+      //list("sugar", "salt", "sumac"),
+    //)
+  //)
 
   // consistent setter, getter and other functions are provided automatically
-  println(gramsOfPowdersIAlsoWillBuy.loc("2020-01-01", "Salt")) // 130, of course
-  val moarOranges = numbersOfFruitIIntendToBuy.setLoc(("2020-01-02", "Orange"), 30)
-  // addition is handled automatically...
-  val doubleThatFruitOrder = numbersOfFruitIIntendToBuy + numbersOfFruitIIntendToBuy 
-  // but in a DataType-aware way; the following will produce a compile error
-  val dontMixYourUnits = numbersOfFruitIIntendToBuy + gramsOfPowdersIAlsoWillBuy
-  // thanks to the marvels of typing, arithmetic between array types can be handled automatically
-  trait Euros extends UnitType { type ElemT = Double }
-  case class SingleIndexedList[T <: UnitType, Idx0](
-    values: List[T#ElemT],
-    indices: List[Idx0],
-  )
-  val eurosPerGram = SingleIndexedList[Euros, String](
-    values=List(0.01, 0.015, 0.02, 2400.0),
-    indices=List("Sugar", "Salt", "Sumac", "Radium"),
-  )
-  val totalCostOfMyPowders = gramsOfPowdersIAlsoWillBuy * eurosPerGram
+  //println(gramsofpowdersialsowillbuy.loc("2020-01-01", "salt")) // 130, of course
+  //val moaroranges = numbersoffruitiintendtobuy.setloc(("2020-01-02", "orange"), 30)
+  //// addition is handled automatically...
+  //val doublethatfruitorder = numbersoffruitiintendtobuy + numbersoffruitiintendtobuy 
+  //// but in a datatype-aware way; the following will produce a compile error
+  //val dontmixyourunits = numbersoffruitiintendtobuy + gramsofpowdersialsowillbuy
+  //// thanks to the marvels of typing, arithmetic between array types can be handled automatically
+  //trait euros extends unittype { type elemt = double }
+  //case class singleindexedlist[t <: unittype, idx0](
+    //values: list[t#elemt],
+    //indices: list[idx0],
+  //)
+  //val eurospergram = singleindexedlist[euros, string](
+    //values=list(0.01, 0.015, 0.02, 2400.0),
+    //indices=list("sugar", "salt", "sumac", "radium"),
+  //)
+  //val totalcostofmypowders = gramsofpowdersialsowillbuy * eurospergram
 }
