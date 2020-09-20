@@ -34,9 +34,15 @@ object ArrayDefs {
     def ::(self: A, other: (I0, DT#T)): A
     def head(self: A): (I0, DT#T) = (indices(self)(0), getElem(self, 0))
     def shape(self: A): Int = indices(self).length
-    def tail(self: A): A = ILocTC.iLocTCForList.iloc(self, (1 to shape(self)).toList)
+    def tail(self: A): A = self match {
+      case s if shape(self) <= 1 => getNil(s)
+      case _ => ILocTC.iLocTCForList.iloc(self, (1 to shape(self)).toList)
+    }
 
-    def unapply(self: A): ((I0, DT#T), A) = (head(self), tail(self)) 
+    def unapply(self: A): Option[((I0, DT#T), A)] = self match {
+      case s if shape(self) == 0 => None
+      case _ => Some(head(self), tail(self)) 
+    }
 
     trait ILocTC[R] {
       type Out
@@ -81,6 +87,8 @@ object ArrayDefs {
       //def iloc[R](r: R)(implicit iLocTc: Is1dSpArr[A, I0, T]#ILocTC[R]): iLocTc.Out = tc1d.iloc(self, r)
       def iloc[R](r: R)(implicit iLocTc: tc1d.ILocTC[R]) = tc1d.iloc(self, r)
       def ::(other: (I0, T#T)): A = tc1d.::(self, other)
+      def shape: Int = tc1d.shape(self)
+      def unapply: Option[((I0, T#T), A)] = tc1d.unapply(self) 
     }
   }
 
