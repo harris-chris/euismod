@@ -17,6 +17,7 @@ object IndicesObj {
     def ++(idx: Index[ElemT]) = Index[ElemT](vals ++ idx.vals)
     def :+(elem: ElemT) = Index[ElemT](vals :+ elem)
     def toList = vals
+    def length = vals.length
   }
   object Index {
     def empty[ElemT: IsIdxElem]: Index[ElemT] = Index[ElemT](Nil: List[ElemT])

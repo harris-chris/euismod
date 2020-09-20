@@ -25,7 +25,7 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   )
   type Dim2T = DateType
   val dim2 = Index(
-    SportDate.YMD(2020,8,1), SportDate.YMD(2020,8,2), SportDate.YMD(2020,8,3), SportDate.YMD(2020,8,4)
+    SportDate.YMD(2020,8,1), SportDate.YMD(2020,8,2), SportDate.YMD(2020,8,3), SportDate.YMD(2020,8,4), SportDate.YMD(2020,8,5),
   )
   val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
   val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))

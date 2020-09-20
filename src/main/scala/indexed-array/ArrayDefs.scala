@@ -32,6 +32,11 @@ object ArrayDefs {
     def iloc[R](self: A, r: R)(implicit iLocTc: ILocTC[R]): iLocTc.Out = iLocTc.iloc(self, r)
     def getNil(self: A): A
     def ::(self: A, other: (I0, DT#T)): A
+    def head(self: A): (I0, DT#T) = (indices(self)(0), getElem(self, 0))
+    def shape(self: A): Int = indices(self).length
+    def tail(self: A): A = ILocTC.iLocTCForList.iloc(self, (1 to shape(self)).toList)
+
+    def unapply(self: A): ((I0, DT#T), A) = (head(self), tail(self)) 
 
     trait ILocTC[R] {
       type Out
