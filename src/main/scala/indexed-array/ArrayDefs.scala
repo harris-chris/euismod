@@ -6,47 +6,15 @@ import IndicesObj.Index
 
 import java.time.LocalDate
 
-//object TestAsOne {
-  //trait StoresNumeric[A, T] {
-    //def getNum(self: A): T
-  //}
-  //object StoresNumericSyntax {
-    //implicit class StoresNumericOps[A, T](value: A) {
-      //def getNum(implicit sn: StoresNumeric[A, T]): T = sn.getNum(value)
-    //}
-  //}
-  //case class ANumber[T](
-    //num: T
-  //)
-  //implicit def aNumberStoresNumeric[T] = 
-    //new StoresNumeric[ANumber[T], T] {
-      //def getNum(self: ANumber[T]): T = self.num
-    //}
-  //val a = ANumber[Int](3)
-  //import StoresNumericSyntax._
-  //// 1. Works fine, so explicit conversion possible
-  //aNumberStoresNumeric[Int].getNum(a) 
-  //// 2. Works fine, so implicit conversion possible
-  //implicitly[StoresNumeric[ANumber[Int], Int]].getNum(a) 
-  //// 3. Doesn't work, so implicit conversion not working
-  //println(implicitly[ANumber[Int] => StoresNumeric[ANumber[Int], Int]]) // no implicit view available...
-  //// 4. The holy grail. Doesn't work, for the same reason as above, plus possibly other
-  //a.getNum
-//}
-
-object StoresNumericObj {
+object test{
   abstract class StoresNumeric[A, T: Numeric] {
     def getNum(self: A): T
   }
   object StoresNumericSyntax {
-    implicit class StoresNumericOps[A](private val self: A) extends AnyVal {
-      def getNum[T](implicit sn: StoresNumeric[A, T]): T = sn.getNum(self)
+    implicit class StoresNumericOps[A, T: Numeric](value: A) {
+      def getNum(implicit sn: StoresNumeric[A, T]): T = sn.getNum(value)
     }
   }
-}
-
-object ANumberObj {
-  import StoresNumericObj._
   case class ANumber[T: Numeric](
     num: T
   )
@@ -54,19 +22,15 @@ object ANumberObj {
     new StoresNumeric[ANumber[T], T] {
       def getNum(self: ANumber[T]): T = self.num
     }
-}
-
-object StoresNumericTest {
-  import ANumberObj._
-  import StoresNumericObj._
   import StoresNumericSyntax._
   val a = ANumber[Int](3)
+  import Numeric.IntIsIntegral
   // 1. Works fine, so explicit conversion possible
   aNumberStoresNumeric[Int].getNum(a) 
   // 2. Works fine, so implicit conversion possible
   implicitly[StoresNumeric[ANumber[Int], Int]].getNum(a) 
   // 3. Doesn't work, so implicit conversion not working
-  //println(implicitly[ANumber[Int] => StoresNumeric[ANumber[Int], Int]]) // no implicit view available...
+  println(implicitly[ANumber[Int] => StoresNumericOps[ANumber[Int], Int]]) // no implicit view available...
   // 4. The holy grail. Doesn't work, for the same reason as above, plus possibly other
   a.getNum
 }
@@ -92,9 +56,7 @@ object ArrayDefs {
 
   abstract class Is1dSpArr[A, I0: IsIdxElem, T <: DataType] {
     type Self = A
-    //type Im1 <: DataType
-    //def name(self: A): Option[Im1]
-    //def indices(self: A): Index[I0]
+    def indices(self: A): Index[I0]
     def getElem(self: A, i: Int): T#T
     def iloc[R](self: A, r: R)(implicit 
       iLocTc: Is1dSpArr[A, I0, T]#ILocTC[R]
@@ -118,8 +80,8 @@ object ArrayDefs {
   }
 
   object Is1dSpArrSyntax {
-    implicit class Is1dSpArrOps[A, I0, T <: DataType](private val self: A) {
-      //def indices: Index[I0] = tc1d.indices(value)
+    implicit class Is1dSpArrOps[A, I0, T <: DataType](self: A) {
+      def indices(implicit tc1d: Is1dSpArr[A, I0, T]): Index[I0] = tc1d.indices(self)
       def getElem(i: Int)(implicit tc1d: Is1dSpArr[A, I0, T]) = tc1d.getElem(self, i)
       //def iloc[R](r: R)(implicit iLocTc: Is1dSpArr[A, N, I0, T]#ILocTC[R]): iLocTc.Out
       //def iloc[R](r: R)(implicit iLocTc: tc1d.ILocTC[R]): iLocTc.Out = tc1d.iloc(value, r)

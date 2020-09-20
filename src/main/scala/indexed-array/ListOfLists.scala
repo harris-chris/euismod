@@ -13,9 +13,8 @@ object ListOfListsObj {
   )
   implicit def list1dIs1dSpArr[A, I0: IsIdxElem, T <: DataType] = 
     new Is1dSpArr[List1d[I0, T], I0, T] {
-      //type Self = List1d[N, I0, T]
+      def indices(self: Self) = self.indices
       def getElem(self: List1d[I0, T], i: Int) = self.data(i)
-      //def indices(self: Self) = self.indices
       //def ::(self: Self, other: T#T) = new Self(
         //self.indices,
         //other :: self.data 
