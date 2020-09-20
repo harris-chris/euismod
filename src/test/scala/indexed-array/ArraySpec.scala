@@ -45,33 +45,26 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     //assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).ref == SportDate.YMD(2020,8,1))
     //assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).value == 0.1)
   //}
+  "List1d" should "implement the Is1dSpArr typeclass" in {
+    import ArrayDefs._
+    import ArrayDefs.Is1dSpArrSyntax._
+    println(list1dIs1dSpArr[List1d[Dim2T, PositionsData], Dim2T, PositionsData])
+    println(implicitly[Is1dSpArr[List1d[Dim2T, PositionsData], Dim2T, PositionsData]])
+    println(implicitly[List1d[Dim2T, PositionsData] => Is1dSpArrOps[List1d[Dim2T, PositionsData], Dim2T, PositionsData]])
+  }
   "Arr1d" should "return correct datum with .getElem" in {
     import ArrayDefs._
     import ArrayDefs.Is1dSpArrSyntax._
-    import ListOfListsObj._
     val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
-
-    import Skeleton._
-
-    println(implicitly[Is1dSpArr[List1d[Dim2T, PositionsData], Dim2T, PositionsData]])
-    println(implicitly[Is1dSpArr[List1d[Dim2T, PositionsData], Dim2T, PositionsData]].getElem(list1d, 0))
-    println(list1dIs1dSpArr[List1d[Dim2T, PositionsData], Dim2T, PositionsData])
-    println(list1dIs1dSpArr[List1d[Dim2T, PositionsData], Dim2T, PositionsData].getElem(list1d, 0))
-    println(implicitly[List1d[Dim2T, PositionsData] => Is1dSpArrOps[List1d[Dim2T, PositionsData], Dim2T, PositionsData]])
-    //println(Is1dSpArrOps[List1d[Dim2T, PositionsData], Dim2T, PositionsData](list1d).getElem(0))
-    println(list1d.getElem(0))
-    //println(List1d.list1dIs1dSpArr[Dim2T, PositionsData].getElem(list1d, 0))
-    //println(list1dIs1dSpArr[Dim2T, PositionsData].getElem(list1d, 0))
-    //assert(List1d.list1dIs1dSpArr[Dim2T, PositionsData].getElem(list1d, 0) == values1d(0))
-    //val t2 = Is1dSpArrOps[List1d[Dim2T, PositionsData], Dim2T, PositionsData](list1d)
-    //t2.getElem(0)
-    //// It's probably not doing the conversion, since getElem syntax seems OK
-    //println(list1d.getElem(0))
-    //println(implicitly[Is1dSpArr[List1d[Dim2T, PositionsData], Dim2T, PositionsData]](list1d).getElem(0))
-    //val conv = new ListOfListsObj.list1dIs1dSpArr[Dim2T, PositionsData](dim2, values1d)
-    //assert(implicitly[List1d[Dim2T, PositionsData]](list1d).getElem(list1d, 2) == values1d(2))
-    //assert(arr1d.getElem(2) == values1d(2))
+    values1d.zipWithIndex.forall({case(x, i) => x == list1d.getElem(i)})
   }
+  "Arr1d" should "return correct datum with .iloc using Int" in {
+    import ArrayDefs._
+    import ArrayDefs.Is1dSpArrSyntax._
+    val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
+    values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
+  }
+
   //"Arr1d" should "return correct Datum with .loc" in {
     //val arr1d = Arr1d[Dim2T, PositionsData](dim2, values1d)
     //assert(

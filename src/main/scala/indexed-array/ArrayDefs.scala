@@ -6,34 +6,45 @@ import IndicesObj.Index
 
 import java.time.LocalDate
 
-object test{
-  abstract class StoresNumeric[A, T: Numeric] {
-    def getNum(self: A): T
-  }
-  object StoresNumericSyntax {
-    implicit class StoresNumericOps[A, T: Numeric](value: A) {
-      def getNum(implicit sn: StoresNumeric[A, T]): T = sn.getNum(value)
+object test {
+  abstract class IsArr[A, T] {
+    def getSingleElem(self: A, i: Int): T
+    def getSlice[S](self: A, sl: S)(implicit slTc: IsSlice[S]): slTc.Out = slTc.getSlice(self, sl) 
+
+    trait IsSlice[S] {
+      type Out
+      def getSlice(self: A, sl: S): Out
+    }
+    object IsSlice {
+      implicit val intIsSlice = new IsSlice[Int] {
+        type Out = T
+        def getSlice(self: A, sl: Int): Out = getSingleElem(self, sl)
+      }
+      implicit val listIsSlice = new IsSlice[List[Int]] {
+        type Out = List[T]
+        def getSlice(self: A, sl: List[Int]): Out = sl.map(getSingleElem(self, _))
+      }
     }
   }
-  case class ANumber[T: Numeric](
-    num: T
-  )
-  implicit def aNumberStoresNumeric[T: Numeric] = 
-    new StoresNumeric[ANumber[T], T] {
-      def getNum(self: ANumber[T]): T = self.num
+
+  implicit def listIsArr[A, T] = 
+    new IsArr[List[Double], Double] {
+      def getSingleElem(self: List[Double], i: Int) = self(i)
     }
-  import StoresNumericSyntax._
-  val a = ANumber[Int](3)
-  import Numeric.IntIsIntegral
-  // 1. Works fine, so explicit conversion possible
-  aNumberStoresNumeric[Int].getNum(a) 
-  // 2. Works fine, so implicit conversion possible
-  implicitly[StoresNumeric[ANumber[Int], Int]].getNum(a) 
-  // 3. Doesn't work, so implicit conversion not working
-  println(implicitly[ANumber[Int] => StoresNumericOps[ANumber[Int], Int]]) // no implicit view available...
-  // 4. The holy grail. Doesn't work, for the same reason as above, plus possibly other
-  a.getNum
+
+  object IsArrSyntax {
+    implicit class IsArrOps[A, T](self: A)(implicit tc: IsArr[A, T]) {
+      def getSingleElem(i: Int) = tc.getSingleElem(self, i)
+      def getSlice[S](sl: S)(implicit slTc: tc.IsSlice[S]) = tc.getSlice(self, sl)
+    }
+  }
+
+  import IsArrSyntax.IsArrOps
+
+  val l = List(1.0, 2.0, 3.0)
+  l.getSlice(List(0,1)) 
 }
+
 
 object ArrayDefs {
 
@@ -54,37 +65,37 @@ object ArrayDefs {
     //def isEmpty = false
   //}
 
-  abstract class Is1dSpArr[A, I0: IsIdxElem, T <: DataType] {
+  abstract class Is1dSpArr[A, I0: IsIdxElem, DT <: DataType] {
     type Self = A
     def indices(self: A): Index[I0]
-    def getElem(self: A, i: Int): T#T
-    def iloc[R](self: A, r: R)(implicit 
-      iLocTc: Is1dSpArr[A, I0, T]#ILocTC[R]
-    ): iLocTc.Out = iLocTc.iloc(self, r)
+    def getElem(self: A, i: Int): DT#T
+    def iloc[R](self: A, r: R)(implicit iLocTc: ILocTC[R]): iLocTc.Out = iLocTc.iloc(self, r)
     //def ::(self: A, other: T#T): A
 
-    abstract class ILocTC[R] {
+    trait ILocTC[R] {
       type Out
       def iloc(self: A, ref: R): Out 
     }
     object ILocTC {
-      implicit def iLocTCForInt[OutT] = new ILocTC[Int] { 
-        type Out = T#T
-        def iloc(self: A, ref: Int) = getElem(self, ref)
+      implicit val iLocTCForInt = new ILocTC[Int] { 
+        type Out = DT#T
+        def iloc(self: A, ref: Int): Out = getElem(self, ref)
       }
-      implicit def iLocTCForList[OutT] = new ILocTC[List[Int]] { 
-        type Out = List[T#T]
-        def iloc(self: A, ref: List[Int]) = ref.map(getElem(self, _))
+      implicit val iLocTCForList = new ILocTC[List[Int]] { 
+        type Out = List[DT#T]
+        def iloc(self: A, ref: List[Int]): Out = ref.map(getElem(self, _))
       }
     }
   }
 
   object Is1dSpArrSyntax {
-    implicit class Is1dSpArrOps[A, I0, T <: DataType](self: A) {
-      def indices(implicit tc1d: Is1dSpArr[A, I0, T]): Index[I0] = tc1d.indices(self)
-      def getElem(i: Int)(implicit tc1d: Is1dSpArr[A, I0, T]) = tc1d.getElem(self, i)
-      //def iloc[R](r: R)(implicit iLocTc: Is1dSpArr[A, N, I0, T]#ILocTC[R]): iLocTc.Out
-      //def iloc[R](r: R)(implicit iLocTc: tc1d.ILocTC[R]): iLocTc.Out = tc1d.iloc(value, r)
+    implicit class Is1dSpArrOps[A, I0, T <: DataType](self: A)(implicit 
+      tc1d: Is1dSpArr[A, I0, T]
+    ) {
+      def indices: Index[I0] = tc1d.indices(self)
+      def getElem(i: Int) = tc1d.getElem(self, i)
+      //def iloc[R](r: R)(implicit iLocTc: Is1dSpArr[A, I0, T]#ILocTC[R]): iLocTc.Out = tc1d.iloc(self, r)
+      def iloc[R](r: R)(implicit iLocTc: tc1d.ILocTC[R]) = tc1d.iloc(self, r)
       //def ::(other: T#T): A = tc1d.::(value, other)
     }
   }
@@ -131,46 +142,5 @@ object ArrayDefs {
       //////implicit val I1Type: Aux[I1, I0] = instance(i => getDim1Slice(i))
     ////}
   //}
-  ////object Is2dVec {
-    ////type Aux[A, I0, I1, T, M1] = Is2dVec[A, I0, I1, T, M1] { type Out = O }
-  ////}
-  //// give this typeclass method syntax
-  //implicit class Is2dVecOps[A, I0, I1, T, M1](value: A)(implicit 
-    //tc2d: Is2dVec[A, I0, I1, T, M1], tc1d: Is1dSpArr[M1, I0, I1, T]) {
-      //def getElem(i: Int) = tc2d.getElem(value, i)
-      //def indices = tc2d.indices(value)
-      //def loc[I](at: I) = ???
-      //def iloc[R](r: R)(implicit iLoc2d: tc2d.ILocTC[R, M1, I1, T]) = tc2d.iloc(value, r)
-    //}
-
-  //case class IndexedList[N, I0, T: Numeric](
-    //name: N,
-    //indices: List[I0],
-    //data: List[T]
-  //)
-
-  //case class IndexedListOfLists[I0, I1, T: Numeric](
-    //indices: (List[I0], List[I1]),
-    //data: List[List[T]],
-  //)
-
-  //implicit def listOfListsIs2dVec[I0, I1, T: Numeric] = 
-    //new Is2dVec[IndexedListOfLists[I0, I1, T], I0, I1, T, IndexedList[I0, I1, T]] {
-      //def getElem(self: IndexedListOfLists[I0, I1, T], i: Int): IndexedList[I0, I1, T] = 
-        //IndexedList[I0, I1, T](self.indices._1(i), self.indices._2, self.data(i))
-      //def indices(self: Self) = self.indices
-    //}
-
-  //val arr1d = IndexedList[Char, Int, Double](
-    //'0', List(0,1,2), List(0.1, 1.1, 2.1)
-  //)
-  //assert(arr1d.getElem(1) == 1.1)
-  //assert(arr1d.iloc(0) == 0.1)
-  //println(implicitly[Is1dSpArr[IndexedList[Char, Int, Double], Char, Int, Double]]) 
-  //val arr2d = IndexedListOfLists[Char, Int, Double](
-    //(List('0', '1'), List(0,1,2)), List(List(0.1, 1.1, 2.1), List(0.2, 1.2, 2.2))
-  //)
-  //assert(arr2d.getElem(0) == arr1d)
-  //assert(arr2d.iloc(0, 2) == 2.1)
 }
 
