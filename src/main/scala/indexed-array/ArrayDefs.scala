@@ -6,46 +6,6 @@ import IndicesObj.Index
 
 import java.time.LocalDate
 
-object test {
-  abstract class IsArr[A, T] {
-    def getSingleElem(self: A, i: Int): T
-    def getSlice[S](self: A, sl: S)(implicit slTc: IsSlice[S]): slTc.Out = slTc.getSlice(self, sl) 
-
-    trait IsSlice[S] {
-      type Out
-      def getSlice(self: A, sl: S): Out
-    }
-    object IsSlice {
-      implicit val intIsSlice = new IsSlice[Int] {
-        type Out = T
-        def getSlice(self: A, sl: Int): Out = getSingleElem(self, sl)
-      }
-      implicit val listIsSlice = new IsSlice[List[Int]] {
-        type Out = List[T]
-        def getSlice(self: A, sl: List[Int]): Out = sl.map(getSingleElem(self, _))
-      }
-    }
-  }
-
-  implicit def listIsArr[A, T] = 
-    new IsArr[List[Double], Double] {
-      def getSingleElem(self: List[Double], i: Int) = self(i)
-    }
-
-  object IsArrSyntax {
-    implicit class IsArrOps[A, T](self: A)(implicit tc: IsArr[A, T]) {
-      def getSingleElem(i: Int) = tc.getSingleElem(self, i)
-      def getSlice[S](sl: S)(implicit slTc: tc.IsSlice[S]) = tc.getSlice(self, sl)
-    }
-  }
-
-  import IsArrSyntax.IsArrOps
-
-  val l = List(1.0, 2.0, 3.0)
-  l.getSlice(List(0,1)) 
-}
-
-
 object ArrayDefs {
 
   //sealed abstract class SportArray[+A, +T] {
@@ -70,7 +30,8 @@ object ArrayDefs {
     def indices(self: A): Index[I0]
     def getElem(self: A, i: Int): DT#T
     def iloc[R](self: A, r: R)(implicit iLocTc: ILocTC[R]): iLocTc.Out = iLocTc.iloc(self, r)
-    //def ::(self: A, other: T#T): A
+    def nil(self: A): A
+    def ::(self: A, other: DT#T): A
 
     trait ILocTC[R] {
       type Out
@@ -82,10 +43,25 @@ object ArrayDefs {
         def iloc(self: A, ref: Int): Out = getElem(self, ref)
       }
       implicit val iLocTCForList = new ILocTC[List[Int]] { 
-        type Out = List[DT#T]
-        def iloc(self: A, ref: List[Int]): Out = ref.map(getElem(self, _))
+        type Out = Self
+        def iloc(self: A, ref: List[Int]): Out = ref.map(getElem(self, _)
+          ).toList.foldLeft(nil(self))((a, b) => (::(a, b))) 
       }
     }
+    //trait LocTC[R] {
+      //type Out
+      //def loc(self: A, ref: R): Out
+    //}
+    //object LocTC {
+      //implicit val locTCForI0 = new LocTC[I0] { 
+        //type Out = Option[DT#T]
+        //def loc(self: A, ref: I0): Out = indices(self).indexOf(ref).map(getElem(self, _))
+      //}
+      //implicit val locTCForListI0 = new LocTC[List[I0]] { 
+        //type Out = Option[List[DT#T]]
+        //def loc(self: A, ref: List[I0]): Out = ref.map(indices(self).indexOfgetElem(self, _))
+      //}
+    //}
   }
 
   object Is1dSpArrSyntax {
