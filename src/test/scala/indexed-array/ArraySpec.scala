@@ -58,12 +58,24 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
     values1d.zipWithIndex.forall({case(x, i) => x == list1d.getElem(i)})
   }
-  "Arr1d" should "return correct datum with .iloc using Int" in {
+  "Arr1d" should "be constructable from cons" in {
     import ArrayDefs._
     import ArrayDefs.Is1dSpArrSyntax._
-    val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
-    values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
+    val lst = List1d[Dim2T, PositionsData](Index[Dim2T](List()), Nil: List[PositionsData#T])
+    val lst1 = (dim2(0), values1d(0)) :: lst
+    val lst2 = (dim2(1), values1d(1)) :: lst1
+    val lst3 = (dim2(2), values1d(2)) :: lst2
+    val lst4 = (dim2(3), values1d(3)) :: lst3
+    val lst5 = (dim2(4), values1d(4)) :: lst4
+    assert(lst5 == List1d[Dim2T, PositionsData](dim2, values1d))
   }
+
+  //"Arr1d" should "return correct datum with .iloc using Int" in {
+    //import ArrayDefs._
+    //import ArrayDefs.Is1dSpArrSyntax._
+    //val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
+    //values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
+  //}
 
   //"Arr1d" should "return correct Datum with .loc" in {
     //val arr1d = Arr1d[Dim2T, PositionsData](dim2, values1d)

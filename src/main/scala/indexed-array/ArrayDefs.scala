@@ -30,8 +30,8 @@ object ArrayDefs {
     def indices(self: A): Index[I0]
     def getElem(self: A, i: Int): DT#T
     def iloc[R](self: A, r: R)(implicit iLocTc: ILocTC[R]): iLocTc.Out = iLocTc.iloc(self, r)
-    def nil(self: A): A
-    def ::(self: A, other: DT#T): A
+    def getNil(self: A): A
+    def ::(self: A, other: (I0, DT#T)): A
 
     trait ILocTC[R] {
       type Out
@@ -44,8 +44,11 @@ object ArrayDefs {
       }
       implicit val iLocTCForList = new ILocTC[List[Int]] { 
         type Out = Self
-        def iloc(self: A, ref: List[Int]): Out = ref.map(getElem(self, _)
-          ).toList.foldLeft(nil(self))((a, b) => (::(a, b))) 
+        def iloc(self: A, ref: List[Int]): Out = {
+          val data: List[DT#T] = ref.map(getElem(self, _)).toList
+          val idx: Index[I0] = Index(ref.map(indices(self)(_)))
+          idx.toList.zip(data).foldLeft(getNil(self))((a, b) => ::(a, (b._1, b._2))) 
+        }
       }
     }
     //trait LocTC[R] {
@@ -72,7 +75,7 @@ object ArrayDefs {
       def getElem(i: Int) = tc1d.getElem(self, i)
       //def iloc[R](r: R)(implicit iLocTc: Is1dSpArr[A, I0, T]#ILocTC[R]): iLocTc.Out = tc1d.iloc(self, r)
       def iloc[R](r: R)(implicit iLocTc: tc1d.ILocTC[R]) = tc1d.iloc(self, r)
-      //def ::(other: T#T): A = tc1d.::(value, other)
+      def ::(other: (I0, T#T)): A = tc1d.::(self, other)
     }
   }
 

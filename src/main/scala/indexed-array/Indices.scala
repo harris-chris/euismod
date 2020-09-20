@@ -15,8 +15,11 @@ object IndicesObj {
     }
     def apply(i: Int): ElemT = vals(i)
     def ++(idx: Index[ElemT]) = Index[ElemT](vals ++ idx.vals)
+    def :+(elem: ElemT) = Index[ElemT](vals :+ elem)
+    def toList = vals
   }
   object Index {
+    def empty[ElemT: IsIdxElem]: Index[ElemT] = Index[ElemT](Nil: List[ElemT])
     def apply[ElemT: IsIdxElem](vals: ElemT*): Index[ElemT] = Index[ElemT](vals.toList)
   }
 }
