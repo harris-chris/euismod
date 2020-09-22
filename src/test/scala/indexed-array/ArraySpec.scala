@@ -69,22 +69,22 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     val lst5 = (dim2(4), values1d(4)) :: lst4
     assert(lst5 == List1d[Dim2T, PositionsData](dim2, values1d))
   }
-  "Arr1d" should "decompose using cons" in {
-    import ArrayDefs._
-    import ArrayDefs.Is1dSpArrSyntax._
-    val lst = List1d[Dim2T, PositionsData](dim2, values1d)
-    lst match {
-      case lst(h, t) => {assert(h == lst.head); assert(l == lst.tail)}
-      case _ => assert(false)
-    }
-  }
-
-  //"Arr1d" should "return correct datum with .iloc using Int" in {
+  //"Arr1d" should "decompose using cons" in {
     //import ArrayDefs._
     //import ArrayDefs.Is1dSpArrSyntax._
-    //val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
-    //values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
+    //val lst = List1d[Dim2T, PositionsData](dim2, values1d)
+    //lst match {
+      //case h :: t => {assert(h == lst.head); assert(l == lst.tail)}
+      //case _ => assert(false)
+    //}
   //}
+
+  "Arr1d" should "return correct datum with .iloc using Int" in {
+    import ArrayDefs._
+    import ArrayDefs.Is1dSpArrSyntax._
+    val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
+    values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
+  }
 
   //"Arr1d" should "return correct Datum with .loc" in {
     //val arr1d = Arr1d[Dim2T, PositionsData](dim2, values1d)

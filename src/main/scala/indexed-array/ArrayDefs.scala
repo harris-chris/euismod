@@ -8,23 +8,6 @@ import java.time.LocalDate
 
 object ArrayDefs {
 
-  //sealed abstract class SportArray[+A, +T] {
-    //def isEmpty: Boolean
-    //def head: T
-    //def tail: A
-  //}
-
-  //case object NoArr extends SportArray[Nothing, Nothing] {
-    //def isEmpty = true
-    //def head: Nothing = throw new NoSuchElementException("head of empty sportarray")
-    //def tail: SportArray[Nothing, Nothing] = throw new NoSuchElementException("tail of empty sportarray")
-  //}
-
-  //final case class ::[A, T](head: T, tail: SportArray[A, T]) extends SportArray[A, T] 
-  //{
-    //def isEmpty = false
-  //}
-
   abstract class Is1dSpArr[A, I0: IsIdxElem, DT <: DataType] {
     type Self = A
     def indices(self: A): Index[I0]
@@ -79,12 +62,9 @@ object ArrayDefs {
   }
 
   object Is1dSpArrSyntax {
-    implicit class Is1dSpArrOps[A, I0, T <: DataType](self: A)(implicit 
-      tc1d: Is1dSpArr[A, I0, T]
-    ) {
+    implicit class Is1dSpArrOps[A, I0, T <: DataType](self: A)(implicit val tc1d: Is1dSpArr[A, I0, T]) {
       def indices: Index[I0] = tc1d.indices(self)
       def getElem(i: Int) = tc1d.getElem(self, i)
-      //def iloc[R](r: R)(implicit iLocTc: Is1dSpArr[A, I0, T]#ILocTC[R]): iLocTc.Out = tc1d.iloc(self, r)
       def iloc[R](r: R)(implicit iLocTc: tc1d.ILocTC[R]) = tc1d.iloc(self, r)
       def ::(other: (I0, T#T)): A = tc1d.::(self, other)
       def shape: Int = tc1d.shape(self)
