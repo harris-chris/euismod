@@ -83,15 +83,18 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     import ArrayDefs._
     import ArrayDefs.Is1dSpArrSyntax._
     val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
-    values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
+    assert(
+      values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
+    )
   }
-
-  //"Arr1d" should "return correct Datum with .loc" in {
-    //val arr1d = Arr1d[Dim2T, PositionsData](dim2, values1d)
-    //assert(
-      //arr1d.loc(dim2.vals(2)) == Some(Datum[Dim2T, PositionsData](dim2.vals(2), values1d(2)))
-    //)
-  //}
+  "Arr1d" should "return correct Datum with .loc" in {
+    import ArrayDefs._
+    import ArrayDefs.Is1dSpArrSyntax._
+    val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
+    assert(
+      dim2.toList.zip(values1d).forall({case(d, v) => list1d.loc(d) == Some(v)})
+    )
+  }
   //"Arr2d" should "return a correct Arr1d with .loc" in {
     //val arr2d = Arr2d[Dim1T, Dim2T, PositionsData]((dim1, dim2), values2d)
     //assert(

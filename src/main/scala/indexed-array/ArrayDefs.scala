@@ -13,6 +13,7 @@ object ArrayDefs {
     def indices(self: A): Index[I0]
     def getElem(self: A, i: Int): DT#T
     def iloc[R](self: A, r: R)(implicit iLocTc: ILocTC[R]): iLocTc.Out = iLocTc.iloc(self, r)
+    def loc[R](self: A, r: R)(implicit locTc: LocTC[R]): locTc.Out = locTc.loc(self, r)
     def getNil(self: A): A
     def ::(self: A, other: (I0, DT#T)): A
     def head(self: A): (I0, DT#T) = (indices(self)(0), getElem(self, 0))
@@ -45,20 +46,24 @@ object ArrayDefs {
         }
       }
     }
-    //trait LocTC[R] {
-      //type Out
-      //def loc(self: A, ref: R): Out
-    //}
-    //object LocTC {
-      //implicit val locTCForI0 = new LocTC[I0] { 
-        //type Out = Option[DT#T]
-        //def loc(self: A, ref: I0): Out = indices(self).indexOf(ref).map(getElem(self, _))
-      //}
-      //implicit val locTCForListI0 = new LocTC[List[I0]] { 
-        //type Out = Option[List[DT#T]]
-        //def loc(self: A, ref: List[I0]): Out = ref.map(indices(self).indexOfgetElem(self, _))
-      //}
-    //}
+
+    trait LocTC[R] {
+      type Out
+      def loc(self: A, ref: R): Out
+    }
+    object LocTC {
+      implicit val locTCForI0 = new LocTC[I0] { 
+        type Out = Option[DT#T]
+        def loc(self: A, ref: I0): Out = indices(self).indexOf(ref).map(getElem(self, _))
+      }
+      implicit val locTCForListI0 = new LocTC[List[I0]] { 
+        type Out = Option[List[DT#T]]
+        def loc(self: A, ref: List[I0]): Out = ref.flatMap(indices(self).indexOf(_)) match {
+          case is if is.length == ref.length => Some(is.map(getElem(self, _)))
+          case _ => None
+        }
+      }
+    }
   }
 
   object Is1dSpArrSyntax {
@@ -66,6 +71,7 @@ object ArrayDefs {
       def indices: Index[I0] = tc1d.indices(self)
       def getElem(i: Int) = tc1d.getElem(self, i)
       def iloc[R](r: R)(implicit iLocTc: tc1d.ILocTC[R]) = tc1d.iloc(self, r)
+      def loc[R](r: R)(implicit locTc: tc1d.LocTC[R]) = tc1d.loc(self, r)
       def ::(other: (I0, T#T)): A = tc1d.::(self, other)
       def shape: Int = tc1d.shape(self)
       def unapply: Option[((I0, T#T), A)] = tc1d.unapply(self) 
