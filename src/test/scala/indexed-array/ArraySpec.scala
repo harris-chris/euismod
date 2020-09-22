@@ -87,6 +87,23 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
     )
   }
+  "Arr1d" should "return correct datum with .iloc using List[Int]" in {
+    import ArrayDefs._
+    import ArrayDefs.Is1dSpArrSyntax._
+    val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
+    assert(
+      values1d.zipWithIndex.forall(
+        {
+          case(x, i) => i match {
+            case i if i < 4 => List1d[Dim2T, PositionsData](
+              Index(List(dim2(i), dim2(i+1))), List(values1d(i), values1d(i+1))
+            ) == list1d.iloc(List(i, i+1))
+            case i if i == 4 => true
+          }
+        }
+      )
+    )
+  }
   "Arr1d" should "return correct Datum with .loc" in {
     import ArrayDefs._
     import ArrayDefs.Is1dSpArrSyntax._
