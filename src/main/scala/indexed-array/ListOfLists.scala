@@ -22,4 +22,22 @@ object ListOfListsObj {
         //other :: self.data 
       //)
     }
+  
+  case class List2d[I0: IsIdxElem, I1: IsIdxElem, T <: DataType] ( 
+    indices: (Index[I0], Index[I1]),
+    data: List[List[T#T]],
+  )
+  implicit def list2dIs2dSpArr[A, I0: IsIdxElem, I1: IsIdxElem, T <: DataType] = 
+    new Is2dSpArr[List2d[I0, I1, T], I0, I1, T, List1d[I1, T]] {
+      def indices(self: Self) = self.indices
+      def getElem(self: List2d[I0, I1, T], i: Int) = List1d(self.indices._2, self.data(i))
+      def getNil(self: Self) = List2d[I0, I1, T]((Index.empty[I0], Index.empty[I1]), Nil: List[List[T#T]])
+      def ::(self: Self, other: (I0, List1d[I1, T])) = List2d[I0, I1, T](
+        (self.indices._1 :+ other._1, self.indices._2), self.data :+ other._2.data
+      )
+      //def ::(self: Self, other: T#T) = new Self(
+        //self.indices,
+        //other :: self.data 
+      //)
+    }
 }

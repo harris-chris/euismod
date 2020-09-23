@@ -78,16 +78,16 @@ object ArrayDefs {
     }
   }
 
-  abstract class Is2dSpArr[A, I0: IsIdxElem, I1: IsIdxElem, DT <: DataType, M1] {
+  abstract class Is2dSpArr[A, I0: IsIdxElem, I1: IsIdxElem, DT <: DataType, M1](implicit tc1d: Is1dSpArr[M1, I1, DT]) {
     type Self = A
-    def indices(self: A): Index[I0]
-    def getElem[O](self: A, i: Int)(implicit tc1d: Is1dSpArr[O, I1, DT]): M1
-    //def iloc[R](self: A, r: R)(implicit iLocTc: ILocTC[R]): iLocTc.Out = iLocTc.iloc(self, r)
+    def indices(self: A): (Index[I0], Index[I1])
+    def getElem(self: A, i: Int): M1
+    def iloc[R, Out](self: A, r: R)(implicit iLocTc: ILocTC.Aux[R, Out], tc1d: Is1dSpArr[Out, I1, DT]): iLocTc.Out = iLocTc.iloc(self, r)
     //def loc[R](self: A, r: R)(implicit locTc: LocTC[R]): locTc.Out = locTc.loc(self, r)
     def getNil(self: A): A
-    def ::(self: A, other: (I0, DT#T)): A
+    def ::(self: A, other: (I0, M1)): A
     //def head(self: A): (I0, DT#T) = (indices(self)(0), getElem(self, 0))
-    //def shape(self: A): Int = indices(self).length
+    def shape(self: A): (Int, Int) = (indices(self)._1.length, indices(self)._2.length)
     //def tail(self: A): A = self match {
       //case s if shape(self) <= 1 => getNil(s)
       //case _ => ILocTC.iLocTCForList.iloc(self, (1 to shape(self)).toList)
@@ -98,24 +98,25 @@ object ArrayDefs {
       //case _ => Some(head(self), tail(self)) 
     //}
 
-    //trait ILocTC[R] {
-      //type Out
-      //def iloc[O](self: A, ref: R)(implicit tc1d: Is1dSpArr[O, I1, DT]): Out 
-    //}
-    //object ILocTC {
-      //implicit val iLocTCForInt = new ILocTC[Int] { 
-        //type Out = M1
-        //def iloc[O](self: A, ref: Int)(implicit tc1d: Is1dSpArr[O, I1, DT]): Out = getElem(self, ref)
-      //}
-      //implicit val iLocTCForList = new ILocTC[List[Int]] { 
-        //type Out = Self
-        //def iloc[O](self: A, ref: List[Int])(implicit tc1d: Is1dSpArr[O, I1, DT]): Out = {
-          //val data: List[DT#T] = ref.map(getElem(self, _)).toList
-          //val idx: Index[I0] = Index(ref.map(indices(self)(_)))
-          //idx.toList.zip(data).foldLeft(getNil(self))((a, b) => ::(a, (b._1, b._2))) 
-        //}
-      //}
-    //}
+    trait ILocTC[R] {
+      type Out
+      def iloc(self: A, ref: R)(implicit tc1d: Is1dSpArr[Out, I1, DT]): Out 
+    }
+    object ILocTC {
+      type Aux[A0, B0] = ILocTC[A0] { type Out = B0 }
+      implicit val iLocTCForInt = new ILocTC[Int] { 
+        type Out = M1
+        def iloc(self: A, ref: Int)(implicit tc1d: Is1dSpArr[Out, I1, DT]): Out = getElem(self, ref)
+      }
+      implicit val iLocTCForList = new ILocTC[List[Int]] { 
+        type Out = Self
+        def iloc(self: A, ref: List[Int])(implicit tc1d: Is1dSpArr[Out, I1, DT]): Out = {
+          val data: List[M1] = ref.map(getElem(self, _)).toList
+          val idx: Index[I0] = Index(ref.map(indices(self)._1(_)))
+          idx.toList.zip(data).foldLeft(getNil(self))((a, b) => ::(a, (b._1, b._2))) 
+        }
+      }
+    }
 
     //trait LocTC[R] {
       //type Out
@@ -141,12 +142,12 @@ object ArrayDefs {
       val tc2d: Is2dSpArr[A, I0, I1, T, M1],
       val tc1d: Is1dSpArr[A, I1, T],
     ) {
-      def indices: Index[I0] = tc2d.indices(self)
+      def indices: (Index[I0], Index[I1]) = tc2d.indices(self)
       def getElem(i: Int) = tc2d.getElem(self, i)
       //def iloc[R](r: R)(implicit iLocTc: tc2d.ILocTC[R]) = tc2d.iloc(self, r)
       //def loc[R](r: R)(implicit locTc: tc2d.LocTC[R]) = tc2d.loc(self, r)
-      def ::(other: (I0, T#T)): A = tc2d.::(self, other)
-      //def shape: Int = tc2d.shape(self)
+      def ::(other:(I0, M1)): A = tc2d.::(self, other)
+      def shape: (Int, Int) = tc2d.shape(self)
       //def unapply: Option[((I0, T#T), A)] = tc2d.unapply(self) 
     }
   }
