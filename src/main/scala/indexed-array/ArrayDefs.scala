@@ -100,17 +100,17 @@ object ArrayDefs {
 
     trait ILocTC[R] {
       type Out
-      def iloc(self: A, ref: R)(implicit tc1d: Is1dSpArr[Out, I1, DT]): Out 
+      def iloc(self: A, r: R)(implicit iLocTc: ILocTC.Aux[R, Out], tc1d: Is1dSpArr[Out, I1, DT]): iLocTc.Out
     }
     object ILocTC {
       type Aux[A0, B0] = ILocTC[A0] { type Out = B0 }
       implicit val iLocTCForInt = new ILocTC[Int] { 
         type Out = M1
-        def iloc(self: A, ref: Int)(implicit tc1d: Is1dSpArr[Out, I1, DT]): Out = getElem(self, ref)
+        def iloc(self: A, r: Int)(implicit iLocTc: ILocTC.Aux[Int, Out], tc1d: Is1dSpArr[Out, I1, DT]): iLocTc.Out = getElem(self, r)
       }
       implicit val iLocTCForList = new ILocTC[List[Int]] { 
         type Out = Self
-        def iloc(self: A, ref: List[Int])(implicit tc1d: Is1dSpArr[Out, I1, DT]): Out = {
+        def iloc(self: A, ref: List[Int])(implicit iLocTc: ILocTC.Aux[List[Int], Out], tc1d: Is1dSpArr[Out, I1, DT]): Out = {
           val data: List[M1] = ref.map(getElem(self, _)).toList
           val idx: Index[I0] = Index(ref.map(indices(self)._1(_)))
           idx.toList.zip(data).foldLeft(getNil(self))((a, b) => ::(a, (b._1, b._2))) 
@@ -140,11 +140,10 @@ object ArrayDefs {
   object Is2dSpArrSyntax {
     implicit class Is2dSpArrOps[A, I0, I1, T <: DataType, M1](self: A)(implicit 
       val tc2d: Is2dSpArr[A, I0, I1, T, M1],
-      val tc1d: Is1dSpArr[A, I1, T],
     ) {
       def indices: (Index[I0], Index[I1]) = tc2d.indices(self)
       def getElem(i: Int) = tc2d.getElem(self, i)
-      //def iloc[R](r: R)(implicit iLocTc: tc2d.ILocTC[R]) = tc2d.iloc(self, r)
+      def iloc[R, Out](r: R)(implicit iLocTc: tc2d.ILocTC.Aux[R, Out], tc1d: Is1dSpArr[Out, I1, T]) = tc2d.iloc(self, r)
       //def loc[R](r: R)(implicit locTc: tc2d.LocTC[R]) = tc2d.loc(self, r)
       def ::(other:(I0, M1)): A = tc2d.::(self, other)
       def shape: (Int, Int) = tc2d.shape(self)
