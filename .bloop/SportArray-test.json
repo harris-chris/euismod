@@ -19,12 +19,60 @@
             "/data/vap/sport-array/.bloop/SportDate/scala-2.13/classes",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.2/scala-library-2.13.2.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.1/scalatest_2.13-3.1.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite_2.13.2/2.2.0/ammonite_2.13.2-2.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/nscala-time/nscala-time_2.13/2.24.0/nscala-time_2.13-2.24.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.1/scalactic_2.13-3.1.1.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-terminal_2.13/2.2.0/ammonite-terminal_2.13-2.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-ops_2.13/2.2.0/ammonite-ops_2.13-2.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-util_2.13/2.2.0/ammonite-util_2.13-2.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-runtime_2.13.2/2.2.0/ammonite-runtime_2.13.2-2.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-interp-api_2.13.2/2.2.0/ammonite-interp-api_2.13.2-2.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-repl-api_2.13.2/2.2.0/ammonite-repl-api_2.13.2-2.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-interp_2.13.2/2.2.0/ammonite-interp_2.13.2-2.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-repl_2.13.2/2.2.0/ammonite-repl_2.13.2-2.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/joda-time/joda-time/2.10.6/joda-time-2.10.6.jar",
-            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/joda/joda-convert/2.2.1/joda-convert-2.2.1.jar"
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/joda/joda-convert/2.2.1/joda-convert-2.2.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/sourcecode_2.13/0.2.1/sourcecode_2.13-0.2.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/fansi_2.13/0.2.9/fansi_2.13-0.2.9.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.7.1/os-lib_2.13-0.7.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-collection-compat_2.13/2.1.6/scala-collection-compat_2.13-2.1.6.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/pprint_2.13/0.5.9/pprint_2.13-0.5.9.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle_2.13/1.2.0/upickle_2.13-1.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/requests_2.13/0.6.5/requests_2.13-0.6.5.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/io/get-coursier/interface/0.0.21/interface-0.0.21.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/scopt/scopt_2.13/3.7.1/scopt_2.13-3.7.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/bsp4j/2.0.0-M6/bsp4j-2.0.0-M6.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/trees_2.13/4.3.20/trees_2.13-4.3.20.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/scalaparse_2.13/2.3.0/scalaparse_2.13-2.3.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/javassist/javassist/3.21.0-GA/javassist-3.21.0-GA.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline-terminal/3.14.1/jline-terminal-3.14.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline-terminal-jna/3.14.1/jline-terminal-jna-3.14.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline-reader/3.14.1/jline-reader-3.14.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.2.5/javaparser-core-3.2.5.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/geny_2.13/0.6.2/geny_2.13-0.6.2.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ujson_2.13/1.2.0/ujson_2.13-1.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upack_2.13/1.2.0/upack_2.13-1.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle-implicits_2.13/1.2.0/upickle-implicits_2.13-1.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline/3.14.1/jline-3.14.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.3.1/jna-5.3.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/lsp4j/org.eclipse.lsp4j.generator/0.8.1/org.eclipse.lsp4j.generator-0.8.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/lsp4j/org.eclipse.lsp4j.jsonrpc/0.8.1/org.eclipse.lsp4j.jsonrpc-0.8.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/common_2.13/4.3.20/common_2.13-4.3.20.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/thesamet/scalapb/scalapb-runtime_2.13/0.10.3/scalapb-runtime_2.13-0.10.3.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/fastparse_2.13/1.0.1/fastparse_2.13-1.0.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/fastparse_2.13/2.3.0/fastparse_2.13-2.3.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle-core_2.13/1.2.0/upickle-core_2.13-1.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/xtend/org.eclipse.xtend.lib/2.18.0/org.eclipse.xtend.lib-2.18.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/google/code/gson/gson/2.8.2/gson-2.8.2.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/thesamet/scalapb/lenses_2.13/0.10.3/lenses_2.13-0.10.3.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.11.4/protobuf-java-3.11.4.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/fastparse-utils_2.13/1.0.1/fastparse-utils_2.13-1.0.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.18.0/org.eclipse.xtext.xbase.lib-2.18.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/xtend/org.eclipse.xtend.lib.macro/2.18.0/org.eclipse.xtend.lib.macro-2.18.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/google/guava/guava/21.0/guava-21.0.jar"
         ],
         "out": "/data/vap/sport-array/.bloop/SportArray",
         "classesDir": "/data/vap/sport-array/.bloop/SportArray/scala-2.13/test-classes",
@@ -149,6 +197,23 @@
                     ]
                 },
                 {
+                    "organization": "com.lihaoyi",
+                    "name": "ammonite_2.13.2",
+                    "version": "2.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ammonite_2.13.2",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite_2.13.2/2.2.0/ammonite_2.13.2-2.2.0.jar"
+                        },
+                        {
+                            "name": "ammonite_2.13.2",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite_2.13.2/2.2.0/ammonite_2.13.2-2.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
                     "organization": "com.github.nscala-time",
                     "name": "nscala-time_2.13",
                     "version": "2.24.0",
@@ -217,6 +282,142 @@
                     ]
                 },
                 {
+                    "organization": "com.lihaoyi",
+                    "name": "ammonite-terminal_2.13",
+                    "version": "2.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ammonite-terminal_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-terminal_2.13/2.2.0/ammonite-terminal_2.13-2.2.0.jar"
+                        },
+                        {
+                            "name": "ammonite-terminal_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-terminal_2.13/2.2.0/ammonite-terminal_2.13-2.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "ammonite-ops_2.13",
+                    "version": "2.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ammonite-ops_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-ops_2.13/2.2.0/ammonite-ops_2.13-2.2.0.jar"
+                        },
+                        {
+                            "name": "ammonite-ops_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-ops_2.13/2.2.0/ammonite-ops_2.13-2.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "ammonite-util_2.13",
+                    "version": "2.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ammonite-util_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-util_2.13/2.2.0/ammonite-util_2.13-2.2.0.jar"
+                        },
+                        {
+                            "name": "ammonite-util_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-util_2.13/2.2.0/ammonite-util_2.13-2.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "ammonite-runtime_2.13.2",
+                    "version": "2.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ammonite-runtime_2.13.2",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-runtime_2.13.2/2.2.0/ammonite-runtime_2.13.2-2.2.0.jar"
+                        },
+                        {
+                            "name": "ammonite-runtime_2.13.2",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-runtime_2.13.2/2.2.0/ammonite-runtime_2.13.2-2.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "ammonite-interp-api_2.13.2",
+                    "version": "2.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ammonite-interp-api_2.13.2",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-interp-api_2.13.2/2.2.0/ammonite-interp-api_2.13.2-2.2.0.jar"
+                        },
+                        {
+                            "name": "ammonite-interp-api_2.13.2",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-interp-api_2.13.2/2.2.0/ammonite-interp-api_2.13.2-2.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "ammonite-repl-api_2.13.2",
+                    "version": "2.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ammonite-repl-api_2.13.2",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-repl-api_2.13.2/2.2.0/ammonite-repl-api_2.13.2-2.2.0.jar"
+                        },
+                        {
+                            "name": "ammonite-repl-api_2.13.2",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-repl-api_2.13.2/2.2.0/ammonite-repl-api_2.13.2-2.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "ammonite-interp_2.13.2",
+                    "version": "2.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ammonite-interp_2.13.2",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-interp_2.13.2/2.2.0/ammonite-interp_2.13.2-2.2.0.jar"
+                        },
+                        {
+                            "name": "ammonite-interp_2.13.2",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-interp_2.13.2/2.2.0/ammonite-interp_2.13.2-2.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "ammonite-repl_2.13.2",
+                    "version": "2.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ammonite-repl_2.13.2",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-repl_2.13.2/2.2.0/ammonite-repl_2.13.2-2.2.0.jar"
+                        },
+                        {
+                            "name": "ammonite-repl_2.13.2",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-repl_2.13.2/2.2.0/ammonite-repl_2.13.2-2.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
                     "organization": "joda-time",
                     "name": "joda-time",
                     "version": "2.10.6",
@@ -247,6 +448,702 @@
                             "name": "joda-convert",
                             "classifier": "sources",
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/joda/joda-convert/2.2.1/joda-convert-2.2.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "sourcecode_2.13",
+                    "version": "0.2.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "sourcecode_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/sourcecode_2.13/0.2.1/sourcecode_2.13-0.2.1.jar"
+                        },
+                        {
+                            "name": "sourcecode_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/sourcecode_2.13/0.2.1/sourcecode_2.13-0.2.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "fansi_2.13",
+                    "version": "0.2.9",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "fansi_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/fansi_2.13/0.2.9/fansi_2.13-0.2.9.jar"
+                        },
+                        {
+                            "name": "fansi_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/fansi_2.13/0.2.9/fansi_2.13-0.2.9-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "os-lib_2.13",
+                    "version": "0.7.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "os-lib_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.7.1/os-lib_2.13-0.7.1.jar"
+                        },
+                        {
+                            "name": "os-lib_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.7.1/os-lib_2.13-0.7.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang.modules",
+                    "name": "scala-collection-compat_2.13",
+                    "version": "2.1.6",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-collection-compat_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-collection-compat_2.13/2.1.6/scala-collection-compat_2.13-2.1.6.jar"
+                        },
+                        {
+                            "name": "scala-collection-compat_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-collection-compat_2.13/2.1.6/scala-collection-compat_2.13-2.1.6-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "pprint_2.13",
+                    "version": "0.5.9",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "pprint_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/pprint_2.13/0.5.9/pprint_2.13-0.5.9.jar"
+                        },
+                        {
+                            "name": "pprint_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/pprint_2.13/0.5.9/pprint_2.13-0.5.9-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "upickle_2.13",
+                    "version": "1.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "upickle_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle_2.13/1.2.0/upickle_2.13-1.2.0.jar"
+                        },
+                        {
+                            "name": "upickle_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle_2.13/1.2.0/upickle_2.13-1.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "requests_2.13",
+                    "version": "0.6.5",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "requests_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/requests_2.13/0.6.5/requests_2.13-0.6.5.jar"
+                        },
+                        {
+                            "name": "requests_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/requests_2.13/0.6.5/requests_2.13-0.6.5-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-compiler",
+                    "version": "2.13.2",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-compiler",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2.jar"
+                        },
+                        {
+                            "name": "scala-compiler",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "io.get-coursier",
+                    "name": "interface",
+                    "version": "0.0.21",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "interface",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/io/get-coursier/interface/0.0.21/interface-0.0.21.jar"
+                        },
+                        {
+                            "name": "interface",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/io/get-coursier/interface/0.0.21/interface-0.0.21-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.github.scopt",
+                    "name": "scopt_2.13",
+                    "version": "3.7.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scopt_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/scopt/scopt_2.13/3.7.1/scopt_2.13-3.7.1.jar"
+                        },
+                        {
+                            "name": "scopt_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/scopt/scopt_2.13/3.7.1/scopt_2.13-3.7.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "ch.epfl.scala",
+                    "name": "bsp4j",
+                    "version": "2.0.0-M6",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "bsp4j",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/bsp4j/2.0.0-M6/bsp4j-2.0.0-M6.jar"
+                        },
+                        {
+                            "name": "bsp4j",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/bsp4j/2.0.0-M6/bsp4j-2.0.0-M6-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scalameta",
+                    "name": "trees_2.13",
+                    "version": "4.3.20",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "trees_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/trees_2.13/4.3.20/trees_2.13-4.3.20.jar"
+                        },
+                        {
+                            "name": "trees_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/trees_2.13/4.3.20/trees_2.13-4.3.20-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "scalaparse_2.13",
+                    "version": "2.3.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scalaparse_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/scalaparse_2.13/2.3.0/scalaparse_2.13-2.3.0.jar"
+                        },
+                        {
+                            "name": "scalaparse_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/scalaparse_2.13/2.3.0/scalaparse_2.13-2.3.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.javassist",
+                    "name": "javassist",
+                    "version": "3.21.0-GA",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "javassist",
+                            "checksum": {
+                                "type": "sha1",
+                                "digest": "598244f595db5c5fb713731eddbb1c91a58d959b"
+                            },
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/javassist/javassist/3.21.0-GA/javassist-3.21.0-GA.jar"
+                        },
+                        {
+                            "name": "javassist",
+                            "classifier": "sources",
+                            "checksum": {
+                                "type": "sha1",
+                                "digest": "81fefbd46ba6a18fc7af83b9c60b28c0862cd492"
+                            },
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/javassist/javassist/3.21.0-GA/javassist-3.21.0-GA-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.jline",
+                    "name": "jline-terminal",
+                    "version": "3.14.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "jline-terminal",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline-terminal/3.14.1/jline-terminal-3.14.1.jar"
+                        },
+                        {
+                            "name": "jline-terminal",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline-terminal/3.14.1/jline-terminal-3.14.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.jline",
+                    "name": "jline-terminal-jna",
+                    "version": "3.14.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "jline-terminal-jna",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline-terminal-jna/3.14.1/jline-terminal-jna-3.14.1.jar"
+                        },
+                        {
+                            "name": "jline-terminal-jna",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline-terminal-jna/3.14.1/jline-terminal-jna-3.14.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.jline",
+                    "name": "jline-reader",
+                    "version": "3.14.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "jline-reader",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline-reader/3.14.1/jline-reader-3.14.1.jar"
+                        },
+                        {
+                            "name": "jline-reader",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline-reader/3.14.1/jline-reader-3.14.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.github.javaparser",
+                    "name": "javaparser-core",
+                    "version": "3.2.5",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "javaparser-core",
+                            "checksum": {
+                                "type": "sha1",
+                                "digest": "c00bf4bbcaa2ecb51bcbdd483bc58b8d569bf88c"
+                            },
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.2.5/javaparser-core-3.2.5.jar"
+                        },
+                        {
+                            "name": "javaparser-core",
+                            "classifier": "sources",
+                            "checksum": {
+                                "type": "sha1",
+                                "digest": "8804532795a855e746c1ff5243752e940c06680b"
+                            },
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.2.5/javaparser-core-3.2.5-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "geny_2.13",
+                    "version": "0.6.2",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "geny_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/geny_2.13/0.6.2/geny_2.13-0.6.2.jar"
+                        },
+                        {
+                            "name": "geny_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/geny_2.13/0.6.2/geny_2.13-0.6.2-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "ujson_2.13",
+                    "version": "1.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "ujson_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ujson_2.13/1.2.0/ujson_2.13-1.2.0.jar"
+                        },
+                        {
+                            "name": "ujson_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ujson_2.13/1.2.0/ujson_2.13-1.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "upack_2.13",
+                    "version": "1.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "upack_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upack_2.13/1.2.0/upack_2.13-1.2.0.jar"
+                        },
+                        {
+                            "name": "upack_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upack_2.13/1.2.0/upack_2.13-1.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "upickle-implicits_2.13",
+                    "version": "1.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "upickle-implicits_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle-implicits_2.13/1.2.0/upickle-implicits_2.13-1.2.0.jar"
+                        },
+                        {
+                            "name": "upickle-implicits_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle-implicits_2.13/1.2.0/upickle-implicits_2.13-1.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.jline",
+                    "name": "jline",
+                    "version": "3.14.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "jline",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline/3.14.1/jline-3.14.1.jar"
+                        },
+                        {
+                            "name": "jline",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline/3.14.1/jline-3.14.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "net.java.dev.jna",
+                    "name": "jna",
+                    "version": "5.3.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "jna",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.3.1/jna-5.3.1.jar"
+                        },
+                        {
+                            "name": "jna",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.3.1/jna-5.3.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.eclipse.lsp4j",
+                    "name": "org.eclipse.lsp4j.generator",
+                    "version": "0.8.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "org.eclipse.lsp4j.generator",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/lsp4j/org.eclipse.lsp4j.generator/0.8.1/org.eclipse.lsp4j.generator-0.8.1.jar"
+                        },
+                        {
+                            "name": "org.eclipse.lsp4j.generator",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/lsp4j/org.eclipse.lsp4j.generator/0.8.1/org.eclipse.lsp4j.generator-0.8.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.eclipse.lsp4j",
+                    "name": "org.eclipse.lsp4j.jsonrpc",
+                    "version": "0.8.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "org.eclipse.lsp4j.jsonrpc",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/lsp4j/org.eclipse.lsp4j.jsonrpc/0.8.1/org.eclipse.lsp4j.jsonrpc-0.8.1.jar"
+                        },
+                        {
+                            "name": "org.eclipse.lsp4j.jsonrpc",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/lsp4j/org.eclipse.lsp4j.jsonrpc/0.8.1/org.eclipse.lsp4j.jsonrpc-0.8.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scalameta",
+                    "name": "common_2.13",
+                    "version": "4.3.20",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "common_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/common_2.13/4.3.20/common_2.13-4.3.20.jar"
+                        },
+                        {
+                            "name": "common_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/common_2.13/4.3.20/common_2.13-4.3.20-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.thesamet.scalapb",
+                    "name": "scalapb-runtime_2.13",
+                    "version": "0.10.3",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scalapb-runtime_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/thesamet/scalapb/scalapb-runtime_2.13/0.10.3/scalapb-runtime_2.13-0.10.3.jar"
+                        },
+                        {
+                            "name": "scalapb-runtime_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/thesamet/scalapb/scalapb-runtime_2.13/0.10.3/scalapb-runtime_2.13-0.10.3-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scalameta",
+                    "name": "fastparse_2.13",
+                    "version": "1.0.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "fastparse_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/fastparse_2.13/1.0.1/fastparse_2.13-1.0.1.jar"
+                        },
+                        {
+                            "name": "fastparse_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/fastparse_2.13/1.0.1/fastparse_2.13-1.0.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "fastparse_2.13",
+                    "version": "2.3.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "fastparse_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/fastparse_2.13/2.3.0/fastparse_2.13-2.3.0.jar"
+                        },
+                        {
+                            "name": "fastparse_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/fastparse_2.13/2.3.0/fastparse_2.13-2.3.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.lihaoyi",
+                    "name": "upickle-core_2.13",
+                    "version": "1.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "upickle-core_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle-core_2.13/1.2.0/upickle-core_2.13-1.2.0.jar"
+                        },
+                        {
+                            "name": "upickle-core_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle-core_2.13/1.2.0/upickle-core_2.13-1.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.eclipse.xtend",
+                    "name": "org.eclipse.xtend.lib",
+                    "version": "2.18.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "org.eclipse.xtend.lib",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/xtend/org.eclipse.xtend.lib/2.18.0/org.eclipse.xtend.lib-2.18.0.jar"
+                        },
+                        {
+                            "name": "org.eclipse.xtend.lib",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/xtend/org.eclipse.xtend.lib/2.18.0/org.eclipse.xtend.lib-2.18.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.google.code.gson",
+                    "name": "gson",
+                    "version": "2.8.2",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "gson",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/google/code/gson/gson/2.8.2/gson-2.8.2.jar"
+                        },
+                        {
+                            "name": "gson",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/google/code/gson/gson/2.8.2/gson-2.8.2-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.thesamet.scalapb",
+                    "name": "lenses_2.13",
+                    "version": "0.10.3",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "lenses_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/thesamet/scalapb/lenses_2.13/0.10.3/lenses_2.13-0.10.3.jar"
+                        },
+                        {
+                            "name": "lenses_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/thesamet/scalapb/lenses_2.13/0.10.3/lenses_2.13-0.10.3-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.google.protobuf",
+                    "name": "protobuf-java",
+                    "version": "3.11.4",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "protobuf-java",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.11.4/protobuf-java-3.11.4.jar"
+                        },
+                        {
+                            "name": "protobuf-java",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.11.4/protobuf-java-3.11.4-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scalameta",
+                    "name": "fastparse-utils_2.13",
+                    "version": "1.0.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "fastparse-utils_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/fastparse-utils_2.13/1.0.1/fastparse-utils_2.13-1.0.1.jar"
+                        },
+                        {
+                            "name": "fastparse-utils_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalameta/fastparse-utils_2.13/1.0.1/fastparse-utils_2.13-1.0.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.eclipse.xtext",
+                    "name": "org.eclipse.xtext.xbase.lib",
+                    "version": "2.18.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "org.eclipse.xtext.xbase.lib",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.18.0/org.eclipse.xtext.xbase.lib-2.18.0.jar"
+                        },
+                        {
+                            "name": "org.eclipse.xtext.xbase.lib",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.18.0/org.eclipse.xtext.xbase.lib-2.18.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.eclipse.xtend",
+                    "name": "org.eclipse.xtend.lib.macro",
+                    "version": "2.18.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "org.eclipse.xtend.lib.macro",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/xtend/org.eclipse.xtend.lib.macro/2.18.0/org.eclipse.xtend.lib.macro-2.18.0.jar"
+                        },
+                        {
+                            "name": "org.eclipse.xtend.lib.macro",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/xtend/org.eclipse.xtend.lib.macro/2.18.0/org.eclipse.xtend.lib.macro-2.18.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.google.guava",
+                    "name": "guava",
+                    "version": "21.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "guava",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/google/guava/guava/21.0/guava-21.0.jar"
+                        },
+                        {
+                            "name": "guava",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/google/guava/guava/21.0/guava-21.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-compiler",
+                    "version": "2.13.2",
+                    "configurations": "optional",
+                    "artifacts": [
+                        {
+                            "name": "scala-compiler",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2.jar"
+                        },
+                        {
+                            "name": "scala-compiler",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2-sources.jar"
                         }
                     ]
                 },

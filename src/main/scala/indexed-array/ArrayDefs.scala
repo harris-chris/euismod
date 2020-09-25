@@ -45,6 +45,10 @@ object ArrayDefs {
           idx.toList.zip(data).foldLeft(getNil(self))((a, b) => ::(a, (b._1, b._2))) 
         }
       }
+      implicit val iLocTCForNull = new ILocTC[Null] { 
+        type Out = Self
+        def iloc(self: A, ref: Null): Out = self
+      }
     }
 
     trait LocTC[R] {
