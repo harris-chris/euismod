@@ -27,6 +27,9 @@ libraryDependencies += {
   }
   "com.lihaoyi" % "ammonite" % version % "test" cross CrossVersion.full
 }
+libraryDependencies ++= Seq(
+  "com.chuusai" %% "shapeless" % "2.3.3"
+)
 
 sourceGenerators in Test += Def.task {
   val file = (sourceManaged in Test).value / "amm.scala"
