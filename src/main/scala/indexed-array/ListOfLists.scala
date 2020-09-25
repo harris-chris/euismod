@@ -15,8 +15,8 @@ object ListOfListsObj {
     data: List[T#T],
   )
   implicit def list1dIs1dSpArr[I0: IsIdxElem, T <: DataType] = 
-    new Is1dSpArr[List1d[I0, T], T] {
-      def indices(self: Self)(implicit i0IsIdx: IsIdxElem[I0]): Index[I0] :: HNil = self.indices
+    new Is1dSpArr[List1d[I0, T], T, I0] {
+      def indices(self: Self): Index[I0] :: HNil = self.indices
       def getElem(self: Self, i: Int) = self.data(i)
       def getNil(self: Self) = List1d[I0, T](Index.empty[I0] :: HNil, Nil: List[T#T])
       //def ::(self: Self, other: (I0, T#T)) = List1d[I0, T](self.indices :+ other._1, self.data :+ other._2)

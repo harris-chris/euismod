@@ -1,5 +1,8 @@
 package sportarray
 
+import shapeless._
+import shapeless.ops.hlist._
+
 object Main extends App {
   import ListOfListsObj._
   import ArrayDefs._
@@ -15,6 +18,6 @@ object Main extends App {
     SportDate.YMD(2020,8,4), SportDate.YMD(2020,8,5),
   )
   val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
-  val list1d = List1d[Dim2T, PositionsData](dim2, values1d)
+  val list1d = List1d[Dim2T, PositionsData](dim2 :: HNil, values1d)
   values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
 }

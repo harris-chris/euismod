@@ -16,16 +16,16 @@ object ArrayDefs {
     //def indices(self: A): HList
     type Aux[A0, M0] = IsSpArr[A0, T] { type M1 = M0 }
     def getElem(self: A, i: Int): M1
+    def getNil(self: A): A
     def iloc[R](self: A, r: R)(implicit iLocTc: ILoc[R, A, T]): iLocTc.Out = iLocTc.iloc(self, r)
   }
 
-  abstract class Is1dSpArr[A, T <: DataType] extends IsSpArr[A, T] {
+  abstract class Is1dSpArr[A, T <: DataType, I0: IsIdxElem] extends IsSpArr[A, T] {
     type M1 = T#T
     //def getElem(self: A, i: Int): T#T
-    //def indices[I0](self: A)(implicit i0IsIdx: IsIdxElem[I0]): Index[I0] :: HNil
+    def indices(self: A): Index[I0] :: HNil
     //def iloc[R](self: A, r: R)(implicit iLocTc: ILoc[R, A, T]): iLocTc.Out = iLocTc.iloc(self, r)
     //def loc[R](self: A, r: R)(implicit locTc: Loc[R]): locTc.Out = locTc.loc(self, r)
-    def getNil(self: A): A
     //def ::(self: A, other: (I0, T#T)): A
     //def head(self: A): (I0, T#T) = (indices(self)(0), getElem(self, 0))
     //def shape(self: A): Int = indices(self).length
