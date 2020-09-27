@@ -38,3 +38,15 @@ sourceGenerators in Test += Def.task {
 }.taskValue
 
 commands ++= Seq(removegit)
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+
+// if your project uses multiple Scala versions, use this for cross building
+addCompilerPlugin("org.typelevel" % "kind-projector" % "0.11.0" cross CrossVersion.full)
+
+// if your project uses both 2.10 and polymorphic lambdas
+libraryDependencies ++= (scalaBinaryVersion.value match {
+  case "2.10" =>
+    compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full) :: Nil
+  case _ =>
+    Nil
+})

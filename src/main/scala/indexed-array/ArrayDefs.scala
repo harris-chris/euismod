@@ -10,23 +10,21 @@ import shapeless.ops.hlist._
 
 object ArrayDefs {
 
-  abstract class IsSpArr[A, T <: DataType] {
+  abstract class IsSpArr[A, T <: DataType, I0: IsIdxElem] {
     type Self = A
     type M1
-    //def indices(self: A): HList
-    type Aux[A0, M0] = IsSpArr[A0, T] { type M1 = M0 }
+    def getIdx(self: A): Index[I0]
     def getElem(self: A, i: Int): M1
     def getNil(self: A): A
     def iloc[R](self: A, r: R)(implicit iLocTc: ILoc[R, A, T]): iLocTc.Out = iLocTc.iloc(self, r)
+    def ::(self: A, other: (I0, M1)): A
   }
 
-  abstract class Is1dSpArr[A, T <: DataType, I0: IsIdxElem] extends IsSpArr[A, T] {
+  abstract class Is1dSpArr[A, T <: DataType, I0: IsIdxElem] extends IsSpArr[A, T, I0] {
     type M1 = T#T
     //def getElem(self: A, i: Int): T#T
-    def indices(self: A): Index[I0] :: HNil
     //def iloc[R](self: A, r: R)(implicit iLocTc: ILoc[R, A, T]): iLocTc.Out = iLocTc.iloc(self, r)
     //def loc[R](self: A, r: R)(implicit locTc: Loc[R]): locTc.Out = locTc.loc(self, r)
-    //def ::(self: A, other: (I0, T#T)): A
     //def head(self: A): (I0, T#T) = (indices(self)(0), getElem(self, 0))
     //def shape(self: A): Int = indices(self).length
     //def tail(self: A): A = self match {
@@ -88,31 +86,33 @@ object ArrayDefs {
   }
   object ILoc {
     type Aux[A0, R0, T0 <: DataType, O0] = ILoc[A0, R0, T0] { type Out = O0 }
-    implicit def iLocTCForInt[A, T <: DataType](implicit isArr: IsSpArr[A, T]) = new ILoc[Int, A, T] { 
+    implicit def iLocForInt[A, T <: DataType, I0: IsIdxElem](implicit isArr: IsSpArr[A, T, I0]) = new ILoc[Int, A, T] { 
       type Out = isArr.M1
       def iloc(self: A, ref: Int): Out = isArr.getElem(self, ref)
     }
-    //implicit val iLocTCForList = new ILocTC[List[Int]] { 
-      //type Out = Self
-      //def iloc(self: A, ref: List[Int]): Out = {
-        //val data: List[DT#T] = ref.map(getElem(self, _)).toList
-        //val idx: Index[I0] = Index(ref.map(indices(self)(_)))
-        //idx.toList.zip(data).foldLeft(getNil(self))((a, b) => ::(a, (b._1, b._2))) 
-      //}
-    //}
-    //implicit val iLocTCForNull = new ILocTC[Null] { 
+    implicit def iLocForList[A, T <: DataType, I0: IsIdxElem](implicit isArr: IsSpArr[A, T, I0]) = new ILoc[List[Int], A, T] { 
+      type Out = A
+      def iloc(self: A, ref: List[Int]): Out = {
+        val data: List[isArr.M1] = ref.map(isArr.getElem(self, _)).toList
+        val idx0: Index[I0] = isArr.getIdx(self)
+        val newIdx: Index[I0] = Index(ref.map(idx0(_)))
+        idx0.toList.zip(data).foldLeft(isArr.getNil(self))((a, b) => isArr.::(a, (b._1, b._2))) 
+      }
+    }
+    //implicit val iLocForNull = new ILoc[Null] { 
       //type Out = Self
       //def iloc(self: A, ref: Null): Out = self
     //}
   }
 
   object Is1dSpArrSyntax {
-    implicit class Is1dSpArrOps[A, I0, T <: DataType](self: A)(implicit val tc1d: IsSpArr[A, T]) {
+    implicit class Is1dSpArrOps[A, T <: DataType, I0](self: A)(implicit val tc1d: IsSpArr[A, T, I0] {type M1 = T#T}) {
       //def indices = tc1d.indices(self)
       def getElem(i: Int) = tc1d.getElem(self, i)
       def iloc[R](r: R)(implicit iLocTc: ILoc[R, A, T]) = tc1d.iloc(self, r)
       //def loc[R](r: R)(implicit locTc: tc1d.LocTC[R]) = tc1d.loc(self, r)
-      //def ::(other: (I0, T#T)): A = tc1d.::(self, other)
+      def getNil = tc1d.getNil(self)
+      def ::(other: (I0, tc1d.M1)): A = tc1d.::(self, other)
       //def shape: Int = tc1d.shape(self)
       //def unapply: Option[((I0, T#T), A)] = tc1d.unapply(self) 
     }
