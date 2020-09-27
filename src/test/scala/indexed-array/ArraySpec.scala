@@ -50,7 +50,7 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   "List1d" should "implement the Is1dSpArr typeclass" in {
     import ArrayDefs._
     import ArrayDefs.Is1dSpArrSyntax._
-    println(list1dIs1dSpArr[List1d[PositionsData, Dim2T], PositionsData, Dim2T])
+    list1dIs1dSpArr[List1d[PositionsData, Dim2T], PositionsData, Dim2T]
     //println(implicitly[Is1dSpArr[List1d[PositionsData, Dim2T], PositionsData, Dim2T]])
     //println(implicitly[List1d[PositionsData, Dim2T] => Is1dSpArrOps[List1d[PositionsData, Dim2T], PositionsData, Dim2T]])
   }
@@ -85,13 +85,10 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     import ArrayDefs.Is1dSpArrSyntax._
     val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
     assert(
-      ILoc.iLocForInt[List1d[PositionsData, Dim2T], PositionsData, Dim2T].iloc(list1d, 0) == values1d(0)
-    )
-    assert(
       values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
     )
   }
-  "Arr1d" should "return correct datum with .iloc using List[Int]" in {
+  "Arr1d" should "return correct 1dSpArr with .iloc using List[Int]" in {
     import ArrayDefs._
     import ArrayDefs.Is1dSpArrSyntax._
     val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
@@ -99,21 +96,25 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       values1d.zipWithIndex.forall(
         {
           case(x, i) => i match {
-            case i if i < 4 => List1d[PositionsData, Dim2T](
-              Index(List(dim2(i), dim2(i+1))), List(values1d(i), values1d(i+1))
-            ) == list1d.iloc(List(i, i+1))
+            case i if i < 4 => {
+              val actual = list1d.iloc(List(i, i+1))
+              val expected = List1d[PositionsData, Dim2T](
+                Index(List(dim2(i), dim2(i+1))), List(values1d(i), values1d(i+1))
+              )
+              actual == expected
+            }
             case i if i == 4 => true
           }
         }
       )
     )
   }
-  //"Arr1d" should "return all data with .iloc using null" in {
-    //import ArrayDefs._
-    //import ArrayDefs.Is1dSpArrSyntax._
-    //val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
-    //assert(list1d.iloc(null) == list1d)
-  //}
+  "Arr1d" should "return all data with .iloc using null" in {
+    import ArrayDefs._
+    import ArrayDefs.Is1dSpArrSyntax._
+    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
+    assert(list1d.iloc(null) == list1d)
+  }
   //"Arr1d" should "return correct Datum with .loc" in {
     //import ArrayDefs._
     //import ArrayDefs.Is1dSpArrSyntax._

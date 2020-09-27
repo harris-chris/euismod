@@ -90,19 +90,21 @@ object ArrayDefs {
       type Out = isArr.M1
       def iloc(self: A, ref: Int): Out = isArr.getElem(self, ref)
     }
-    implicit def iLocForList[A, T <: DataType, I0: IsIdxElem](implicit isArr: IsSpArr[A, T, I0]) = new ILoc[List[Int], A, T, I0] { 
+    implicit def iLocForList[A, T <: DataType, I0: IsIdxElem](implicit isArr: IsSpArr[A, T, I0]) = 
+      new ILoc[List[Int], A, T, I0] { 
       type Out = A
       def iloc(self: A, ref: List[Int]): Out = {
         val data: List[isArr.M1] = ref.map(isArr.getElem(self, _)).toList
         val idx0: Index[I0] = isArr.getIdx(self)
         val newIdx: Index[I0] = Index(ref.map(idx0(_)))
-        idx0.toList.zip(data).foldLeft(isArr.getNil(self))((a, b) => isArr.::(a, (b._1, b._2))) 
+        newIdx.toList.zip(data).foldLeft(isArr.getNil(self))((a, b) => isArr.::(a, (b._1, b._2))) 
       }
     }
-    //implicit val iLocForNull = new ILoc[Null] { 
-      //type Out = Self
-      //def iloc(self: A, ref: Null): Out = self
-    //}
+    implicit def iLocForNull[A, T <: DataType, I0: IsIdxElem](implicit isArr: IsSpArr[A, T, I0]) = 
+      new ILoc[Null, A, T, I0] { 
+      type Out = A
+      def iloc(self: A, ref: Null): Out = self
+    }
   }
 
   object Is1dSpArrSyntax {
