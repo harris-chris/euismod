@@ -86,7 +86,8 @@
             "name": "scala-compiler",
             "version": "2.13.2",
             "options": [
-                
+                "-Xlog-implicits",
+                "-Xplugin:/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/typelevel/kind-projector_2.13.2/0.11.0/kind-projector_2.13.2-0.11.0.jar"
             ],
             "jars": [
                 "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2.jar",
@@ -165,6 +166,23 @@
             "modules": [
                 {
                     "organization": "org.scala-lang",
+                    "name": "scala-compiler",
+                    "version": "2.13.2",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-compiler",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2.jar"
+                        },
+                        {
+                            "name": "scala-compiler",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang",
                     "name": "scala-library",
                     "version": "2.13.2",
                     "configurations": "default",
@@ -177,6 +195,57 @@
                             "name": "scala-library",
                             "classifier": "sources",
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.2/scala-library-2.13.2-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-reflect",
+                    "version": "2.13.2",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-reflect",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2.jar"
+                        },
+                        {
+                            "name": "scala-reflect",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.jline",
+                    "name": "jline",
+                    "version": "3.14.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "jline",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline/3.14.1/jline-3.14.1.jar"
+                        },
+                        {
+                            "name": "jline",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline/3.14.1/jline-3.14.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "net.java.dev.jna",
+                    "name": "jna",
+                    "version": "5.3.1",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "jna",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.3.1/jna-5.3.1.jar"
+                        },
+                        {
+                            "name": "jna",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.3.1/jna-5.3.1-sources.jar"
                         }
                     ]
                 },
@@ -262,23 +331,6 @@
                             "name": "scalactic_2.13",
                             "classifier": "sources",
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.1/scalactic_2.13-3.1.1-sources.jar"
-                        }
-                    ]
-                },
-                {
-                    "organization": "org.scala-lang",
-                    "name": "scala-reflect",
-                    "version": "2.13.2",
-                    "configurations": "default",
-                    "artifacts": [
-                        {
-                            "name": "scala-reflect",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2.jar"
-                        },
-                        {
-                            "name": "scala-reflect",
-                            "classifier": "sources",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2-sources.jar"
                         }
                     ]
                 },
@@ -589,23 +641,6 @@
                     ]
                 },
                 {
-                    "organization": "org.scala-lang",
-                    "name": "scala-compiler",
-                    "version": "2.13.2",
-                    "configurations": "default",
-                    "artifacts": [
-                        {
-                            "name": "scala-compiler",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2.jar"
-                        },
-                        {
-                            "name": "scala-compiler",
-                            "classifier": "sources",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.2/scala-compiler-2.13.2-sources.jar"
-                        }
-                    ]
-                },
-                {
                     "organization": "io.get-coursier",
                     "name": "interface",
                     "version": "0.0.21",
@@ -856,40 +891,6 @@
                             "name": "upickle-implicits_2.13",
                             "classifier": "sources",
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/upickle-implicits_2.13/1.2.0/upickle-implicits_2.13-1.2.0-sources.jar"
-                        }
-                    ]
-                },
-                {
-                    "organization": "org.jline",
-                    "name": "jline",
-                    "version": "3.14.1",
-                    "configurations": "default",
-                    "artifacts": [
-                        {
-                            "name": "jline",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline/3.14.1/jline-3.14.1.jar"
-                        },
-                        {
-                            "name": "jline",
-                            "classifier": "sources",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline/3.14.1/jline-3.14.1-sources.jar"
-                        }
-                    ]
-                },
-                {
-                    "organization": "net.java.dev.jna",
-                    "name": "jna",
-                    "version": "5.3.1",
-                    "configurations": "default",
-                    "artifacts": [
-                        {
-                            "name": "jna",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.3.1/jna-5.3.1.jar"
-                        },
-                        {
-                            "name": "jna",
-                            "classifier": "sources",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.3.1/jna-5.3.1-sources.jar"
                         }
                     ]
                 },

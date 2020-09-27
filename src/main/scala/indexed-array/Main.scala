@@ -6,7 +6,7 @@ import shapeless.ops.hlist._
 object Main extends App {
   import ListOfListsObj._
   import ArrayDefs._
-  import ArrayDefs.Is1dSpArrSyntax._
+  import ArrayDefs.IsSpArrSyntax._
   import Skeleton._
   import Skeleton.IsIdxElemImplicits._
   import IndicesObj.Index

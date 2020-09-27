@@ -49,20 +49,20 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   //}
   "List1d" should "implement the Is1dSpArr typeclass" in {
     import ArrayDefs._
-    import ArrayDefs.Is1dSpArrSyntax._
+    import ArrayDefs.IsSpArrSyntax._
     list1dIs1dSpArr[List1d[PositionsData, Dim2T], PositionsData, Dim2T]
     //println(implicitly[Is1dSpArr[List1d[PositionsData, Dim2T], PositionsData, Dim2T]])
     //println(implicitly[List1d[PositionsData, Dim2T] => Is1dSpArrOps[List1d[PositionsData, Dim2T], PositionsData, Dim2T]])
   }
   "Arr1d" should "return correct datum with .getElem" in {
     import ArrayDefs._
-    import ArrayDefs.Is1dSpArrSyntax._
+    import ArrayDefs.IsSpArrSyntax._
     val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
     values1d.zipWithIndex.forall({case(x, i) => x == list1d.getElem(i)})
   }
   "Arr1d" should "be constructable from cons" in {
     import ArrayDefs._
-    import ArrayDefs.Is1dSpArrSyntax._
+    import ArrayDefs.IsSpArrSyntax._
     val lst0 = List1d[PositionsData, Dim2T](Index[Dim2T](Nil), Nil)
     val lst1 = (dim2(0), values1d(0)) :: lst0
     val lst2 = (dim2(1), values1d(1)) :: lst1
@@ -73,7 +73,7 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   }
   ////"Arr1d" should "decompose using cons" in {
     ////import ArrayDefs._
-    ////import ArrayDefs.Is1dSpArrSyntax._
+    ////import ArrayDefs.IsSpArrSyntax._
     ////val lst = List1d[Dim2T, PositionsData](dim2, values1d)
     ////lst match {
       ////case h :: t => {assert(h == lst.head); assert(l == lst.tail)}
@@ -82,7 +82,7 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   ////}
   "Arr1d" should "return correct datum with .iloc using Int" in {
     import ArrayDefs._
-    import ArrayDefs.Is1dSpArrSyntax._
+    import ArrayDefs.IsSpArrSyntax._
     val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
     assert(
       values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
@@ -90,7 +90,7 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   }
   "Arr1d" should "return correct 1dSpArr with .iloc using List[Int]" in {
     import ArrayDefs._
-    import ArrayDefs.Is1dSpArrSyntax._
+    import ArrayDefs.IsSpArrSyntax._
     val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
     assert(
       values1d.zipWithIndex.forall(
@@ -111,26 +111,26 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   }
   "Arr1d" should "return all data with .iloc using null" in {
     import ArrayDefs._
-    import ArrayDefs.Is1dSpArrSyntax._
+    import ArrayDefs.IsSpArrSyntax._
     val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
     assert(list1d.iloc(null) == list1d)
   }
+  "Arr2d" should "return a 1d array with .getElem" in {
+    import ArrayDefs._
+    import ArrayDefs.IsSpArrSyntax._
+    val list2d = List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), values2d)
+    assert(
+      values2d.zipWithIndex.forall({case(x, i) => 
+        list2d.getElem(i) == List1d[PositionsData, Dim2T](dim2, x)
+      })
+    )
+  }
   //"Arr1d" should "return correct Datum with .loc" in {
     //import ArrayDefs._
-    //import ArrayDefs.Is1dSpArrSyntax._
+    //import ArrayDefs.IsSpArrSyntax._
     //val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
     //assert(
       //dim2.toList.zip(values1d).forall({case(d, v) => list1d.loc(d) == Some(v)})
-    //)
-  //}
-  //"Arr2d" should "return a 1d array with .getElem" in {
-    //import ArrayDefs._
-    //import ArrayDefs.Is2dSpArrSyntax._
-    //val list2d = List2d[Dim1T, Dim2T, PositionsData]((dim1, dim2), values2d)
-    //assert(
-      //values2d.zipWithIndex.forall({case(x, i) => 
-        //list2d.getElem(i) == List1d[Dim2T, PositionsData](dim2, x)
-      //})
     //)
   //}
   //"Arr2d" should "return a 1d array with .iloc using Int on the first dimension" in {
