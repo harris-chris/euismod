@@ -10,7 +10,8 @@ lazy val sportDate = ProjectRef(
 
 lazy val SportArray = (project in file("."))
   .settings(
-    libraryDependencies += scalaTest % Test
+    libraryDependencies += scalaTest % Test,
+    scalacOptions += "-Xlog-implicits",
   )
   .dependsOn(sportDate)
 

@@ -16,7 +16,7 @@ object ArrayDefs {
     def getIdx(self: A): Index[I0]
     def getElem(self: A, i: Int): M1
     def getNil(self: A): A
-    def iloc[R](self: A, r: R)(implicit iLocTc: ILoc[R, A, T]): iLocTc.Out = iLocTc.iloc(self, r)
+    def iloc[R](self: A, r: R)(implicit iLoc: ILoc[R, A, T, I0]): iLoc.Out = iLoc.iloc(self, r)
     def ::(self: A, other: (I0, M1)): A
   }
 
@@ -80,17 +80,17 @@ object ArrayDefs {
     //}
   }
 
-  trait ILoc[R, A, T <: DataType] {
+  trait ILoc[R, A, T <: DataType, I0] {
     type Out
     def iloc(self: A, ref: R): Out
   }
   object ILoc {
-    type Aux[A0, R0, T0 <: DataType, O0] = ILoc[A0, R0, T0] { type Out = O0 }
-    implicit def iLocForInt[A, T <: DataType, I0: IsIdxElem](implicit isArr: IsSpArr[A, T, I0]) = new ILoc[Int, A, T] { 
+    type Aux[A0, R0, T0 <: DataType, I0, O0] = ILoc[A0, R0, T0, I0] { type Out = O0 }
+    implicit def iLocForInt[A, T <: DataType, I0: IsIdxElem](implicit isArr: IsSpArr[A, T, I0]) = new ILoc[Int, A, T, I0] { 
       type Out = isArr.M1
       def iloc(self: A, ref: Int): Out = isArr.getElem(self, ref)
     }
-    implicit def iLocForList[A, T <: DataType, I0: IsIdxElem](implicit isArr: IsSpArr[A, T, I0]) = new ILoc[List[Int], A, T] { 
+    implicit def iLocForList[A, T <: DataType, I0: IsIdxElem](implicit isArr: IsSpArr[A, T, I0]) = new ILoc[List[Int], A, T, I0] { 
       type Out = A
       def iloc(self: A, ref: List[Int]): Out = {
         val data: List[isArr.M1] = ref.map(isArr.getElem(self, _)).toList
@@ -109,7 +109,7 @@ object ArrayDefs {
     implicit class Is1dSpArrOps[A, T <: DataType, I0](self: A)(implicit val tc1d: IsSpArr[A, T, I0] {type M1 = T#T}) {
       //def indices = tc1d.indices(self)
       def getElem(i: Int) = tc1d.getElem(self, i)
-      def iloc[R](r: R)(implicit iLocTc: ILoc[R, A, T]) = tc1d.iloc(self, r)
+      def iloc[R](r: R)(implicit iLoc: ILoc[R, A, T, I0]) = tc1d.iloc(self, r)
       //def loc[R](r: R)(implicit locTc: tc1d.LocTC[R]) = tc1d.loc(self, r)
       def getNil = tc1d.getNil(self)
       def ::(other: (I0, tc1d.M1)): A = tc1d.::(self, other)

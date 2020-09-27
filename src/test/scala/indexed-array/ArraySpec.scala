@@ -63,7 +63,8 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   "Arr1d" should "be constructable from cons" in {
     import ArrayDefs._
     import ArrayDefs.Is1dSpArrSyntax._
-    val lst1: List1d[PositionsData, Dim2T] = List1d[PositionsData, Dim2T](Index[Dim2T](dim2(0)), List(values1d(0)))
+    val lst0 = List1d[PositionsData, Dim2T](Index[Dim2T](Nil), Nil)
+    val lst1 = (dim2(0), values1d(0)) :: lst0
     val lst2 = (dim2(1), values1d(1)) :: lst1
     val lst3 = (dim2(2), values1d(2)) :: lst2
     val lst4 = (dim2(3), values1d(3)) :: lst3
@@ -83,6 +84,9 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     import ArrayDefs._
     import ArrayDefs.Is1dSpArrSyntax._
     val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
+    assert(
+      ILoc.iLocForInt[List1d[PositionsData, Dim2T], PositionsData, Dim2T].iloc(list1d, 0) == values1d(0)
+    )
     assert(
       values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
     )
@@ -104,20 +108,20 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       )
     )
   }
-  "Arr1d" should "return all data with .iloc using null" in {
-    import ArrayDefs._
-    import ArrayDefs.Is1dSpArrSyntax._
-    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
-    assert(list1d.iloc(null) == list1d)
-  }
-  "Arr1d" should "return correct Datum with .loc" in {
-    import ArrayDefs._
-    import ArrayDefs.Is1dSpArrSyntax._
-    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
-    assert(
-      dim2.toList.zip(values1d).forall({case(d, v) => list1d.loc(d) == Some(v)})
-    )
-  }
+  //"Arr1d" should "return all data with .iloc using null" in {
+    //import ArrayDefs._
+    //import ArrayDefs.Is1dSpArrSyntax._
+    //val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
+    //assert(list1d.iloc(null) == list1d)
+  //}
+  //"Arr1d" should "return correct Datum with .loc" in {
+    //import ArrayDefs._
+    //import ArrayDefs.Is1dSpArrSyntax._
+    //val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
+    //assert(
+      //dim2.toList.zip(values1d).forall({case(d, v) => list1d.loc(d) == Some(v)})
+    //)
+  //}
   //"Arr2d" should "return a 1d array with .getElem" in {
     //import ArrayDefs._
     //import ArrayDefs.Is2dSpArrSyntax._
