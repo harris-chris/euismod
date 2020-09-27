@@ -62,7 +62,9 @@ object ArrayDefs {
   }
 
   object IsSpArrSyntax {
-    implicit class Is1dSpArrOps[A, T <: DataType, I0](self: A)(implicit val tc: Is1dSpArr[A, T, I0] {type M1 = T#T}) {
+    implicit class Is1dSpArrOps[A, T <: DataType, I0](self: A)(implicit 
+      val tc: Is1dSpArr[A, T, I0] {type M1 = T#T},
+    ) {
       def getElem(i: Int) = tc.getElem(self, i)
       def iloc[R](r: R)(implicit iLoc: ILoc[R, A, T, I0]) = tc.iloc(self, r)
       def getNil = tc.getNil(self)
@@ -71,7 +73,7 @@ object ArrayDefs {
       def length: Int = tc.length(self)
       //def unapply: Option[((I0, T#T), A)] = tc1d.unapply(self) 
     }
-    implicit class Is2dSpArrOps[A, T <: DataType, I0: IsIdxElem, I1: IsIdxElem, M1C[_ <: DataType, _]](self: A)(implicit 
+    implicit class Is2dSpArrOps[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](self: A)(implicit 
       val tc: Is2dSpArr[A, T, I0, I1, M1C],
     ) {
       def getElem(i: Int) = tc.getElem(self, i)
@@ -82,24 +84,5 @@ object ArrayDefs {
       //def unapply: Option[((I0, T#T), A)] = tc2d.unapply(self) 
     }
   }
-
-
-    ////trait Get2dTC[I] {
-      ////type DM1
-      ////type Out = Get2dTC.MkOut[DM1]
-      ////def apply(i: I): Out
-    ////}
-    ////object Get2dTC {
-      ////type Aux[I, DM1i] = Get2dTC[I] { type DM1 = DM1i }
-      ////type MkOut[DM1] = Option[Is1dSpArr[A, I, DM1, T]]
-      ////def instance[I, DM1i](f: I => MkOut[DM1i]): Aux[I, DM1i] = new Get2dTC[I] {
-        ////override type DM1 = DM1i
-        ////override def apply(i: I): Out = f(i)
-      ////}
-    
-      //////implicit val I0Type: Aux[I0, I1] = instance(i => i.iloc(i))
-      //////implicit val I1Type: Aux[I1, I0] = instance(i => getDim1Slice(i))
-    ////}
-  //}
 }
 
