@@ -14,10 +14,10 @@ object ArrayDefs {
     type Self = A
     type Idx0 = I0
     type M1
-    def getIdx(self: A): Index[I0]
+    def getIdx(self: A): Index[Idx0]
     def getElem(self: A, i: Int): M1
     def getNil(self: A): A
-    def iloc[R](self: A, r: R)(implicit iLoc: ILoc[R, A]): iLoc.Out = iLoc.iloc(self, r)
+    def iloc[R](self: A, r: R)(implicit iLoc: ILoc[R, A, I0]): iLoc.Out = iLoc.iloc(self, r)
     def ::(self: A, other: (I0, M1)): A
     def length(self: A): Int
     def toList(self: A): List[M1] = (for(i <- 0 to length(self)) yield (getElem(self, i))).toList
@@ -36,20 +36,31 @@ object ArrayDefs {
       (length(self), tc1d.length(getElem(self, 0)))
   }
 
-  trait ILoc[R, A] {
+  trait ILoc[R, A, I0] {
     type Out
     def iloc(self: A, ref: R): Out
   }
   object ILoc {
-    type Aux[R0, A0, O0] = ILoc[R0, A0] { type Out = O0 }
-    def apply[R, A](implicit tc: ILoc[R, A]): ILoc[R, A] = tc
-    def instance[R, A, O](func: (A, R) => O): Aux[R, A, O] = new ILoc[R, A] {
+    type Aux[R0, A0, I0, O0] = ILoc[R0, A0, I0] { type Out = O0; type Idx0 = I0 }
+    def apply[R, A, I0](implicit tc: ILoc[R, A, I0]): ILoc[R, A, I0] = tc
+    def instance[R, A, I0, O](func: (A, R) => O): Aux[R, A, I0, O] = new ILoc[R, A, I0] {
       type Out = O
+      type Idx0 = I0
       def iloc(self: A, ref: R): Out = func(self, ref)
     }
 
-    implicit def iLocForInt[A](implicit isArr: IsSpArr[A, _, _]): Aux[Int, A, isArr.M1] = instance(
+    implicit def iLocForInt[A, I0](implicit isArr: IsSpArr[A, _, I0]): Aux[Int, A, I0, isArr.M1] = instance(
       (self: A, ref: Int) => isArr.getElem(self, ref)
+    )
+    implicit def iLocForListOfInts[A, I0: IsIdxElem](implicit 
+      isArr: IsSpArr[A, _, I0]
+    ): Aux[List[Int], A, I0, A] = instance(
+      (self: A, ref: List[Int]) => {
+        val data: List[isArr.M1] = ref.map(isArr.getElem(self, _)).toList
+        val idx0: Index[I0] = isArr.getIdx(self)
+        val newIdx = Index(ref.map(idx0(_)))
+        newIdx.toList.zip(data).foldLeft(isArr.getNil(self))((a, b) => isArr.::(a, (b._1, b._2))) 
+      }
     )
   }
 
@@ -95,7 +106,7 @@ object ArrayDefs {
       val tc: IsSpArr[A, T, I0] {type M1 = T#T},
     ) {
       def getElem(i: Int) = tc.getElem(self, i)
-      def iloc[R](r: R)(implicit iLoc: ILoc[R, A]) = tc.iloc(self, r)
+      def iloc[R](r: R)(implicit iLoc: ILoc[R, A, I0]) = tc.iloc(self, r)
       def getNil = tc.getNil(self)
       def ::(other: (I0, tc.M1)): A = tc.::(self, other)
       def length: Int = tc.length(self)

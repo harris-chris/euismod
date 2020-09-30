@@ -88,27 +88,27 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
     )
   }
-  //"Arr1d" should "return correct 1dSpArr with .iloc using List[Int]" in {
-    //import ArrayDefs._
-    //import ArrayDefs.IsSpArrSyntax._
-    //val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
-    //assert(
-      //values1d.zipWithIndex.forall(
-        //{
-          //case(x, i) => i match {
-            //case i if i < 4 => {
-              //val actual = list1d.iloc(List(i, i+1))
-              //val expected = List1d[PositionsData, Dim2T](
-                //Index(List(dim2(i), dim2(i+1))), List(values1d(i), values1d(i+1))
-              //)
-              //actual == expected
-            //}
-            //case i if i == 4 => true
-          //}
-        //}
-      //)
-    //)
-  //}
+  "Arr1d" should "return correct 1dSpArr with .iloc using List[Int]" in {
+    import ArrayDefs._
+    import ArrayDefs.IsSpArrSyntax._
+    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
+    assert(
+      values1d.zipWithIndex.forall(
+        {
+          case(x, i) => i match {
+            case i if i < 4 => {
+              val actual = list1d.iloc(List(i, i+1))
+              val expected = List1d[PositionsData, Dim2T](
+                Index(List(dim2(i), dim2(i+1))), List(values1d(i), values1d(i+1))
+              )
+              actual == expected
+            }
+            case i if i == 4 => true
+          }
+        }
+      )
+    )
+  }
   //"Arr1d" should "return all data with .iloc using null" in {
     //import ArrayDefs._
     //import ArrayDefs.IsSpArrSyntax._
