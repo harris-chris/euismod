@@ -85,7 +85,9 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     import ArrayDefs.IsSpArrSyntax._
     val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
     assert(
-      values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
+      values1d.zipWithIndex.forall({case(x, i) => list1d.iloc(i) == 
+        List1d[PositionsData, Dim2T](Index(dim2(i)), List(x))
+      })
     )
   }
   "Arr1d" should "return correct 1dSpArr with .iloc using List[Int]" in {
