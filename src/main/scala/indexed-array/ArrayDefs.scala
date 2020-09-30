@@ -52,8 +52,7 @@ object ArrayDefs {
     implicit def iLocForInt[A, I0](implicit isArr: IsSpArr[A, _, I0]): Aux[Int, A, I0, isArr.M1] = instance(
       (self: A, ref: Int) => isArr.getElem(self, ref)
     )
-    implicit def iLocForListOfInts[A, I0: IsIdxElem](implicit 
-      isArr: IsSpArr[A, _, I0]
+    implicit def iLocForListOfInts[A, I0: IsIdxElem](implicit isArr: IsSpArr[A, _, I0],
     ): Aux[List[Int], A, I0, A] = instance(
       (self: A, ref: List[Int]) => {
         val data: List[isArr.M1] = ref.map(isArr.getElem(self, _)).toList
@@ -61,6 +60,12 @@ object ArrayDefs {
         val newIdx = Index(ref.map(idx0(_)))
         newIdx.toList.zip(data).foldLeft(isArr.getNil(self))((a, b) => isArr.::(a, (b._1, b._2))) 
       }
+    )
+    implicit def iLocForNull[A, I0]: Aux[Null, A, I0, A] = instance(
+      (self: A, ref: Null) => self
+    )
+    implicit def iLocForHNil[A, I0]: Aux[HNil, A, I0, A] = instance(
+      (self: A, ref: HNil) => self
     )
   }
 
@@ -79,16 +84,6 @@ object ArrayDefs {
           //val newIdx = Index(ref.map(idx0(_)))
           //newIdx.toList.zip(data).foldLeft(isArr.getNil(self))((a, b) => isArr.::(a, (b._1, b._2))) 
         //}
-      //}
-    //implicit def iLocForNull[A, T <: DataType](implicit isArr: IsSpArr[A, T, _]) = 
-      //new ILoc[Null, A, T] { 
-        //type Out = A
-        //def iloc(self: A, ref: Null): Out = self
-      //}
-    //implicit def iLocForHNil[A, T <: DataType] = 
-      //new ILoc[HNil, A, T] {
-        //type Out = A
-        //def iloc(self: A, ref: HNil): Out = self
       //}
     //implicit def iLocForHList[A, H, L <: HList, T <: DataType, O0](implicit 
       //isArr: IsSpArr[A, T, _],

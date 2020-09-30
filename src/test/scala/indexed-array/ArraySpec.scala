@@ -109,12 +109,12 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       )
     )
   }
-  //"Arr1d" should "return all data with .iloc using null" in {
-    //import ArrayDefs._
-    //import ArrayDefs.IsSpArrSyntax._
-    //val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
-    //assert(list1d.iloc(null) == list1d)
-  //}
+  "Arr1d" should "return all data with .iloc using null" in {
+    import ArrayDefs._
+    import ArrayDefs.IsSpArrSyntax._
+    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
+    assert(list1d.iloc(null) == list1d)
+  }
   //"Arr2d" should "return a 1d array with .getElem" in {
     //import ArrayDefs._
     //import ArrayDefs.IsSpArrSyntax._
