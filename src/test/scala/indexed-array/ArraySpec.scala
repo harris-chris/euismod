@@ -7,7 +7,7 @@ import com.github.nscala_time.time.Imports._
 import sportdate.SportDate
 import sportdate.{IsSportDateInstances, IsSportDateSyntax}
 
-import Skeleton.{PositionsData, IsIdxElemImplicits, DateType, Element, Composite}
+import Skeleton.{PositionsData, IsIdxElemImplicits, DateType, Element, Composite, DataType}
 import Skeleton.IsIdxElemImplicits._
 import Skeleton.IsIdxElem
 import IndicesObj._
@@ -43,6 +43,34 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       List(5.1, 5.2, 5.3, 5.4, 5.5),
     ),
   )
+  def checkList1dWithSingle[T <: DataType, I: IsIdxElem](
+    idx: Index[I], data: List[T#T], f:(List1d[T, I], Int) => List1d[T, I],
+  ): Boolean = {
+    import ArrayDefs.IsSpArrSyntax._
+    data.zipWithIndex.forall({case(x, i) => f(List1d[T, I](idx, data),i) == 
+      List1d[T, I](Index(idx(i)), List(x))
+    })
+  }
+  def checkList1dWithILocListInt[T <: DataType, I: IsIdxElem](
+    idx: Index[I], data: List[T#T], f:(List1d[T, I], List[Int]) => List1d[T, I],
+  ): Boolean = {
+    import ArrayDefs.IsSpArrSyntax._
+    val list1d = List1d[T, I](idx, data)
+    data.zipWithIndex.forall(
+      {
+        case(x, i) => i match {
+          case i if i < 4 => {
+            val actual = f(list1d, List(i, i+1))
+            val expected = List1d[T, I](
+              Index(List(idx(i), idx(i+1))), List(data(i), data(i+1))
+            )
+            actual == expected
+          }
+          case i if i == 4 => true
+        }
+      }
+    )
+  }
   //"Datum" should "store ref and value" in {
     //assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).ref == SportDate.YMD(2020,8,1))
     //assert(Datum[Dim2T, PositionsData](SportDate.YMD(2020,8,1), 0.1).value == 0.1)
@@ -81,41 +109,21 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     ////}
   ////}
   "Arr1d" should "return correct datum with .iloc using Int" in {
-    import ArrayDefs._
     import ArrayDefs.IsSpArrSyntax._
-    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
-    assert(
-      values1d.zipWithIndex.forall({case(x, i) => list1d.iloc(i) == 
-        List1d[PositionsData, Dim2T](Index(dim2(i)), List(x))
-      })
-    )
+    checkList1dWithSingle[PositionsData, Dim2T](dim2, values1d, (l, i) => l.iloc(i))
   }
   "Arr1d" should "return correct 1dSpArr with .iloc using List[Int]" in {
-    import ArrayDefs._
     import ArrayDefs.IsSpArrSyntax._
-    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
-    assert(
-      values1d.zipWithIndex.forall(
-        {
-          case(x, i) => i match {
-            case i if i < 4 => {
-              val actual = list1d.iloc(List(i, i+1))
-              val expected = List1d[PositionsData, Dim2T](
-                Index(List(dim2(i), dim2(i+1))), List(values1d(i), values1d(i+1))
-              )
-              actual == expected
-            }
-            case i if i == 4 => true
-          }
-        }
-      )
-    )
+    checkList1dWithILocListInt[PositionsData, Dim2T](dim2, values1d, (l, r) => l.iloc(r))
   }
   "Arr1d" should "return all data with .iloc using null" in {
-    import ArrayDefs._
     import ArrayDefs.IsSpArrSyntax._
     val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
     assert(list1d.iloc(null) == list1d)
+  }
+  "Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
+    import ArrayDefs.IsSpArrSyntax._
+    checkList1dWithSingle[PositionsData, Dim2T](dim2, values1d, (l, i) => l.iloc(i :: HNil))
   }
   //"Arr2d" should "return a 1d array with .getElem" in {
     //import ArrayDefs._
