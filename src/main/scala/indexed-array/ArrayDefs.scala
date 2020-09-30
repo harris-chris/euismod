@@ -61,11 +61,10 @@ object ArrayDefs {
     implicit def iLocForHNil[A, I0]: ILoc[HNil, A, I0] = instance(
       (self: A, ref: HNil) => self
     )
-    implicit def iLocForHList[A, H, L <: HList, I0]( 
-      isArr: IsSpArr[A, _, I0],
-      ilocHead: ILoc[H, A, I0],
-      ilocTail: ILoc[L, A, I0],
-    ): ILoc[H :: L, A, I0] = instance((self: A, ref: H :: L) => ilocHead.iloc(self, ref.head)) 
+    implicit def iLocForHList[A, H, T <: HList, I0](implicit 
+      ilocHead: Lazy[ILoc[H, A, I0]],
+      ilocTail: ILoc[T, A, I0],
+    ): ILoc[H :: T, A, I0] = instance((self: A, ref: H :: T) => ilocHead.value.iloc(self, ref.head)) 
     // ilocH.iloc(self, ref.head).toList.map(iLocOut.iloc(_, ref.tail))// need to map the iloc tail over every element
     // This is going to be easier if iloc doesn't squeeze the array. At least the squeeze operation could be done later
   }

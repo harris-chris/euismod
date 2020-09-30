@@ -123,6 +123,11 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   }
   "Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
     import ArrayDefs.IsSpArrSyntax._
+    import ArrayDefs._
+    implicitly[IsSpArr[List1d[PositionsData, Dim2T], _, Dim2T]]
+    implicitly[ILoc[Int, List1d[PositionsData, Dim2T], Dim2T]]
+    implicitly[ILoc[HNil, List1d[PositionsData, Dim2T], Dim2T]]
+    implicitly[ILoc[Int :: HNil, List1d[PositionsData, Dim2T], Dim2T]]
     checkList1dWithSingle[PositionsData, Dim2T](dim2, values1d, (l, i) => l.iloc(i :: HNil))
   }
   //"Arr2d" should "return a 1d array with .getElem" in {
