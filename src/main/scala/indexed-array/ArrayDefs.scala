@@ -25,7 +25,7 @@ object ArrayDefs {
 
   abstract class Is1dSpArr[A, T <: DataType, I0: IsIdxElem] extends IsSpArr[A, T, I0] {
     type M1 = T#T
-    def shape(self: A): (Int) = length(self)
+    def shape(self: A): Tuple1[Int] = Tuple1(length(self))
   }
 
   abstract class Is2dSpArr[A, T <: DataType, I0: IsIdxElem, I1: IsIdxElem, M1C[_ <: DataType, _]](
@@ -83,7 +83,7 @@ object ArrayDefs {
     implicit class Is1dSpArrOps[A, T <: DataType, I0](self: A)(implicit 
       val tc: Is1dSpArr[A, T, I0] {type M1 = T#T},
     ) {
-      def shape: Int = tc.shape(self)
+      def shape: Tuple1[Int] = tc.shape(self)
       //def unapply: Option[((I0, T#T), A)] = tc1d.unapply(self) 
     }
     implicit class Is2dSpArrOps[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](self: A)(implicit 

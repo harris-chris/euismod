@@ -8,7 +8,6 @@ import IndicesObj._
 import shapeless._
 import shapeless.ops.hlist._
 
-
 object ListOfListsObj {
 
   case class List1d[T <: DataType, I0: IsIdxElem] (
