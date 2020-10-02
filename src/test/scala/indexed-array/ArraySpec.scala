@@ -92,6 +92,9 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     import ArrayDefs._
     import ArrayDefs.IsSpArrSyntax._
     val lst0 = List1d[PositionsData, Dim2T](Index[Dim2T](Nil), Nil)
+    implicitly[
+      Is1dSpArr[List1d[PositionsData, Dim2T], PositionsData, Dim2T]{type M1 = Double}
+    ]
     val lst1 = (dim2(0), values1d(0)) :: lst0
     val lst2 = (dim2(1), values1d(1)) :: lst1
     val lst3 = (dim2(2), values1d(2)) :: lst2
@@ -134,8 +137,8 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     import ArrayDefs.IsSpArrSyntax._
     import ArrayDefs._
     implicitly[IsSpArr[List1d[PositionsData, Dim2T], _, Dim2T]]
-    implicitly[ILoc[Int, List1d[PositionsData, Dim2T], Dim2T]]
-    implicitly[ILoc[HNil, List1d[PositionsData, Dim2T], Dim2T]]
+    implicitly[ILoc[List1d[PositionsData, Dim2T], Int]]
+    implicitly[ILoc[List1d[PositionsData, Dim2T], HNil]]
     assert(
       checkList1dWithListInt[PositionsData, Dim2T](dim2, values1d, (l, i) => l.iloc(i :: HNil))
     )
@@ -154,6 +157,13 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     implicitly[
       Is2dSpArr[List2d[PositionsData, Dim1T, Dim2T], PositionsData, Dim1T, Dim2T, List1d]
     ].getElem(list2d, 0)
+    implicitly[
+      IsSpArr[List2d[PositionsData, Dim1T, Dim2T], PositionsData, Dim1T] {type M1 = List1d[PositionsData, Dim2T]}
+    ]
+    implicitly[
+      List2d[PositionsData, Dim1T, Dim2T] => 
+      Is2dSpArrOps[List2d[PositionsData, Dim1T, Dim2T], PositionsData, Dim1T, Dim2T, List1d]
+    ]
     assert(
       values2d.zipWithIndex.forall({case(x, i) => 
         list2d.getElem(i) == List1d[PositionsData, Dim2T](dim2, x)

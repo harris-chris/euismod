@@ -22,7 +22,7 @@ object ListOfListsObj {
       def ::(self: Self, other: (I0, T#T)) = List1d[T, I0]((getIdx(self) :+ other._1), self.data :+ other._2)
       def length(self: Self) = self.data.length
     }
-  
+
   case class List2d[T <: DataType, I0: IsIdxElem, I1: IsIdxElem] ( 
     indices: (Index[I0], Index[I1]),
     data: List[List[T#T]],
