@@ -5,7 +5,7 @@ import Skeleton.IsIdxElem
 import IndicesObj.Index
 
 import java.time.LocalDate
-import shapeless._
+import shapeless.{HList, HNil, Lazy, :: => #:}
 import shapeless.ops.hlist._
 
 object ArrayDefs {
@@ -19,8 +19,16 @@ object ArrayDefs {
     def getNil(self: A): A
     def iloc[R](self: A, r: R)(implicit iLoc: ILoc[A, R]): A = iLoc.iloc(self, r)
     def ::(self: A, other: (I0, M1)): A
+    def ++(self: A, other: A)(implicit isArr: IsSpArr[A, T, I0] {type M1 = IsSpArr.this.M1}): A = {
+      val i: List[(I0, M1)] = isArr.toListWithIndex(other)
+      i match {
+        case (idx, elem) :: ts => ::(self, (idx, elem))
+        case Nil => self
+      }
+    }
     def length(self: A): Int
     def toList(self: A): List[M1] = (for(i <- 0 to length(self)) yield (getElem(self, i))).toList
+    def toListWithIndex(self: A): List[(I0, M1)] = getIdx(self).toList.zip(toList(self)).toList
   }
 
   abstract class Is1dSpArr[A, T <: DataType, I0: IsIdxElem] extends IsSpArr[A, T, I0] {
@@ -68,8 +76,8 @@ object ArrayDefs {
         isArr: IsSpArr[A, _, _],
         ilocHead: Lazy[ILoc[A, H]],
         ilocTail: ILoc[A, T],
-      ) = new ILoc[A, H :: T] {
-      def iloc(self: A, ref: H :: T) = ilocHead.value.iloc(self, ref.head) 
+      ) = new ILoc[A, H #: T] {
+      def iloc(self: A, ref: H #: T) = ilocHead.value.iloc(self, ref.head) 
     // ilocH.iloc(self, ref.head).toList.map(iLocOut.iloc(_, ref.tail))// need to map the iloc tail over every element
     // This is going to be easier if iloc doesn't squeeze the array. At least the squeeze operation could be done later
     }
@@ -86,7 +94,7 @@ object ArrayDefs {
       def ::(other: (I0, tc.M1)): A = tc.::(self, other)
       def length: Int = tc.length(self)
       def toList: List[tc.M1] = tc.toList(self)
-      //def unapply: Option[((I0, T#T), A)] = tc1d.unapply(self) 
+      def toListWithIndex = tc.toListWithIndex(self)
     }
     implicit class Is2dSpArrOps[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](self: A)(implicit 
       val tc: Is2dSpArr[A, T, I0, I1, M1C],
@@ -98,6 +106,7 @@ object ArrayDefs {
       def ::(other: (I0, tc.M1)): A = tc.::(self, other)
       def length: Int = tc.length(self)
       def toList: List[tc.M1] = tc.toList(self)
+      def toListWithIndex = tc.toListWithIndex(self)
       //def unapply: Option[((I0, T#T), A)] = tc2d.unapply(self) 
     }
   }
