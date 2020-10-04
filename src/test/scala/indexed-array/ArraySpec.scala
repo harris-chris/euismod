@@ -151,13 +151,25 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       })
     )
   }
-  //"Arr2d" should "return a 1d array with .iloc using Int on the first dimension" in {
+  "Arr2d" should "return a 2d array with .iloc using Int on the first dimension" in {
+    import ArrayDefs._
+    import ArrayDefs.IsSpArrSyntax._
+    val list2d = List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), values2d)
+    println(list2d.iloc(0))
+    println(List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), List(values2d(0))))
+    //assert(
+      //values2d.zipWithIndex.forall({case(x, i) => 
+        //list2d.iloc(i) == List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), List(values2d(i)))
+      //})
+    //)
+  }
+  //"Arr2d" should "return a 2d array with .iloc using Int on the first dimension" in {
     //import ArrayDefs._
     //import ArrayDefs.IsSpArrSyntax._
     //val list2d = List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), values2d)
     //assert(
       //values2d.zipWithIndex.forall({case(x, i) => 
-        //list2d.iloc(i) == List1d[PositionsData, Dim2T](dim2, x)
+        //list2d.iloc(i) == List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), List(values2d(i)))
       //})
     //)
   //}

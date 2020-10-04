@@ -12,7 +12,8 @@ object ArrayDefs {
 
   abstract class IsSpArr[A, T <: DataType, I0: IsIdxElem] {
     type Self = A
-    type M1
+    type M1   
+    type M1I
     def getIdx(self: A): Index[I0]
     def getIdxElem(self: A, i: Int): I0 = getIdx(self)(i)
     def getElem(self: A, i: Int): M1
@@ -53,7 +54,10 @@ object ArrayDefs {
       isArr: IsSpArr[A, _, I0], 
       isIdxElem: IsIdxElem[I0],
     ) = new ILoc[A, Int] {
-      override def iloc(self: A, ref: Int) = isArr.::(isArr.getNil(self), (isArr.getIdx(self)(ref), isArr.getElem(self, ref)))
+      override def iloc(self: A, ref: Int) = isArr.::(
+        isArr.getNil(self), 
+        (isArr.getIdx(self)(ref), isArr.getElem(self, ref))
+      )
     }
     implicit def iLocForListOfInts[A, I0](implicit 
       isArr: IsSpArr[A, _, I0],
@@ -73,11 +77,11 @@ object ArrayDefs {
       def iloc(self: A, ref: HNil) = self
     }
     implicit def iLocForHList[A, H, T <: HList](implicit 
-        isArr: IsSpArr[A, _, _],
-        ilocHead: Lazy[ILoc[A, H]],
-        ilocTail: ILoc[A, T],
-      ) = new ILoc[A, H #: T] {
-      def iloc(self: A, ref: H #: T) = ilocHead.value.iloc(self, ref.head) 
+      isArr: IsSpArr[A, _, _],
+      ilocHead: Lazy[ILoc[A, H]],
+      ilocTail: ILoc[A, T],
+    ) = new ILoc[A, H #: T] {
+      def iloc(self: A, ref: H #: T) = ilocHead.value.iloc(self, ref.head)
     // ilocH.iloc(self, ref.head).toList.map(iLocOut.iloc(_, ref.tail))// need to map the iloc tail over every element
     // This is going to be easier if iloc doesn't squeeze the array. At least the squeeze operation could be done later
     }
