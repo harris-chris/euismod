@@ -1,7 +1,6 @@
 package sportarray
 
 import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
-import Skeleton.IsIdxElem
 import IndicesObj.Index
 
 import java.time.LocalDate
@@ -10,7 +9,7 @@ import shapeless.ops.hlist._
 
 object ArrayDefs {
 
-  abstract class IsSpArr[A, T <: DataType, I0: IsIdxElem] {
+  abstract class IsSpArr[A, T <: DataType, I0] {
     type Self = A
     type M1   
     type M1I
@@ -32,12 +31,12 @@ object ArrayDefs {
     def toListWithIndex(self: A): List[(I0, M1)] = getIdx(self).toList.zip(toList(self)).toList
   }
 
-  abstract class Is1dSpArr[A, T <: DataType, I0: IsIdxElem] extends IsSpArr[A, T, I0] {
+  abstract class Is1dSpArr[A, T <: DataType, I0] extends IsSpArr[A, T, I0] {
     override type M1 = T#T
     def shape(self: A): Tuple1[Int] = Tuple1(length(self))
   }
 
-  abstract class Is2dSpArr[A, T <: DataType, I0: IsIdxElem, I1: IsIdxElem, M1C[_ <: DataType, _]](
+  abstract class Is2dSpArr[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](
     implicit tc1d: Is1dSpArr[M1C[T, I1], T, I1]
   ) extends IsSpArr[A, T, I0] {
     override type M1 = M1C[T, I1]
@@ -52,7 +51,6 @@ object ArrayDefs {
     def apply[A, R](implicit tc: ILoc[A, R]): ILoc[A, R] = tc
     implicit def iLocForInt[A, I0](implicit 
       isArr: IsSpArr[A, _, I0], 
-      isIdxElem: IsIdxElem[I0],
     ) = new ILoc[A, Int] {
       override def iloc(self: A, ref: Int) = isArr.::(
         isArr.getNil(self), 
@@ -61,7 +59,7 @@ object ArrayDefs {
     }
     implicit def iLocForListOfInts[A, I0](implicit 
       isArr: IsSpArr[A, _, I0],
-      isIdxElem: IsIdxElem[I0],
+      isIdxElem: I0,
     ) = new ILoc[A, List[Int]] {
       def iloc(self: A, ref: List[Int]) = {
         val data: List[isArr.M1] = ref.map(isArr.getElem(self, _)).toList

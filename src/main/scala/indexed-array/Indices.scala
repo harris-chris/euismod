@@ -1,12 +1,13 @@
 package sportarray
 
 import sportdate.{IsSportDateInstances, IsSportDateSyntax}
-import Skeleton.{IsIdxElem, DateType, Element, Composite}
+import Skeleton.{DateType, Element, Composite}
 import Skeleton.IsIdxElemImplicits._
+import shapeless.{HList, HNil, :: => #:}
 
 object IndicesObj {
 
-  case class Index[ElemT: IsIdxElem] (
+  case class Index[ElemT] (
     vals: List[ElemT]
   ) {
     def indexOf(at: ElemT): Option[Int] = vals.indexOf(at) match {
@@ -20,7 +21,7 @@ object IndicesObj {
     def length = vals.length
   }
   object Index {
-    def empty[ElemT: IsIdxElem]: Index[ElemT] = Index[ElemT](Nil: List[ElemT])
-    def apply[ElemT: IsIdxElem](vals: ElemT*): Index[ElemT] = Index[ElemT](vals.toList)
+    def empty[ElemT]: Index[ElemT] = Index[ElemT](Nil: List[ElemT])
+    def apply[ElemT](vals: ElemT*): Index[ElemT] = Index[ElemT](vals.toList)
   }
 }
