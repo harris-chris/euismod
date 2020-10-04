@@ -7,9 +7,7 @@ import com.github.nscala_time.time.Imports._
 import sportdate.SportDate
 import sportdate.{IsSportDateInstances, IsSportDateSyntax}
 
-import Skeleton.{PositionsData, IsIdxElemImplicits, DateType, Element, Composite, DataType}
-import Skeleton.IsIdxElemImplicits._
-import Skeleton.IsIdxElem
+import Skeleton.{PositionsData, DateType, Element, Composite, DataType}
 import IndicesObj._
 import shapeless._
 import shapeless.ops.hlist._
@@ -43,7 +41,7 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       List(5.1, 5.2, 5.3, 5.4, 5.5),
     ),
   )
-  def checkList1dWithSingle[T <: DataType, I: IsIdxElem](
+  def checkList1dWithSingle[T <: DataType, I](
     idx: Index[I], data: List[T#T], f:(List1d[T, I], Int) => List1d[T, I],
   ): Boolean = {
     import ArrayDefs.IsSpArrSyntax._
@@ -51,7 +49,7 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       List1d[T, I](Index(idx(i)), List(x))
     })
   }
-  def checkList1dWithListInt[T <: DataType, I: IsIdxElem](
+  def checkList1dWithListInt[T <: DataType, I](
     idx: Index[I], data: List[T#T], f:(List1d[T, I], List[Int]) => List1d[T, I],
   ): Boolean = {
     import ArrayDefs.IsSpArrSyntax._

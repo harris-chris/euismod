@@ -59,7 +59,6 @@ object ArrayDefs {
     }
     implicit def iLocForListOfInts[A, I0](implicit 
       isArr: IsSpArr[A, _, I0],
-      isIdxElem: I0,
     ) = new ILoc[A, List[Int]] {
       def iloc(self: A, ref: List[Int]) = {
         val data: List[isArr.M1] = ref.map(isArr.getElem(self, _)).toList

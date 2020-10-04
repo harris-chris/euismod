@@ -2,7 +2,6 @@ package sportarray
 
 import ArrayDefs._
 import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
-import Skeleton.{IsIdxElem}
 import IndicesObj._
 
 import shapeless._
@@ -10,11 +9,11 @@ import shapeless.ops.hlist._
 
 object ListOfListsObj {
 
-  case class List1d[T <: DataType, I0: IsIdxElem] (
+  case class List1d[T <: DataType, I0] (
     indices: Index[I0],
     data: List[T#T],
   )
-  implicit def list1dIs1dSpArr[A, T <: DataType, I0: IsIdxElem] = 
+  implicit def list1dIs1dSpArr[A, T <: DataType, I0] = 
     new Is1dSpArr[List1d[T, I0], T, I0] {
       def getIdx(self: Self) = self.indices
       def getElem(self: Self, i: Int) = self.data(i)
@@ -23,11 +22,11 @@ object ListOfListsObj {
       def length(self: Self) = self.data.length
     }
 
-  case class List2d[T <: DataType, I0: IsIdxElem, I1: IsIdxElem] ( 
+  case class List2d[T <: DataType, I0, I1] ( 
     indices: (Index[I0], Index[I1]),
     data: List[List[T#T]],
   )
-  implicit def list2dIs2dSpArr[A, T <: DataType, I0: IsIdxElem, I1: IsIdxElem] = 
+  implicit def list2dIs2dSpArr[A, T <: DataType, I0, I1] = 
     new Is2dSpArr[List2d[T, I0, I1], T, I0, I1, List1d] {
       def getIdx(self: Self) = self.indices._1
       def getElem(self: Self, i: Int) = List1d(self.indices._2, self.data(i))
