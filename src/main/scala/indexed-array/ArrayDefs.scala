@@ -9,27 +9,48 @@ import shapeless.ops.hlist._
 
 object ArrayDefs {
 
-  abstract class IsSpArr[A, T <: DataType, I0] {
+  abstract class IsSpBase[A]
+  case object ArrNil extends IsSpBase[Nothing]
+
+  abstract class IsSpArr[A, T <: DataType, I0, M1](implicit 
+    m1IsBase: IsSpBase[M1]
+  ) extends IsSpBase[A] {
     type Self = A
-    type M1   
-    type M1I
     def getIdx(self: A): Index[I0]
     def getIdxElem(self: A, i: Int): I0 = getIdx(self)(i)
     def getElem(self: A, i: Int): M1
     def getNil(self: A): A
     def iloc[R](self: A, r: R)(implicit iLoc: ILoc[A, R]): A = iLoc.iloc(self, r)
     def ::(self: A, other: (I0, M1)): A
-    def ++(self: A, other: A)(implicit isArr: IsSpArr[A, T, I0] {type M1 = IsSpArr.this.M1}): A = {
+    def ++(self: A, other: A)(implicit isArr: IsSpArr[A, T, I0, IsSpArr.this.M1] {type M1 = }): A = {
       val i: List[(I0, M1)] = isArr.toListWithIndex(other)
       i match {
         case (idx, elem) :: ts => ::(self, (idx, elem))
         case Nil => self
       }
     }
+    //def fmap[B](self: A, f: B => B)(implicit fMap: FMap[A, B]) = fMap.fmap(self, f)
     def length(self: A): Int
     def toList(self: A): List[M1] = (for(i <- 0 to length(self)) yield (getElem(self, i))).toList
     def toListWithIndex(self: A): List[(I0, M1)] = getIdx(self).toList.zip(toList(self)).toList
   }
+
+  //trait FMap[A, B] {
+    //def fmap(self: A, f: B => B): A
+  //}
+  //object FMap {
+    //implicit def fMapIfAIsB[A, B](implicit ev: A=:=B) = new FMap[A, B] {
+      //def fmap(self: A, f: B => B): A = self
+    //}
+    //implicit def fMap[A, B, M1O](implicit 
+      //aIsArr: Lazy[IsSpArr[A, _, _] {type M1 = M1O}], 
+      //bIsArr: IsSpArr[B, _, _],
+      //m1IsArr: IsSpArr[M1O, _, _],
+    //) = new FMap[A, B] {
+      //def fmap(self: A, f: B => B): A = 
+        //aIsArr.value.toList(self).map(m1IsArr.fmap(_, f)).foldLeft(aIsArr.value.getNil(self))(aIsArr.value.::(self, _))
+    //}
+  //}
 
   abstract class Is1dSpArr[A, T <: DataType, I0] extends IsSpArr[A, T, I0] {
     override type M1 = T#T
