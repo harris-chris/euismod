@@ -41,25 +41,25 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       List(5.1, 5.2, 5.3, 5.4, 5.5),
     ),
   )
-  def checkList1dWithSingle[T: DataType, I](
-    idx: Index[I], data: List[T], f:(List1d[T, I], Int) => List1d[T, I],
+  def checkList1dWithSingle[I, T: DataType](
+    idx: Index[I], data: List[T], f:(List1d[I, T], Int) => List1d[I, T],
   ): Boolean = {
     import ArrayDefs.IsSpArrSyntax._
-    data.zipWithIndex.forall({case(x, i) => f(List1d[T, I](idx, data),i) == 
-      List1d[T, I](Index(idx(i)), List(x))
+    data.zipWithIndex.forall({case(x, i) => f(List1d[I, T](idx, data),i) == 
+      List1d[I, T](Index(idx(i)), List(x))
     })
   }
-  def checkList1dWithListInt[T <: DataType, I](
-    idx: Index[I], data: List[T#T], f:(List1d[T, I], List[Int]) => List1d[T, I],
+  def checkList1dWithListInt[I, T: DataType](
+    idx: Index[I], data: List[T], f:(List1d[I, T], List[Int]) => List1d[I, T],
   ): Boolean = {
     import ArrayDefs.IsSpArrSyntax._
-    val list1d = List1d[T, I](idx, data)
+    val list1d = List1d[I, T](idx, data)
     data.zipWithIndex.forall(
       {
         case(x, i) => i match {
           case i if i < 4 => {
             val actual = f(list1d, List(i, i+1))
-            val expected = List1d[T, I](
+            val expected = List1d[I, T](
               Index(List(idx(i), idx(i+1))), List(data(i), data(i+1))
             )
             actual == expected
@@ -76,24 +76,24 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   "List1d" should "implement the Is1dSpArr typeclass" in {
     import ArrayDefs._
     import ArrayDefs.IsSpArrSyntax._
-    list1dIs1dSpArr[List1d[PositionsData, Dim2T], PositionsData, Dim2T]
+    list1dIsSpArr[List1d[Dim2T, Double], Dim2T, Double]
     //println(implicitly[Is1dSpArr[List1d[PositionsData, Dim2T], PositionsData, Dim2T]])
     //println(implicitly[List1d[PositionsData, Dim2T] => Is1dSpArrOps[List1d[PositionsData, Dim2T], PositionsData, Dim2T]])
   }
   "Arr1d" should "return correct datum with .getElem" in {
     import ArrayDefs.IsSpArrSyntax._
-    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
+    val list1d = List1d[Dim2T, Double](dim2, values1d)
     assert(values1d.zipWithIndex.forall({case(x, i) => x == list1d.getElem(i)}))
   }
   "Arr1d" should "be constructable from cons" in {
     import ArrayDefs.IsSpArrSyntax._
-    val lst0 = List1d[PositionsData, Dim2T](Index[Dim2T](Nil), Nil)
+    val lst0 = List1d[Dim2T, Double](Index[Dim2T](Nil), Nil)
     val lst1 = (dim2(0), values1d(0)) :: lst0
     val lst2 = (dim2(1), values1d(1)) :: lst1
     val lst3 = (dim2(2), values1d(2)) :: lst2
     val lst4 = (dim2(3), values1d(3)) :: lst3
     val lst5 = (dim2(4), values1d(4)) :: lst4
-    assert(lst5 == List1d[PositionsData, Dim2T](dim2, values1d))
+    assert(lst5 == List1d[Dim2T, Double](dim2, values1d))
   }
   ////"Arr1d" should "decompose using cons" in {
     ////import ArrayDefs._
@@ -106,15 +106,15 @@ class ArraySpec extends AnyFlatSpec with Matchers {
   ////}
   "Arr1d" should "return correct datum with .iloc using Int" in {
     import ArrayDefs.IsSpArrSyntax._
-    assert(checkList1dWithSingle[PositionsData, Dim2T](dim2, values1d, (l, i) => l.iloc(i)))
+    assert(checkList1dWithSingle[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i)))
   }
   "Arr1d" should "return correct 1dSpArr with .iloc using List[Int]" in {
     import ArrayDefs.IsSpArrSyntax._
-    assert(checkList1dWithListInt[PositionsData, Dim2T](dim2, values1d, (l, r) => l.iloc(r)))
+    assert(checkList1dWithListInt[Dim2T, Double](dim2, values1d, (l, r) => l.iloc(r)))
   }
   "Arr1d" should "return all data with .iloc using null" in {
     import ArrayDefs.IsSpArrSyntax._
-    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
+    val list1d = List1d[Dim2T, Double](dim2, values1d)
     assert(list1d.iloc(null) == list1d)
   }
   "Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
@@ -123,38 +123,37 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     //implicitly[ILoc[Int, List1d[PositionsData, Dim2T], Dim2T]]
     //implicitly[ILoc[HNil, List1d[PositionsData, Dim2T], Dim2T]]
     assert(
-      checkList1dWithSingle[PositionsData, Dim2T](dim2, values1d, (l, i) => l.iloc(i :: HNil))
+      checkList1dWithSingle[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
     )
   }
   "Arr1d" should "return the appropriate data with .iloc using an HList of List[Int]" in {
     import ArrayDefs.IsSpArrSyntax._
     assert(
-      checkList1dWithListInt[PositionsData, Dim2T](dim2, values1d, (l, i) => l.iloc(i :: HNil))
+      checkList1dWithListInt[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
     )
   }
   "Arr1d" should "have shape(0) == length" in {
     import ArrayDefs.IsSpArrSyntax._
-    val list1d = List1d[PositionsData, Dim2T](dim2, values1d)
-    assert(list1d.length == list1d.shape._1)
+    val list1d = List1d[Dim2T, Double](dim2, values1d)
     assert(list1d.length == values1d.length)
     assert(list1d.length == dim2.length)
   }
   "Arr2d" should "return a 1d array with .getElem" in {
     import ArrayDefs._
     import ArrayDefs.IsSpArrSyntax._
-    val list2d = List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), values2d)
+    val list2d = List2d[Dim1T, Dim2T, Double]((dim1, dim2), values2d)
     assert(
       values2d.zipWithIndex.forall({case(x, i) => 
-        list2d.getElem(i) == List1d[PositionsData, Dim2T](dim2, x)
+        list2d.getElem(i) == List1d[Dim2T, Double](dim2, x)
       })
     )
   }
   "Arr2d" should "return a 2d array with .iloc using Int on the first dimension" in {
     import ArrayDefs._
     import ArrayDefs.IsSpArrSyntax._
-    val list2d = List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), values2d)
+    val list2d = List2d[Dim1T, Dim2T, Double]((dim1, dim2), values2d)
     println(list2d.iloc(0))
-    println(List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), List(values2d(0))))
+    println(List2d[Dim1T, Dim2T, Double]((dim1, dim2), List(values2d(0))))
     //assert(
       //values2d.zipWithIndex.forall({case(x, i) => 
         //list2d.iloc(i) == List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), List(values2d(i)))

@@ -104,19 +104,19 @@ object ArrayDefs {
     }
   }
 
-  //object IsSpArrSyntax {
-    //implicit class Is1dSpArrOps[A, T <: DataType, I0](self: A)(implicit 
-      //val tc: Is1dSpArr[A, T, I0],
-    //) {
-      //def getNil = tc.getNil(self)
-      //def getElem(i: Int) = tc.getElem(self, i)
-      //def iloc[R](r: R)(implicit iLoc: ILoc[A, R]) = tc.iloc(self, r)
-      //def shape: Tuple1[Int] = tc.shape(self)
-      //def ::(other: (I0, tc.M1)): A = tc.::(self, other)
-      //def length: Int = tc.length(self)
-      //def toList: List[tc.M1] = tc.toList(self)
-      //def toListWithIndex = tc.toListWithIndex(self)
-    //}
+  object IsSpArrSyntax {
+    implicit class IsSpArrOps[A, I0, M1T](self: A)(implicit 
+      val tc: IsSpArr[A, I0, M1T],
+    ) {
+      def getNil = tc.getNil(self)
+      def getElem(i: Int) = tc.getElem(self, i)
+      def iloc[R](r: R)(implicit iLoc: ILoc[A, R]) = tc.iloc(self, r)
+      def ::(other: (I0, tc.M1)): A = tc.::(self, other)
+      def length: Int = tc.length(self)
+      def toList: List[tc.M1] = tc.toList(self)
+      def toListWithIndex = tc.toListWithIndex(self)
+    }
+  }
     //implicit class Is2dSpArrOps[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](self: A)(implicit 
       //val tc: Is2dSpArr[A, T, I0, I1, M1C],
     //) {
