@@ -9,15 +9,16 @@ import sportdate.IsSportDateSyntax._
 
 object Skeleton {
 
+  abstract class IsSpBase[A] {type Self}
 
   // Define your DataTypes here - these are the types of value used in the body of the array
-  sealed trait DataType {
-    type T 
-  }
-  trait PositionsData extends DataType { type T = Double }
-  trait WeightsData extends DataType { type T = Double }
-  trait ValuesData extends DataType { type T = Double }
-  trait PricesData extends DataType { type T = Double }
+  abstract class DataType[A] extends IsSpBase[A]{ type Self = A }
+  implicit val PositionsData = new DataType[Double] {}
+  implicit val WeightsData = new DataType[Double] {}
+  //abstract class PositionsData extends DataType { type Self = Double }
+  //abstract class WeightsData extends DataType { type Self = Double }
+  //abstract class ValuesData extends DataType { type Self = Double }
+  //abstract class PricesData extends DataType { type Self = Double }
 
   // IsIdxElem is a trait which defines whether a particular type can be used for an index
   trait IsIdxElem[A]

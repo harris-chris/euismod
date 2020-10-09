@@ -41,8 +41,8 @@ class ArraySpec extends AnyFlatSpec with Matchers {
       List(5.1, 5.2, 5.3, 5.4, 5.5),
     ),
   )
-  def checkList1dWithSingle[T <: DataType, I](
-    idx: Index[I], data: List[T#T], f:(List1d[T, I], Int) => List1d[T, I],
+  def checkList1dWithSingle[T: DataType, I](
+    idx: Index[I], data: List[T], f:(List1d[T, I], Int) => List1d[T, I],
   ): Boolean = {
     import ArrayDefs.IsSpArrSyntax._
     data.zipWithIndex.forall({case(x, i) => f(List1d[T, I](idx, data),i) == 

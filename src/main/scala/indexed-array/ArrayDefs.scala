@@ -1,6 +1,7 @@
 package sportarray
 
-import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
+//import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
+import Skeleton.{IsSpBase, DataType}
 import IndicesObj.Index
 
 import java.time.LocalDate
@@ -9,21 +10,19 @@ import shapeless.ops.hlist._
 
 object ArrayDefs {
 
-  abstract class IsSpBase[A]
-  case object ArrNil extends IsSpBase[Nothing]
-
-  abstract class IsSpArr[A, T <: DataType, I0, M1](implicit 
-    m1IsBase: IsSpBase[M1]
+  abstract class IsSpArr[A, I0, M1T](implicit 
+    val m1IsArr: IsSpBase[M1T] {type Self = M1T}
   ) extends IsSpBase[A] {
     type Self = A
+    type M1 = m1IsArr.Self
     def getIdx(self: A): Index[I0]
     def getIdxElem(self: A, i: Int): I0 = getIdx(self)(i)
     def getElem(self: A, i: Int): M1
     def getNil(self: A): A
     def iloc[R](self: A, r: R)(implicit iLoc: ILoc[A, R]): A = iLoc.iloc(self, r)
     def ::(self: A, other: (I0, M1)): A
-    def ++(self: A, other: A)(implicit isArr: IsSpArr[A, T, I0, IsSpArr.this.M1] {type M1 = }): A = {
-      val i: List[(I0, M1)] = isArr.toListWithIndex(other)
+    def ++(self: A, other: A): A = {
+      val i: List[(I0, M1)] = toListWithIndex(other)
       i match {
         case (idx, elem) :: ts => ::(self, (idx, elem))
         case Nil => self
@@ -52,34 +51,34 @@ object ArrayDefs {
     //}
   //}
 
-  abstract class Is1dSpArr[A, T <: DataType, I0] extends IsSpArr[A, T, I0] {
-    override type M1 = T#T
-    def shape(self: A): Tuple1[Int] = Tuple1(length(self))
-  }
+  //abstract class Is1dSpArr[A, T <: DataType, I0] extends IsSpArr[A, T, I0] {
+    //override type M1 = T#T
+    //def shape(self: A): Tuple1[Int] = Tuple1(length(self))
+  //}
 
-  abstract class Is2dSpArr[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](
-    implicit tc1d: Is1dSpArr[M1C[T, I1], T, I1]
-  ) extends IsSpArr[A, T, I0] {
-    override type M1 = M1C[T, I1]
-    def shape(self: A): (Int, Int) = 
-      (length(self), tc1d.length(getElem(self, 0)))
-  }
+  //abstract class Is2dSpArr[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](
+    //implicit tc1d: Is1dSpArr[M1C[T, I1], T, I1]
+  //) extends IsSpArr[A, T, I0] {
+    //override type M1 = M1C[T, I1]
+    //def shape(self: A): (Int, Int) = 
+      //(length(self), tc1d.length(getElem(self, 0)))
+  //}
 
   trait ILoc[A, R] {
     def iloc(self: A, ref: R): A
   }
   object ILoc {
     def apply[A, R](implicit tc: ILoc[A, R]): ILoc[A, R] = tc
-    implicit def iLocForInt[A, I0](implicit 
-      isArr: IsSpArr[A, _, I0], 
+    implicit def iLocForInt[A, I0, M1T](implicit 
+      isArr: IsSpArr[A, I0, M1T], 
     ) = new ILoc[A, Int] {
       override def iloc(self: A, ref: Int) = isArr.::(
         isArr.getNil(self), 
         (isArr.getIdx(self)(ref), isArr.getElem(self, ref))
       )
     }
-    implicit def iLocForListOfInts[A, I0](implicit 
-      isArr: IsSpArr[A, _, I0],
+    implicit def iLocForListOfInts[A, I0, M1T](implicit 
+      isArr: IsSpArr[A, I0, M1T],
     ) = new ILoc[A, List[Int]] {
       def iloc(self: A, ref: List[Int]) = {
         val data: List[isArr.M1] = ref.map(isArr.getElem(self, _)).toList
@@ -105,32 +104,32 @@ object ArrayDefs {
     }
   }
 
-  object IsSpArrSyntax {
-    implicit class Is1dSpArrOps[A, T <: DataType, I0](self: A)(implicit 
-      val tc: Is1dSpArr[A, T, I0],
-    ) {
-      def getNil = tc.getNil(self)
-      def getElem(i: Int) = tc.getElem(self, i)
-      def iloc[R](r: R)(implicit iLoc: ILoc[A, R]) = tc.iloc(self, r)
-      def shape: Tuple1[Int] = tc.shape(self)
-      def ::(other: (I0, tc.M1)): A = tc.::(self, other)
-      def length: Int = tc.length(self)
-      def toList: List[tc.M1] = tc.toList(self)
-      def toListWithIndex = tc.toListWithIndex(self)
-    }
-    implicit class Is2dSpArrOps[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](self: A)(implicit 
-      val tc: Is2dSpArr[A, T, I0, I1, M1C],
-    ) {
-      def getNil = tc.getNil(self)
-      def getElem(i: Int) = tc.getElem(self, i)
-      def iloc[R](r: R)(implicit iLoc: ILoc[A, R]) = tc.iloc(self, r)
-      def shape: (Int, Int) = tc.shape(self)
-      def ::(other: (I0, tc.M1)): A = tc.::(self, other)
-      def length: Int = tc.length(self)
-      def toList: List[tc.M1] = tc.toList(self)
-      def toListWithIndex = tc.toListWithIndex(self)
-      //def unapply: Option[((I0, T#T), A)] = tc2d.unapply(self) 
-    }
-  }
+  //object IsSpArrSyntax {
+    //implicit class Is1dSpArrOps[A, T <: DataType, I0](self: A)(implicit 
+      //val tc: Is1dSpArr[A, T, I0],
+    //) {
+      //def getNil = tc.getNil(self)
+      //def getElem(i: Int) = tc.getElem(self, i)
+      //def iloc[R](r: R)(implicit iLoc: ILoc[A, R]) = tc.iloc(self, r)
+      //def shape: Tuple1[Int] = tc.shape(self)
+      //def ::(other: (I0, tc.M1)): A = tc.::(self, other)
+      //def length: Int = tc.length(self)
+      //def toList: List[tc.M1] = tc.toList(self)
+      //def toListWithIndex = tc.toListWithIndex(self)
+    //}
+    //implicit class Is2dSpArrOps[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](self: A)(implicit 
+      //val tc: Is2dSpArr[A, T, I0, I1, M1C],
+    //) {
+      //def getNil = tc.getNil(self)
+      //def getElem(i: Int) = tc.getElem(self, i)
+      //def iloc[R](r: R)(implicit iLoc: ILoc[A, R]) = tc.iloc(self, r)
+      //def shape: (Int, Int) = tc.shape(self)
+      //def ::(other: (I0, tc.M1)): A = tc.::(self, other)
+      //def length: Int = tc.length(self)
+      //def toList: List[tc.M1] = tc.toList(self)
+      //def toListWithIndex = tc.toListWithIndex(self)
+      ////def unapply: Option[((I0, T#T), A)] = tc2d.unapply(self) 
+    //}
+  //}
 }
 
