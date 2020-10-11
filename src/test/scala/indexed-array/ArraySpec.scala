@@ -154,11 +154,11 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     val list2d = List2d[Dim1T, Dim2T, Double]((dim1, dim2), values2d)
     println(list2d.iloc(0))
     println(List2d[Dim1T, Dim2T, Double]((dim1, dim2), List(values2d(0))))
-    //assert(
-      //values2d.zipWithIndex.forall({case(x, i) => 
-        //list2d.iloc(i) == List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), List(values2d(i)))
-      //})
-    //)
+    assert(
+      values2d.zipWithIndex.forall({case(x, i) => 
+        list2d.iloc(i) == List2d[Dim1T, Dim2T, Double]((dim1, dim2), List(values2d(i)))
+      })
+    )
   }
   //"Arr2d" should "return a 2d array with .iloc using Int on the first dimension" in {
     //import ArrayDefs._

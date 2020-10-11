@@ -28,28 +28,31 @@ object ArrayDefs {
         case Nil => self
       }
     }
-    //def fmap[B](self: A, f: B => B)(implicit fMap: FMap[A, B]) = fMap.fmap(self, f)
+    def fmap[B](self: A, f: B => B)(implicit fMap: FMap[A, B]) = fMap.fmap(self, f)
     def length(self: A): Int
     def toList(self: A): List[M1] = (for(i <- 0 to length(self)) yield (getElem(self, i))).toList
     def toListWithIndex(self: A): List[(I0, M1)] = getIdx(self).toList.zip(toList(self)).toList
   }
 
-  //trait FMap[A, B] {
-    //def fmap(self: A, f: B => B): A
-  //}
-  //object FMap {
-    //implicit def fMapIfAIsB[A, B](implicit ev: A=:=B) = new FMap[A, B] {
-      //def fmap(self: A, f: B => B): A = self
-    //}
-    //implicit def fMap[A, B, M1O](implicit 
-      //aIsArr: Lazy[IsSpArr[A, _, _] {type M1 = M1O}], 
-      //bIsArr: IsSpArr[B, _, _],
-      //m1IsArr: IsSpArr[M1O, _, _],
-    //) = new FMap[A, B] {
-      //def fmap(self: A, f: B => B): A = 
-        //aIsArr.value.toList(self).map(m1IsArr.fmap(_, f)).foldLeft(aIsArr.value.getNil(self))(aIsArr.value.::(self, _))
-    //}
-  //}
+  trait FMap[A, B] {
+    def fmap(self: A, f: B => B): A
+  }
+  object FMap {
+    implicit def fMapIfAIsB[A, B](implicit ev: A=:=B) = new FMap[A, B] {
+      def fmap(self: A, f: B => B): A = self
+    }
+    implicit def fMapIfAIsNotB[A, I0O, I1O, M1O, B, M2O](implicit 
+      isArr: Lazy[IsSpArr[A, I0O, M1O]], 
+      m1IsArr: IsSpArr[M1O, I1O, M2O],  
+      fMap: FMap[M1O, B],
+    ) = new FMap[A, B] {
+      def fmap(self: A, f: B => B): A = {
+        val aList: List[(I0O, M1O)] = isArr.value.toListWithIndex(self)
+        val m1List: List[(I0O, M1O)] = aList.map((t: (I0O, M1O)) => (t._1, m1IsArr.fmap(t._2, f)))
+        m1List.foldLeft(isArr.value.getNil(self))((b, a) => isArr.value.::(b, a))
+      }
+    }
+  }
 
   //abstract class Is1dSpArr[A, T <: DataType, I0] extends IsSpArr[A, T, I0] {
     //override type M1 = T#T
