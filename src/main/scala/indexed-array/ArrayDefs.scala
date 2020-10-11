@@ -10,21 +10,21 @@ import shapeless.ops.hlist._
 
 object ArrayDefs {
 
-  abstract class IsSpArr[A, I0, M1T](implicit 
+  abstract class IsSpArr[A[_, _], I0, M1T](implicit 
     val m1IsArr: IsSpBase[M1T] {type Self = M1T}
-  ) extends IsSpBase[A] {
-    type Self = A
+  ) extends IsSpBase[A[I0, M1T]] {
+    type Self = A[I0, M1T]
     type M1 = m1IsArr.Self
-    def getIdx(self: A): Index[I0]
-    def getIdxElem(self: A, i: Int): I0 = getIdx(self)(i)
-    def getElem(self: A, i: Int): M1
-    def getNil[I, M](self: A)(implicit 
+    def getIdx(self: Self): Index[I0]
+    def getIdxElem(self: Self, i: Int): I0 = getIdx(self)(i)
+    def getElem(self: Self, i: Int): M1
+    def getNil[I, M](self: Self)(implicit 
       mIsDataType: DataType[M],
       outIsArr: IsSpArr[A, I, M],
-    ): A
-    def iloc[R](self: A, r: R)(implicit iLoc: ILoc[A, R]): A = iLoc.iloc(self, r)
-    def ::(self: A, other: (I0, M1)): A
-    def ++(self: A, other: A): A = {
+    ): A[I, M]
+    def iloc[R](self: Self, r: R)(implicit iLoc: ILoc[A, R]): Self = iLoc.iloc(self, r)
+    def ::(self: Self, other: (I0, M1)): Self
+    def ++(self: Self, other: Self): Self = {
       val i: List[(I0, M1)] = toListWithIndex(other)
       i match {
         case (idx, elem) :: ts => ::(self, (idx, elem))
@@ -32,25 +32,28 @@ object ArrayDefs {
       }
     }
     def fmap[B, C](self: A, f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
-    def length(self: A): Int
-    def toList(self: A): List[M1] = (for(i <- 0 to length(self)) yield (getElem(self, i))).toList
-    def toListWithIndex(self: A): List[(I0, M1)] = getIdx(self).toList.zip(toList(self)).toList
-    def fromList[I, M](self: A, l: List[(I, M)])(implicit 
+    def length(self: Self): Int
+    def toList(self: Self): List[M1] = (for(i <- 0 to length(self)) yield (getElem(self, i))).toList
+    def toListWithIndex(self: Self): List[(I0, M1)] = getIdx(self).toList.zip(toList(self)).toList
+    def fromList[I, M](self: Self, l: List[(I, M)])(implicit 
       mIsDataType: DataType[M],
       outIsArr: IsSpArr[A, I, M],
-    ): A = l.foldLeft(getNil(self))((b, a) => outIsArr.::(b, a))
-    def mapList[M2](self: A, f: M1 => M2)(implicit 
+    ): Self = l.foldLeft(getNil(self))((b, a) => outIsArr.::(b, a))
+    def mapList[M2](self: Self, f: M1 => M2)(implicit 
       mIsDataType: DataType[M2],
       outIsArr: IsSpArr[A, I0, M2],
-    ): A = 
+    ): Self = 
       fromList(self,
         toListWithIndex(self).map((t: (I0, M1)) => (t._1, f(t._2)))
       )
   }
 
-  trait FMap[A, B, C] {
-    def fmap(self: A, f: B => C): A
-  }
+  abstract class Is2dSpArr[A[_, _, I1], I0, I1, T: DataType] extends IsSpArr[λ[I0L, T] => A[I0L, I1L, T], I0, T]
+
+  def xyz[F[_[+_]]] = 12345
+  trait Q[A[+_], B[+_]]
+
+  // we can use kind-projector to adapt Q for xyz
   object FMap {
     implicit def fMapIfAIsB[A, I0, M1, B, C](implicit 
       isArr: Lazy[IsSpArr[A, I0, M1]], 

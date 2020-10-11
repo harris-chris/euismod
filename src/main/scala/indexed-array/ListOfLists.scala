@@ -13,14 +13,14 @@ object ListOfListsObj {
     indices: Index[I0],
     data: List[T],
   )
-  implicit def list1dIsSpArr[A, I0, T: DataType] = 
-    new IsSpArr[List1d[I0, T], I0, T] {
+  implicit def list1dIsSpArr[I0, T: DataType] = 
+    new IsSpArr[List1d, I0, T] {
       def getIdx(self: Self) = self.indices
       def getElem(self: Self, i: Int) = self.data(i)
-      def getNil[I, M](self: Self)(implicit 
+      def getNil[I, M, B](self: Self)(implicit 
         mIsDataType: DataType[M],
-        outIsArr: IsSpArr[A, I, M],
-      ): Self = List1d[I, M](Index.empty[I], Nil: List[M])
+        outIsArr: IsSpArr[List1d, I, M],
+      ): List1d[I, M] = List1d[I, M](Index.empty[I], Nil: List[M])
       def ::(self: Self, other: (I0, M1)) = List1d[I0, M1]((getIdx(self) :+ other._1), self.data :+ other._2)
       def length(self: Self) = self.data.length
     }
