@@ -138,6 +138,13 @@ class ArraySpec extends AnyFlatSpec with Matchers {
     assert(list1d.length == values1d.length)
     assert(list1d.length == dim2.length)
   }
+  "Arr1d" should "use fMap to apply functions to its elements" in {
+    import ArrayDefs.IsSpArrSyntax._
+    val list1d = List1d[Dim2T, Double](dim2, values1d)
+    val listmapped = list1d.fmap(_: Double => 'a')
+    val c = list1d.fmap(_: String => 'a')
+    assert(listmapped.toList.forall(_ == 'a'))
+  }
   "Arr2d" should "return a 1d array with .getElem" in {
     import ArrayDefs._
     import ArrayDefs.IsSpArrSyntax._

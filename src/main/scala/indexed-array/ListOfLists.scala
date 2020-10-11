@@ -17,8 +17,11 @@ object ListOfListsObj {
     new IsSpArr[List1d[I0, T], I0, T] {
       def getIdx(self: Self) = self.indices
       def getElem(self: Self, i: Int) = self.data(i)
-      def getNil(self: Self) = List1d[I0, T](Index.empty[I0], Nil: List[T])
-      def ::(self: Self, other: (I0, T)) = List1d[I0, T]((getIdx(self) :+ other._1), self.data :+ other._2)
+      def getNil[I, M](self: Self)(implicit 
+        mIsDataType: DataType[M],
+        outIsArr: IsSpArr[A, I, M],
+      ): Self = List1d[I, M](Index.empty[I], Nil: List[M])
+      def ::(self: Self, other: (I0, M1)) = List1d[I0, M1]((getIdx(self) :+ other._1), self.data :+ other._2)
       def length(self: Self) = self.data.length
     }
 

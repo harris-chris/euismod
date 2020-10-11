@@ -18,7 +18,10 @@ object ArrayDefs {
     def getIdx(self: A): Index[I0]
     def getIdxElem(self: A, i: Int): I0 = getIdx(self)(i)
     def getElem(self: A, i: Int): M1
-    def getNil(self: A): A
+    def getNil[I, M](self: A)(implicit 
+      mIsDataType: DataType[M],
+      outIsArr: IsSpArr[A, I, M],
+    ): A
     def iloc[R](self: A, r: R)(implicit iLoc: ILoc[A, R]): A = iLoc.iloc(self, r)
     def ::(self: A, other: (I0, M1)): A
     def ++(self: A, other: A): A = {
@@ -28,29 +31,47 @@ object ArrayDefs {
         case Nil => self
       }
     }
-    def fmap[B](self: A, f: B => B)(implicit fMap: FMap[A, B]) = fMap.fmap(self, f)
+    def fmap[B, C](self: A, f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
     def length(self: A): Int
     def toList(self: A): List[M1] = (for(i <- 0 to length(self)) yield (getElem(self, i))).toList
     def toListWithIndex(self: A): List[(I0, M1)] = getIdx(self).toList.zip(toList(self)).toList
+    def fromList[I, M](self: A, l: List[(I, M)])(implicit 
+      mIsDataType: DataType[M],
+      outIsArr: IsSpArr[A, I, M],
+    ): A = l.foldLeft(getNil(self))((b, a) => outIsArr.::(b, a))
+    def mapList[M2](self: A, f: M1 => M2)(implicit 
+      mIsDataType: DataType[M2],
+      outIsArr: IsSpArr[A, I0, M2],
+    ): A = 
+      fromList(self,
+        toListWithIndex(self).map((t: (I0, M1)) => (t._1, f(t._2)))
+      )
   }
 
-  trait FMap[A, B] {
-    def fmap(self: A, f: B => B): A
+  trait FMap[A, B, C] {
+    def fmap(self: A, f: B => C): A
   }
   object FMap {
-    implicit def fMapIfAIsB[A, B](implicit ev: A=:=B) = new FMap[A, B] {
-      def fmap(self: A, f: B => B): A = self
+    implicit def fMapIfAIsB[A, I0, M1, B, C](implicit 
+      isArr: Lazy[IsSpArr[A, I0, M1]], 
+      cIsDataType: DataType[C],
+      ev: M1=:=B,
+      outIsArr: IsSpArr[A, I0, C],
+    ) = new FMap[A, M1, C] {
+      def fmap(self: A, f: M1 => C): A = 
+        isArr.value.mapList(self, f)
     }
-    implicit def fMapIfAIsNotB[A, I0O, I1O, M1O, B, M2O](implicit 
-      isArr: Lazy[IsSpArr[A, I0O, M1O]], 
-      m1IsArr: IsSpArr[M1O, I1O, M2O],  
-      fMap: FMap[M1O, B],
-    ) = new FMap[A, B] {
-      def fmap(self: A, f: B => B): A = {
-        val aList: List[(I0O, M1O)] = isArr.value.toListWithIndex(self)
-        val m1List: List[(I0O, M1O)] = aList.map((t: (I0O, M1O)) => (t._1, m1IsArr.fmap(t._2, f)))
-        m1List.foldLeft(isArr.value.getNil(self))((b, a) => isArr.value.::(b, a))
-      }
+    implicit def fMapIfAIsNotB[A, I0, I1, M1, M2, B, C](implicit 
+      isArr: Lazy[IsSpArr[A, I0, M1]], 
+      cIsDataType: DataType[C],
+      m1IsArr: IsSpArr[M1, I1, M2],
+      fMap: FMap[M1, B, C],
+      outIsArr: IsSpArr[A, I0, C],
+    ) = new FMap[A, M1, C] {
+      def fmap(self: A, f: M1 => C): A = isArr.value.mapList(self, f)
+        //val aList: List[(I0O, M1O)] = isArr.value.toListWithIndex(self)
+        //val m1List: List[(I0O, M1O)] = aList.map((t: (I0O, M1O)) => (t._1, m1IsArr.fmap(t._2, f)))
+        //m1List.foldLeft(isArr.value.getNil(self))((b, a) => isArr.value.::(b, a))
     }
   }
 
@@ -73,6 +94,7 @@ object ArrayDefs {
   object ILoc {
     def apply[A, R](implicit tc: ILoc[A, R]): ILoc[A, R] = tc
     implicit def iLocForInt[A, I0, M1T](implicit 
+      m1tIsDataType: DataType[M1T], 
       isArr: IsSpArr[A, I0, M1T], 
     ) = new ILoc[A, Int] {
       override def iloc(self: A, ref: Int) = isArr.::(
@@ -81,6 +103,7 @@ object ArrayDefs {
       )
     }
     implicit def iLocForListOfInts[A, I0, M1T](implicit 
+      m1tIsDataType: DataType[M1T], 
       isArr: IsSpArr[A, I0, M1T],
     ) = new ILoc[A, List[Int]] {
       def iloc(self: A, ref: List[Int]) = {
@@ -110,6 +133,7 @@ object ArrayDefs {
   object IsSpArrSyntax {
     implicit class IsSpArrOps[A, I0, M1T](self: A)(implicit 
       val tc: IsSpArr[A, I0, M1T],
+      m1TIsDataType: DataType[M1T],
     ) {
       def getNil = tc.getNil(self)
       def getElem(i: Int) = tc.getElem(self, i)
@@ -118,6 +142,7 @@ object ArrayDefs {
       def length: Int = tc.length(self)
       def toList: List[tc.M1] = tc.toList(self)
       def toListWithIndex = tc.toListWithIndex(self)
+      def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
     }
   }
     //implicit class Is2dSpArrOps[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](self: A)(implicit 
