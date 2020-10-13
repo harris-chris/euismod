@@ -87,6 +87,7 @@
             "version": "2.13.2",
             "options": [
                 "-Xlog-implicits",
+                "-Xplugin:kind-projector_2.10-0.6.0.jar",
                 "-Xplugin:/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/typelevel/kind-projector_2.13.2/0.11.0/kind-projector_2.13.2-0.11.0.jar"
             ],
             "jars": [

@@ -31,47 +31,49 @@ object ArrayDefs {
         case Nil => self
       }
     }
-    def fmap[B, C](self: A, f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
+    def fmap[B, C](self: A[I0, M1], f: B => C)(implicit fMap: FMap[A, I0, M1, B, C]) = fMap.fmap(self, f)
     def length(self: Self): Int
     def toList(self: Self): List[M1] = (for(i <- 0 to length(self)) yield (getElem(self, i))).toList
     def toListWithIndex(self: Self): List[(I0, M1)] = getIdx(self).toList.zip(toList(self)).toList
     def fromList[I, M](self: Self, l: List[(I, M)])(implicit 
-      mIsDataType: DataType[M],
+      mIsSpBase: IsSpBase[M],
       outIsArr: IsSpArr[A, I, M],
-    ): Self = l.foldLeft(getNil(self))((b, a) => outIsArr.::(b, a))
-    def mapList[M2](self: Self, f: M1 => M2)(implicit 
-      mIsDataType: DataType[M2],
-      outIsArr: IsSpArr[A, I0, M2],
-    ): Self = 
-      fromList(self,
+    ): A[I, M] = l.foldLeft(getNil(self))((b, a) => outIsArr.::(b, a))
+    def mapList[C](self: Self, f: M1 => C)(implicit 
+      mIsSpBase: IsSpBase[C],
+      outIsArr: IsSpArr[A, I0, C],
+    ): A[I0, C] = fromList(self,
         toListWithIndex(self).map((t: (I0, M1)) => (t._1, f(t._2)))
       )
   }
 
-  abstract class Is2dSpArr[A[_, _, I1], I0, I1, T: DataType] extends IsSpArr[λ[I0L, T] => A[I0L, I1L, T], I0, T]
+  trait FMap[A[_, _], I, M1, B, C] {
+    type Out
+    def fmap(self: A[I, M1], f: B => C): Out 
+  }
 
-  def xyz[F[_[+_]]] = 12345
-  trait Q[A[+_], B[+_]]
-
-  // we can use kind-projector to adapt Q for xyz
   object FMap {
-    implicit def fMapIfAIsB[A, I0, M1, B, C](implicit 
-      isArr: Lazy[IsSpArr[A, I0, M1]], 
-      cIsDataType: DataType[C],
-      ev: M1=:=B,
-      outIsArr: IsSpArr[A, I0, C],
-    ) = new FMap[A, M1, C] {
-      def fmap(self: A, f: M1 => C): A = 
+    implicit def fMapIfM1IsB[A[_, _], I, M1, B, C](implicit 
+      isArr: Lazy[IsSpArr[A, I, M1]], 
+      cIsSpBase: IsSpBase[C],
+      outIsArr: IsSpArr[A, I, C],
+      outIsSpBase: IsSpBase[A[I, C]],
+    ) = new FMap[A, I, M1, M1, C] {
+      type Out = A[I, C]
+      def fmap(self: A[I, M1], f: M1 => C): A[I, C] = 
         isArr.value.mapList(self, f)
     }
-    implicit def fMapIfAIsNotB[A, I0, I1, M1, M2, B, C](implicit 
-      isArr: Lazy[IsSpArr[A, I0, M1]], 
-      cIsDataType: DataType[C],
-      m1IsArr: IsSpArr[M1, I1, M2],
-      fMap: FMap[M1, B, C],
-      outIsArr: IsSpArr[A, I0, C],
-    ) = new FMap[A, M1, C] {
-      def fmap(self: A, f: M1 => C): A = isArr.value.mapList(self, f)
+    implicit def fMapIfM1IsNotB[A[_, _], I0, I1, M1C[_, _], M2, B, C, M1O](implicit 
+      isArr: Lazy[IsSpArr[A, I0, M1C[I1, M2]]], 
+      m1IsSpBase: IsSpBase[M1C[I1, M2]],
+      m1IsArr: IsSpArr[M1C, I1, M2],
+      fMapForM1: FMap[M1C, I1, M2, B, C] {type Out = M1O},
+      outIsArr: IsSpArr[A, I0, M1O],
+      m1OutIsSpBase: IsSpBase[M1O],
+    ) = new FMap[A, I0, M1C[I1, M2], B, C] {
+      type Out = A[I0, M1O]
+      def fmap(self: A[I0, M1C[I1, M2]], f: B => C): Out = isArr.value.mapList(
+        self, b => fMapForM1.fmap(b, f))
         //val aList: List[(I0O, M1O)] = isArr.value.toListWithIndex(self)
         //val m1List: List[(I0O, M1O)] = aList.map((t: (I0O, M1O)) => (t._1, m1IsArr.fmap(t._2, f)))
         //m1List.foldLeft(isArr.value.getNil(self))((b, a) => isArr.value.::(b, a))
@@ -91,12 +93,12 @@ object ArrayDefs {
       //(length(self), tc1d.length(getElem(self, 0)))
   //}
 
-  trait ILoc[A, R] {
+  trait ILoc[A[_, _], R] {
     def iloc(self: A, ref: R): A
   }
   object ILoc {
-    def apply[A, R](implicit tc: ILoc[A, R]): ILoc[A, R] = tc
-    implicit def iLocForInt[A, I0, M1T](implicit 
+    def apply[A[_, _], R](implicit tc: ILoc[A, R]): ILoc[A, R] = tc
+    implicit def iLocForInt[A[_, _], I0, M1T](implicit 
       m1tIsDataType: DataType[M1T], 
       isArr: IsSpArr[A, I0, M1T], 
     ) = new ILoc[A, Int] {
@@ -105,7 +107,7 @@ object ArrayDefs {
         (isArr.getIdx(self)(ref), isArr.getElem(self, ref))
       )
     }
-    implicit def iLocForListOfInts[A, I0, M1T](implicit 
+    implicit def iLocForListOfInts[A[_, _], I0, M1T](implicit 
       m1tIsDataType: DataType[M1T], 
       isArr: IsSpArr[A, I0, M1T],
     ) = new ILoc[A, List[Int]] {
