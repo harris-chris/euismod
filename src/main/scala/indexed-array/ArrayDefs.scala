@@ -45,6 +45,17 @@ object ArrayDefs {
       )
   }
 
+  abstract class Is1dSpArr[A[_, _], I0, T: DataType] extends IsSpArr[A, I0, T]
+  abstract class Is2dSpArr[A[_, _, _], I0, I1, T, A1[_, _]]( implicit 
+    tIsDataType: DataType[T],
+    a1IsSpArr: IsSpArr[A1, I1, T],
+  ) extends IsSpArr[A[?, ?, I1], I0, A1[I1, T]]
+  abstract class Is3dSpArr[A[_, _, _, _], I0, I1, I2, T, A1[_, _], A2[_, _, _]]( implicit 
+    a1IsSpArr: IsSpArr[A1, I2, T],
+    tIsDataType: DataType[T],
+    a2IsSpBase: IsSpBase[A2[I1, I2, T] {type Self = A2[I1, I2, T]}],
+  ) extends Is2dSpArr[A[?, ?, ?, I2], I1, I2, T, A1]
+
   trait FMap[A[_, _], I, M1, B, C] {
     type Out
     def fmap(self: A[I, M1], f: B => C): Out 
