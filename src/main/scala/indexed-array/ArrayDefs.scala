@@ -45,17 +45,18 @@ object ArrayDefs {
       )
   }
 
-  abstract class Is1dSpArr[A[_, _], I0, T](
-    implicit tIsDataType: DataType[T]
+  abstract class Is1dSpArr[A[_, _], I0, T]( implicit 
+    tIsDataType: DataType[T]
   ) extends IsSpArr[A, I0, T]
   abstract class Is2dSpArr[A[_, _, _], I0, I1, T, A1[_, _]]( implicit 
     tIsDataType: DataType[T],
-    a1IsSpArr: Is1dSpArr[A1, I1, T],
+    a1Is1dSpArr: Is1dSpArr[A1, I1, T],
   ) extends Is1dSpArr[({ type L[I0L, TL] = A[I0L, I1, TL] })#L, I0, T]
   abstract class Is3dSpArr[A[_, _, _, _], I0, I1, I2, T, A1[_, _], A2[_, _, _]]( implicit 
-    a1IsSpArr: Is1dSpArr[A1, I2, T],
     tIsDataType: DataType[T],
-  ) extends Is2dSpArr[({ type L[I0L, I1L, TL] = A[I0L, I1L, I2, TL] })#L, I1, I2, T, A1]
+    a1Is1dSpArr: Is1dSpArr[A1, I1, T],
+    a2Is2dSpArr: Is2dSpArr[A2, I1, I2, T, A1],
+  ) extends Is2dSpArr[({ type L[I0L, I1L, TL] = A[I0L, I1L, I2, TL] })#L, I0, I1, T, A1]
 
   trait FMap[A[_, _], I, M1, B, C] {
     type Out
