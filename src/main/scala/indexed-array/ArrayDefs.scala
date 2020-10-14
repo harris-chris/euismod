@@ -11,18 +11,17 @@ import shapeless.ops.hlist._
 object ArrayDefs {
 
   abstract class IsSpArr[A[_, _], I0, M1T](implicit 
-    val m1IsArr: IsSpBase[M1T] {type Self = M1T}
+    val m1IsSpBase: IsSpBase[M1T] {type Self = M1T}
   ) extends IsSpBase[A[I0, M1T]] {
     type Self = A[I0, M1T]
-    type M1 = m1IsArr.Self
+    type M1 = m1IsSpBase.Self
     def getIdx(self: Self): Index[I0]
     def getIdxElem(self: Self, i: Int): I0 = getIdx(self)(i)
     def getElem(self: Self, i: Int): M1
-    def getNil[I, M](self: Self)(implicit 
-      mIsDataType: DataType[M],
-      outIsArr: IsSpArr[A, I, M],
-    ): A[I, M]
-    def iloc[R](self: Self, r: R)(implicit iLoc: ILoc[A, R]): Self = iLoc.iloc(self, r)
+    def getNil[I, M1](self: Self)(implicit 
+      outIsArr: IsSpArr[A, I, M1],
+    ): A[I, M1]
+    def iloc[R](self: Self, r: R)(implicit iLoc: ILoc[A, I0, M1T, R]): Self = iLoc.iloc(self, r)
     def ::(self: Self, other: (I0, M1)): Self
     def ++(self: Self, other: Self): Self = {
       val i: List[(I0, M1)] = toListWithIndex(other)
@@ -36,7 +35,6 @@ object ArrayDefs {
     def toList(self: Self): List[M1] = (for(i <- 0 to length(self)) yield (getElem(self, i))).toList
     def toListWithIndex(self: Self): List[(I0, M1)] = getIdx(self).toList.zip(toList(self)).toList
     def fromList[I, M](self: Self, l: List[(I, M)])(implicit 
-      mIsSpBase: IsSpBase[M],
       outIsArr: IsSpArr[A, I, M],
     ): A[I, M] = l.foldLeft(getNil(self))((b, a) => outIsArr.::(b, a))
     def mapList[C](self: Self, f: M1 => C)(implicit 
@@ -93,16 +91,16 @@ object ArrayDefs {
       //(length(self), tc1d.length(getElem(self, 0)))
   //}
 
-  trait ILoc[A[_, _], R] {
-    def iloc(self: A, ref: R): A
+  trait ILoc[A[_, _], I, M1, R] {
+    def iloc(self: A[I, M1], ref: R): A[I, M1]
   }
   object ILoc {
-    def apply[A[_, _], R](implicit tc: ILoc[A, R]): ILoc[A, R] = tc
+    def apply[A[_, _], I, M1, R](implicit tc: ILoc[A, I, M1, R]): ILoc[A, I, M1, R] = tc
     implicit def iLocForInt[A[_, _], I0, M1T](implicit 
-      m1tIsDataType: DataType[M1T], 
+      m1tIsSpBase: IsSpBase[M1T], 
       isArr: IsSpArr[A, I0, M1T], 
-    ) = new ILoc[A, Int] {
-      override def iloc(self: A, ref: Int) = isArr.::(
+    ) = new ILoc[A, I0, M1T, Int] {
+      override def iloc(self: A[I0, M1T], ref: Int) = isArr.::(
         isArr.getNil(self), 
         (isArr.getIdx(self)(ref), isArr.getElem(self, ref))
       )
@@ -110,44 +108,44 @@ object ArrayDefs {
     implicit def iLocForListOfInts[A[_, _], I0, M1T](implicit 
       m1tIsDataType: DataType[M1T], 
       isArr: IsSpArr[A, I0, M1T],
-    ) = new ILoc[A, List[Int]] {
-      def iloc(self: A, ref: List[Int]) = {
+    ) = new ILoc[A, I0, M1T, List[Int]] {
+      def iloc(self: A[I0, M1T], ref: List[Int]) = {
         val data: List[isArr.M1] = ref.map(isArr.getElem(self, _)).toList
         val idx0: Index[I0] = isArr.getIdx(self)
         val newIdx = Index(ref.map(idx0(_)))
         newIdx.toList.zip(data).foldLeft(isArr.getNil(self))((a, b) => isArr.::(a, (b._1, b._2))) 
       }
     }
-    implicit def iLocForNull[A] = new ILoc[A, Null] {
-      def iloc(self: A, ref: Null) = self
+    implicit def iLocForNull[A[_, _], I, M] = new ILoc[A, I, M, Null] {
+      def iloc(self: A[I, M], ref: Null) = self
     }
-    implicit def iLocForHNil[A] = new ILoc[A, HNil] {
-      def iloc(self: A, ref: HNil) = self
+    implicit def iLocForHNil[A[_, _], I, M] = new ILoc[A, I, M, HNil] {
+      def iloc(self: A[I, M], ref: HNil) = self
     }
-    implicit def iLocForHList[A, H, T <: HList](implicit 
-      isArr: IsSpArr[A, _, _],
-      ilocHead: Lazy[ILoc[A, H]],
-      ilocTail: ILoc[A, T],
-    ) = new ILoc[A, H #: T] {
-      def iloc(self: A, ref: H #: T) = ilocHead.value.iloc(self, ref.head)
+    implicit def iLocForHList[A[_, _], I, M, H, T <: HList](implicit 
+      isArr: IsSpArr[A, I, M],
+      ilocHead: Lazy[ILoc[A, I, M, H]],
+      ilocTail: ILoc[A, I, M, T],
+    ) = new ILoc[A, I, M, H #: T] {
+      def iloc(self: A[I, M], ref: H #: T) = ilocHead.value.iloc(self, ref.head)
     // ilocH.iloc(self, ref.head).toList.map(iLocOut.iloc(_, ref.tail))// need to map the iloc tail over every element
     // This is going to be easier if iloc doesn't squeeze the array. At least the squeeze operation could be done later
     }
   }
 
   object IsSpArrSyntax {
-    implicit class IsSpArrOps[A, I0, M1T](self: A)(implicit 
+    implicit class IsSpArrOps[A[_, _], I0, M1T](self: A[I0, M1T])(implicit 
       val tc: IsSpArr[A, I0, M1T],
-      m1TIsDataType: DataType[M1T],
+      m1tIsSpBase: IsSpBase[M1T],
     ) {
       def getNil = tc.getNil(self)
       def getElem(i: Int) = tc.getElem(self, i)
-      def iloc[R](r: R)(implicit iLoc: ILoc[A, R]) = tc.iloc(self, r)
-      def ::(other: (I0, tc.M1)): A = tc.::(self, other)
+      def iloc[R](r: R)(implicit iLoc: ILoc[A, I0, M1T, R]) = tc.iloc(self, r)
+      def ::(other: (I0, tc.M1)): A[I0, M1T] = tc.::(self, other)
       def length: Int = tc.length(self)
       def toList: List[tc.M1] = tc.toList(self)
       def toListWithIndex = tc.toListWithIndex(self)
-      def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
+      def fmap[B, C](f: B => C)(implicit fMap: FMap[A, I0, M1T, B, C]) = fMap.fmap(self, f)
     }
   }
     //implicit class Is2dSpArrOps[A, T <: DataType, I0, I1, M1C[_ <: DataType, _]](self: A)(implicit 
