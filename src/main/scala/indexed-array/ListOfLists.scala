@@ -14,7 +14,7 @@ object ListOfListsObj {
     data: List[T],
   )
   implicit def list1dIsSpArr[I0, T: DataType] = 
-    new IsSpArr[List1d, I0, T] {
+    new Is1dSpArr[List1d, I0, T] {
       def getIdx(self: Self) = self.indices
       def getElem(self: Self, i: Int) = self.data(i)
       def getNil[I, M, B](self: Self)(implicit 
@@ -48,7 +48,7 @@ object ListOfListsObj {
     data: List[List[List[T]]],
   )
   implicit def list3dIsSpArr[A, I0, I1, I2, T: DataType] = 
-    new Is2dSpArr[List3d, I0, List2d[I1, I2, T]] {
+    new Is3dSpArr[List3d, I0, I1, I2, T, List1d, List2d] {
       def getIdx(self: Self) = self.indices._1
       def getElem(self: Self, i: Int) = List2d((self.indices._2, self.indices._3), self.data(i))
       def getNil(self: Self) = List3d[I0, I1, I2, T](
