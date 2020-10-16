@@ -9,21 +9,22 @@ import shapeless.ops.hlist._
 
 object ListOfListsObj {
 
-  case class List1d[I0, T: DataType] (
-    indices: Index[I0],
+  case class List1d[I, T: DataType] (
+    indices: Index[I],
     data: List[T],
   )
-  implicit def list1dIsSpArr[I0, T: DataType] = 
-    new Is1dSpArr[List1d, I0, T] {
-      def getIdx(self: Self) = self.indices
-      def getElem(self: Self, i: Int) = self.data(i)
-      def getNil[I, M, B](self: Self)(implicit 
-        mIsDataType: DataType[M],
-        outIsArr: IsSpArr[List1d, I, M],
-      ): List1d[I, M] = List1d[I, M](Index.empty[I], Nil: List[M])
-      def ::(self: Self, other: (I0, M1)) = List1d[I0, M1]((getIdx(self) :+ other._1), self.data :+ other._2)
-      def length(self: Self) = self.data.length
-    }
+  implicit def list1dIsSpArr[I, T: DataType] = new Is1dSpArr[List1d[I, T], T] {
+    type I0 = I
+    def getIdx(self: Self) = self.indices
+    def getElem(self: Self, i: Int) = self.data(i)
+    def getNil(self: Self) = List1d[I, T](Index.empty[I], Nil: List[T])
+    def ::(self: Self, other: (I0, M1)) = List1d[I0, M1]((getIdx(self) :+ other._1), self.data :+ other._2)
+    def length(self: Self) = self.data.length
+  }
+
+  val l1d = List1d[Char, Double](Index(List('a', 'b', 'c')), List(1.0, 2.0, 3.0))
+  implicitly[IsSpArr[List1d[Char, Double]]]
+  implicitly[IsSpArr[List1d[Char, Int]]]
 
   case class List2d[I0, I1, T: DataType] ( 
     indices: (Index[I0], Index[I1]),

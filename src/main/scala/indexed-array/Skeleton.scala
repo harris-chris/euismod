@@ -14,7 +14,7 @@ object Skeleton {
   // Define your DataTypes here - these are the types of value used in the body of the array
   abstract class DataType[A] extends IsSpBase[A]{ type Self = A }
   implicit val PositionsData = new DataType[Double] {}
-  implicit val WeightsData = new DataType[Double] {}
+  //implicit val WeightsData = new DataType[Int] {}
   //abstract class PositionsData extends DataType { type Self = Double }
   //abstract class WeightsData extends DataType { type Self = Double }
   //abstract class ValuesData extends DataType { type Self = Double }
