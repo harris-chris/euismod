@@ -17,9 +17,10 @@ object ArrayDefs {
     implicit val m1IsSpBase: IsSpBase[M1T] {type Self = M1T}
     type M1 = m1IsSpBase.Self
     def getIdx(self: Self): Index[I0]
-    def getIdxElem(self: Self, i: Int): I0 = getIdx(self)(i)
     def getElem(self: Self, i: Int): M1
     def getNil(self: Self): A
+    
+    def getIdxElem(self: Self, i: Int): I0 = getIdx(self)(i)
     def iloc[R](self: Self, r: R)(implicit iLoc: ILoc[A, R]): Self = iLoc.iloc(self, r)
     def ::(self: Self, other: (I0, M1)): Self
     def ++(self: Self, other: Self): Self = {
@@ -43,18 +44,30 @@ object ArrayDefs {
         toListWithIndex(self).map((t: (I0, M1)) => (t._1, f(t._2)))
       )
   }
-
-  abstract class Is1dSpArr[A, T]( implicit m1TisDataType: DataType[T]) extends IsSpArr[A] {
-    type M1T = T
+  object IsSpArr {
+    def apply[A, _M1: IsSpBase]: IsSpArr[A] { type M1 = _M1 } = new IsSpArr[A] { type M1 = _M1 } 
   }
 
-  abstract class Is2dSpArr[A, A1]( implicit val a1Is1dSpArr: Is1dSpArr[A1, _] ) extends IsSpArr[A] { 
-    type M1T = A1 
+  //abstract class Is1dSpArr[A] private extends IsSpArr[A] 
+  //object Is1dSpArr {
+    //def apply[A, _I0, _M1: DataType]: Is1dSpArr[A] { type I0 = _I0; type M1 = _M1 } = 
+      //new Is1dSpArr[A] { type I0 = _I0; type M1 = _M1 } 
+  //}
+
+  //object Is1dSpArr {
+    //def apply[A, _T: DataType]: Is1dSpArr[A] = new Is1dSpArr[A] { type M1 = _T } 
+  //}
+
+  abstract class Is2dSpArr[A] private extends IsSpArr[A]
+  object Is2dSpArr {
+    def apply[A, _A1: Is1dSpArr]: Is2dSpArr[A] = new Is2dSpArr[A] { type Self = A; type M1 = _A1 } 
   }
 
-  abstract class Is3dSpArr[A, A2]( implicit val a2Is2dSpArr: Is2dSpArr[A2, _] ) extends IsSpArr[A] {
-    type M1T = A2
+  abstract class Is3dSpArr[A] private extends IsSpArr[A]
+  object Is3dSpArr {
+    def apply[A, _A2: Is2dSpArr]: Is3dSpArr[A] = new Is3dSpArr[A] { type Self = A; type M1 = _A2 }
   }
+
   //trait FMap[A[_, _], I, M1, B, C] {
     //type Out
     //def fmap(self: A[I, M1], f: B => C): Out 

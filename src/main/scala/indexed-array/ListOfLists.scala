@@ -13,14 +13,14 @@ object ListOfListsObj {
     indices: Index[I],
     data: List[T],
   )
-  implicit def list1dIsSpArr[I, T: DataType] = new Is1dSpArr[List1d[I, T], T] {
-    type I0 = I
-    def getIdx(self: Self) = self.indices
-    def getElem(self: Self, i: Int) = self.data(i)
-    def getNil(self: Self) = List1d[I, T](Index.empty[I], Nil: List[T])
-    def ::(self: Self, other: (I0, M1)) = List1d[I0, M1]((getIdx(self) :+ other._1), self.data :+ other._2)
-    def length(self: Self) = self.data.length
-  }
+  implicit def list1dIsSpArr[I, T: DataType] = IsSpArr[List1d[I, T], T] // {
+    //type I0 = I
+    //def getIdx(self: List1d[I, T]) = self.indices
+    //def getElem(self: List1d[I, T], i: Int) = self.data(i)
+    //def getNil(self: List1d[I, T]) = List1d[I, T](Index.empty[I], Nil: List[T])
+    //def ::(self: List1d[I, T], other: (I0, T)) = List1d[I0, T]((getIdx(self) :+ other._1), self.data :+ other._2)
+    //def length(self: List1d[I, T]) = self.data.length
+  //}
 
   val l1d = List1d[Char, Double](Index(List('a', 'b', 'c')), List(1.0, 2.0, 3.0))
   implicitly[IsSpArr[List1d[Char, Double]]]
