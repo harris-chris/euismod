@@ -1,6 +1,7 @@
 package sportarray
 
 import org.scalatest._
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.featurespec.{AnyFeatureSpec}
 import com.github.nscala_time.time.Imports._
 
@@ -10,16 +11,17 @@ import sportdate.{IsSportDateInstances, IsSportDateSyntax}
 import Skeleton.{IsBase, IsElement}
 import IndicesObj._
 import shapeless._
-import shapeless.test.{illTyped}
+//import shapeless.test.{illTyped}
 import shapeless.ops.hlist._
 
 import ListOfListsObj._
 
-class ArraySpec extends AnyFeatureSpec with GivenWhenThen {
+class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   import ArrayDefs._
   info("types that are able to implement IsArray should type check; otherwise not")
   feature("IsArray typeclass") {
-    Given("An implicit conversion")
+    Given("A 1-d arraylike type and an implicit conversion to IsArray")
+    case class A1[T](data: List[T])
     implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
       self => A1[T](Nil: List[T]),
       (self, n) => self.data(n),
@@ -27,15 +29,101 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen {
       (self, o) => A1[T](o :: self.data),
     )
 
-    When("A case class which can implemented IsArray")
-    case class A1[T](data: List[T])
-
+    When("A valid IsElement is used")
     Then("It should compile")
-    the[IsArray[A1[Double]]]
+    val _ = implicitly[IsArray[A1[Double]]]
+     
+    When("A bad IsElement is used")
+    case class BadElem()
+
+    Then("It should not compile")
+    "implicitly[IsArray[A1[BadElem]]]" shouldNot typeCheck
+
+    Given("A 1dOf1d arraylike type and an implicit conversion to IsArray")
+    case class A1OfA1[T](data: List[A1[T]])
+    implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+      self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+      (self, n) => self.data(n),
+      self => self.data.length,
+      (self, o) => A1OfA1[T](o :: self.data),
+    )
+
+    When("A valid IsElement is used")
+    Then("It should compile")
+    val _ = implicitly[IsArray[A1OfA1[Double]]]
+     
+    When("A bad IsElement is used")
+    Then("It should not compile")
+    "implicitly[IsArray[A1OfA1[BadElem]]]" shouldNot typeCheck
+
+    Given("A 2d arraylike type and an implicit conversion to IsArray")
+    case class A2[T](data: List[List[T]])
+    implicit def a2ev[T: IsElement] = IsArray[A2[T], A1[T]](
+      self => A2[T](List(List())),
+      (self, n) => A1[T](self.data(n)),
+      self => self.data.length,
+      (self, o) => A2[T](a1ev.toList(o) :: self.data),
+    )
+
+    When("A valid IsElement is used")
+    Then("It should compile")
+    val _ = implicitly[IsArray[A2[Double]]]
+     
+    When("A bad IsElement is used")
+    Then("It should not compile")
+    "implicitly[IsArray[A2[BadElem]]]" shouldNot typeCheck
+  }
+
+  info("Implicit class conversions and typeclass syntax should work for IsArray implementations")
+  feature("IsArray typeclass") {
+    Given("An arraylike value and an implicit conversion to IsArray")
+    case class A1[T](data: List[T])
+    implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
+      self => A1[T](Nil: List[T]),
+      (self, n) => {println("HERE"); self.data(n)},
+      self => self.data.length,
+      (self, o) => A1[T](o :: self.data),
+    )
+    val t1 = A1[Double](List(1, 2, 3))
+    When("Implicit conversion is in scope")
+    import IsArraySyntax._
+    Then("IsArray syntax should be available")
+    val c = implicitly[A1[Double] => IsArrayOps[A1[Double]]]
+    assert(t1.data.zipWithIndex.forall(t => t1.getAtN(t._2) == t._1))
+  }
+  info("IsXd typeclasses ")
+  feature("IsXd typeclass") {
+    Given("An 2-d arraylike which returns a 1-d arraylike")
+    case class A1[T](data: List[T])
+    implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
+      self => A1[T](Nil: List[T]),
+      (self, n) => self.data(n),
+      self => self.data.length,
+      (self, o) => A1[T](o :: self.data),
+    )
+    //implicit def a1Is1d[T: Element] = Is1d[A1[T], T]
+    case class A1OfA1[T](data: List[A1[T]])
+    implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+      self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+      (self, n) => self.data(n),
+      self => self.data.length,
+      (self, o) => A1OfA1[T](o :: self.data),
+    )
+    When("Implementation of Is2d is attempted without Is1d implemented for the 1-d array")
+    Then("It should fail to compile")
+    "implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]" shouldNot typeCheck
+    val _ = the[Is1d[A1[Double]]](a1)
+    val a2 = A1OfA1[Double](List(A1[Double](List(1, 2)),A1[Double](List(3, 4))))
+    val a1 = a2.getAtN(1)
   }
 }
 
 
+    //When("An 1-d array is returned from it")
+    //val t2 = A1OfA1[Double](A1[Double](List(1.0, 2.0)) :: Nil)
+    //val t1 = the[IsArray[A1OfA1[Double]]].getAtN(t2, 0)
+    //Then("This should also implement IsArray")
+    //the[IsArray[A1[Double]]](t1)
     //case class A1OfA1[T](data: List[A1[T]])
     //implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
       //self => A1OfA1[T](List(A1[T](Nil: List[T]))),

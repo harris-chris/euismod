@@ -30,34 +30,20 @@ object ArrayDefs {
   }
   object IsArray {
     def apply[A, _E: IsBase](
-      getEmpty: A => A,
-      getAtN: (A, Int) => _E,
-      length: A => Int,
-      cons: (A, _E) => A,
+      fgetEmpty: A => A,
+      fgetAtN: (A, Int) => _E,
+      flength: A => Int,
+      fcons: (A, _E) => A,
     ) (implicit _eIsBase: IsBase[_E],
-    ): IsArray[A] { type E = _E } = 
-      new IsArray[A] { 
-        type E = _E 
-        implicit val eIsBase = _eIsBase
-        def getEmpty(self: A): A = getEmpty(self)
-        def getAtN(self: A, n: Int) = getAtN(self, n)
-        def length(self: A) = length(self)
-        def ::(self: A, other: _E) = cons(self, other)
-      }
+    ): IsArray[A] { type E = _E } = new IsArray[A] { 
+      type E = _E 
+      implicit val eIsBase = _eIsBase
+      def getEmpty(self: A): A = fgetEmpty(self)
+      def getAtN(self: A, n: Int) = fgetAtN(self, n)
+      def length(self: A) = flength(self)
+      def ::(self: A, other: _E) = fcons(self, other)
+    }
   }
-
-  case class Lst[D](
-    data: List[D],
-  )
-  implicit def lstIsArray[D: IsBase] = IsArray[Lst[D], D](
-    getEmpty = self => Lst(List()),
-    getAtN = (self, n) => self.data(n),
-    length = self => self.data.length,
-    cons = (self, o) => Lst(o :: self.data),
-  )
-  val lst = Lst(List(1.0, 2.0))
-  
-  val tc = implicitly[IsArray[Lst[Double]]]: IsArray[Lst[Double]]
 
   abstract class Updatable[A](implicit aIsArray: IsArray[A]) {
     def setAtIndex(self: A, i: Int, setTo: aIsArray.E): A

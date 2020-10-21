@@ -13,10 +13,10 @@ object ListOfListsObj {
     data: List[T],
   )
   implicit def list1dIsSpArr[T: IsElement] = IsArray[List1d[T], T](
-    getEmpty = self => List1d[T](List()),
-    getAtN = (self, n) => self.data(n),
-    length = self => self.data.length,
-    cons = (self, elem) => List1d(elem :: self.data),
+    fgetEmpty = self => List1d[T](List()),
+    fgetAtN = (self, n) => self.data(n),
+    flength = self => self.data.length,
+    fcons = (self, elem) => List1d(elem :: self.data),
   )
 
   //val l1d = List1d[Char, Double](Index(List('a', 'b', 'c')), List(1.0, 2.0, 3.0))

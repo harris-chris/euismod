@@ -10,7 +10,7 @@ lazy val sportDate = ProjectRef(
 
 lazy val SportArray = (project in file("."))
   .settings(
-    libraryDependencies += "org.scalatest" %% "scalatest-featurespec" % "3.2.0" % "test",
+    libraryDependencies += scalaTest % Test,
     scalacOptions ++= Seq("-Xlog-implicits", "-Xplugin:kind-projector_2.10-0.6.0.jar")
   )
   .dependsOn(sportDate)

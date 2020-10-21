@@ -2,22 +2,21 @@ package sportarray
 
 import shapeless._
 import shapeless.ops.hlist._
+import Skeleton._
+import ArrayDefs._
 
 object Main extends App {
-  //import ListOfListsObj._
-  //import ArrayDefs._
-  //import ArrayDefs.IsSpArrSyntax._
-  //import Skeleton._
-  //import Skeleton.IsIdxElemImplicits._
-  //import IndicesObj.Index
-  //import sportdate.SportDate
-  //import sportdate.{IsSportDateInstances, IsSportDateSyntax}
-  //type Dim2T = DateType
-  //val dim2 = Index(
-    //SportDate.YMD(2020,8,1), SportDate.YMD(2020,8,2), SportDate.YMD(2020,8,3), 
-    //SportDate.YMD(2020,8,4), SportDate.YMD(2020,8,5),
-  //)
-  //val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
-  //val list1d = List1d[Dim2T, Double](dim2, values1d)
-  //values1d.zipWithIndex.forall({case(x, i) => x == list1d.iloc(i)})
+  case class A1[T](data: List[T])
+  implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
+    self => A1[T](Nil: List[T]),
+    (self, n) => {println("HERE"); self.data(n)},
+    self => self.data.length,
+    (self, o) => A1[T](o :: self.data),
+  )
+  val t1 = A1[Double](List(1, 2, 3))
+  import IsArraySyntax._
+  println("Imported Syntax")
+  val c = implicitly[A1[Double] => IsArrayOps[A1[Double]]]
+  println("Defined implicit conv")
+  println(implicitly[IsArray[A1[Double]]].getAtN(t1, 1))
 }
