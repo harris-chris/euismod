@@ -1,7 +1,7 @@
 package sportarray
 
 //import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
-import Skeleton.{IsBase, IsElement}
+import Skeleton.{IsBase, IsElement, PositionsData}
 import IndicesObj.Index
 
 import java.time.LocalDate

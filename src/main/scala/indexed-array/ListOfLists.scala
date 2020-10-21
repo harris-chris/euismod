@@ -9,11 +9,11 @@ import shapeless.ops.hlist._
 
 object ListOfListsObj {
 
-  case class List1d[I, T: IsElement] (
+  case class List1d[T: IsElement] (
     data: List[T],
   )
-  implicit def list1dIsSpArr[I, T: IsElement] = IsArray[List1d[I, T], T](
-    getEmpty = self => List1d[I, T](List()),
+  implicit def list1dIsSpArr[T: IsElement] = IsArray[List1d[T], T](
+    getEmpty = self => List1d[T](List()),
     getAtN = (self, n) => self.data(n),
     length = self => self.data.length,
     cons = (self, elem) => List1d(elem :: self.data),

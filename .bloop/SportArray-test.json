@@ -19,12 +19,11 @@
             "/data/vap/sport-array/.bloop/SportDate/scala-2.13/classes",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.2/scala-library-2.13.2.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/chuusai/shapeless_2.13/2.3.3/shapeless_2.13-2.3.3.jar",
-            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.1/scalatest_2.13-3.1.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-featurespec_2.13/3.2.0/scalatest-featurespec_2.13-3.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite_2.13.2/2.2.0/ammonite_2.13.2-2.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/nscala-time/nscala-time_2.13/2.24.0/nscala-time_2.13-2.24.0.jar",
-            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.1/scalactic_2.13-3.1.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-core_2.13/3.2.0/scalatest-core_2.13-3.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.2/scala-reflect-2.13.2.jar",
-            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-terminal_2.13/2.2.0/ammonite-terminal_2.13-2.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-ops_2.13/2.2.0/ammonite-ops_2.13-2.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-util_2.13/2.2.0/ammonite-util_2.13-2.2.0.jar",
@@ -35,6 +34,9 @@
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/ammonite-repl_2.13.2/2.2.0/ammonite-repl_2.13.2-2.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/joda-time/joda-time/2.10.6/joda-time-2.10.6.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/joda/joda-convert/2.2.1/joda-convert-2.2.1.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-compatible/3.2.0/scalatest-compatible-3.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.2.0/scalactic_2.13-3.2.0.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/sourcecode_2.13/0.2.1/sourcecode_2.13-0.2.1.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/fansi_2.13/0.2.9/fansi_2.13-0.2.9.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/lihaoyi/os-lib_2.13/0.7.1/os-lib_2.13-0.7.1.jar",
@@ -269,18 +271,18 @@
                 },
                 {
                     "organization": "org.scalatest",
-                    "name": "scalatest_2.13",
-                    "version": "3.1.1",
+                    "name": "scalatest-featurespec_2.13",
+                    "version": "3.2.0",
                     "configurations": "default",
                     "artifacts": [
                         {
-                            "name": "scalatest_2.13",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.1/scalatest_2.13-3.1.1.jar"
+                            "name": "scalatest-featurespec_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-featurespec_2.13/3.2.0/scalatest-featurespec_2.13-3.2.0.jar"
                         },
                         {
-                            "name": "scalatest_2.13",
+                            "name": "scalatest-featurespec_2.13",
                             "classifier": "sources",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest_2.13/3.1.1/scalatest_2.13-3.1.1-sources.jar"
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-featurespec_2.13/3.2.0/scalatest-featurespec_2.13-3.2.0-sources.jar"
                         }
                     ]
                 },
@@ -319,36 +321,19 @@
                     ]
                 },
                 {
-                    "organization": "org.scalactic",
-                    "name": "scalactic_2.13",
-                    "version": "3.1.1",
+                    "organization": "org.scalatest",
+                    "name": "scalatest-core_2.13",
+                    "version": "3.2.0",
                     "configurations": "default",
                     "artifacts": [
                         {
-                            "name": "scalactic_2.13",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.1/scalactic_2.13-3.1.1.jar"
+                            "name": "scalatest-core_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-core_2.13/3.2.0/scalatest-core_2.13-3.2.0.jar"
                         },
                         {
-                            "name": "scalactic_2.13",
+                            "name": "scalatest-core_2.13",
                             "classifier": "sources",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.1.1/scalactic_2.13-3.1.1-sources.jar"
-                        }
-                    ]
-                },
-                {
-                    "organization": "org.scala-lang.modules",
-                    "name": "scala-xml_2.13",
-                    "version": "1.2.0",
-                    "configurations": "default",
-                    "artifacts": [
-                        {
-                            "name": "scala-xml_2.13",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0.jar"
-                        },
-                        {
-                            "name": "scala-xml_2.13",
-                            "classifier": "sources",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0-sources.jar"
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-core_2.13/3.2.0/scalatest-core_2.13-3.2.0-sources.jar"
                         }
                     ]
                 },
@@ -519,6 +504,57 @@
                             "name": "joda-convert",
                             "classifier": "sources",
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/joda/joda-convert/2.2.1/joda-convert-2.2.1-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scalatest",
+                    "name": "scalatest-compatible",
+                    "version": "3.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scalatest-compatible",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-compatible/3.2.0/scalatest-compatible-3.2.0.jar"
+                        },
+                        {
+                            "name": "scalatest-compatible",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalatest/scalatest-compatible/3.2.0/scalatest-compatible-3.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scalactic",
+                    "name": "scalactic_2.13",
+                    "version": "3.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scalactic_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.2.0/scalactic_2.13-3.2.0.jar"
+                        },
+                        {
+                            "name": "scalactic_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scalactic/scalactic_2.13/3.2.0/scalactic_2.13-3.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang.modules",
+                    "name": "scala-xml_2.13",
+                    "version": "1.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-xml_2.13",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0.jar"
+                        },
+                        {
+                            "name": "scala-xml_2.13",
+                            "classifier": "sources",
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.13/1.2.0/scala-xml_2.13-1.2.0-sources.jar"
                         }
                     ]
                 },
