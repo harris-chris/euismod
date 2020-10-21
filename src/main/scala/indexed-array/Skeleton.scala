@@ -9,11 +9,11 @@ import sportdate.IsSportDateSyntax._
 
 object Skeleton {
 
-  abstract class IsSpBase[A] {type Self}
+  abstract class IsBase[A]
 
   // Define your DataTypes here - these are the types of value used in the body of the array
-  abstract class DataType[A] extends IsSpBase[A]{ type Self = A }
-  implicit val PositionsData = new DataType[Double] {}
+  abstract class IsElement[A] extends IsBase[A]
+  implicit val PositionsData = new IsElement[Double] {}
   //implicit val WeightsData = new DataType[Int] {}
   //abstract class PositionsData extends DataType { type Self = Double }
   //abstract class WeightsData extends DataType { type Self = Double }
