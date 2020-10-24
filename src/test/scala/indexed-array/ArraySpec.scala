@@ -207,7 +207,36 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     )
     val list1d = List1d[Double](values1d)
     val list2d = List2d[Double](values2d)
-    scenario("The user calls getILoc with null to return the entire array") {
+    def checkListWithInt[A: IsArray](
+      a: A, f:(A, Int) => A,
+    ) (implicit aIsArr: IsArray[A],
+    ): Boolean = {
+      import ArrayDefs.IsArraySyntax._
+      (0 to aIsArr.length(a) - 1).forall({case(n) => f(a, n) == 
+        aIsArr.::(aIsArr.getEmpty(a), aIsArr.getAtN(a, n)) 
+      })
+    }
+    def checkList1dWithListInt[T: IsElement](
+      data: List[T], f:(List1d[T], List[Int]) => List1d[T],
+    ): Boolean = {
+      import ArrayDefs.IsArraySyntax._
+      val list1d = List1d[T](data)
+      data.zipWithIndex.forall(
+        {
+          case(x, i) => i match {
+            case i if i < 4 => {
+              val actual = f(list1d, List(i, i+1))
+              val expected = List1d[T](
+                List(data(i), data(i+1))
+              )
+              actual == expected
+            }
+            case i if i == 4 => true
+          }
+        }
+      )
+    }
+    scenario("getILoc is called with null to return the entire array") {
       Given("A 1-dimensional arraylike")
       When("getILoc is called with a null argument")
       import ArrayDefs.IsArraySyntax._
@@ -222,21 +251,31 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       Then("the entire array should be returned")
       assert(t2 == list2d)
     }
-  //"Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    ////implicitly[IsSpArr[List1d[PositionsData, Dim2T], _, Dim2T]]
-    ////implicitly[ILoc[Int, List1d[PositionsData, Dim2T], Dim2T]]
-    ////implicitly[ILoc[HNil, List1d[PositionsData, Dim2T], Dim2T]]
-    //assert(
-      //checkList1dWithSingle[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
-    //)
-  //}
-  //"Arr1d" should "return the appropriate data with .iloc using an HList of List[Int]" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    //assert(
-      //checkList1dWithListInt[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
-    //)
-  //}
+    scenario("getILoc is called with an Int to return the appropriate element") {
+      import ArrayDefs.IsArraySyntax._
+      When("getILoc is called with an Int on a 1d arraylike")
+      Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
+      assert(checkListWithInt[List1d[Double]](list1d, (l, i) => l.getILoc(i)))
+
+      When("getILoc is called with an Int on a 2d arraylike")
+      Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
+      assert(checkListWithInt[List2d[Double]](list2d, (l, i) => l.getILoc(i)))
+    }
+    //"Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
+      //import ArrayDefs.IsSpArrSyntax._
+      ////implicitly[IsSpArr[List1d[PositionsData, Dim2T], _, Dim2T]]
+      ////implicitly[ILoc[Int, List1d[PositionsData, Dim2T], Dim2T]]
+      ////implicitly[ILoc[HNil, List1d[PositionsData, Dim2T], Dim2T]]
+      //assert(
+        //checkList1dWithSingle[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
+      //)
+    //}
+    //"Arr1d" should "return the appropriate data with .iloc using an HList of List[Int]" in {
+      //import ArrayDefs.IsSpArrSyntax._
+      //assert(
+        //checkList1dWithListInt[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
+      //)
+    //}
   }
 }
 
