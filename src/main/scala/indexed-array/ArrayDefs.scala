@@ -68,14 +68,18 @@ object ArrayDefs {
 
   abstract class Is1d[A] private {}
   object Is1d {
-    def apply[A: IsArray, _E: IsElement] = 
-      new Is1d[A] {} 
+    def apply[A, _E]( implicit 
+      aIsArray: IsArray[A] { type E = _E },
+      eIsElement: IsElement[_E],
+    ) = new Is1d[A] {} 
   }
 
   abstract class Is2d[A] private {}
   object Is2d {
-    def apply[A: IsArray, _E: Is1d]: Is2d[A] = 
-      new Is2d[A] {}
+    def apply[A, _E]( implicit 
+      aIsArray: IsArray[A] { type E = _E },
+      eIs1d: Is1d[_E],
+    ) = new Is2d[A] {} 
   }
 
   //abstract class Is2dArray[A] private extends IsArray[A]

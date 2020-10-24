@@ -91,7 +91,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     val c = implicitly[A1[Double] => IsArrayOps[A1[Double]]]
     assert(t1.data.zipWithIndex.forall(t => t1.getAtN(t._2) == t._1))
   }
-  info("IsXd typeclasses ")
+  info("IsXd typeclasses are a way to set the dimensionality of a given array")
   feature("IsXd typeclass") {
     Given("An 2-d arraylike which returns a 1-d arraylike")
     case class A1[T](data: List[T])
@@ -118,6 +118,32 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     Then("It should compile")
     implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
     implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]
+  }
+  feature("Multi-dimensional arrays") {
+    Given("A 1-dimensional arraylike, and a 2d list of 1d arraylike 2d array implementation")
+    case class A1[T](data: List[T])
+    implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
+      self => A1[T](Nil: List[T]),
+      (self, n) => self.data(n),
+      self => self.data.length,
+      (self, o) => A1[T](o :: self.data),
+    )
+    case class A1OfA1[T](data: List[A1[T]])
+    implicit def a1ofa1IsArray[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+      self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+      (self, n) => self.data(n),
+      self => self.data.length,
+      (self, o) => A1OfA1[T](o :: self.data),
+    )
+    implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
+    implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]
+    When("getAtN is called on a concrete instance of the 2d arraylike")
+    import ArrayDefs.IsArraySyntax._
+    val t2 = A1OfA1[Double](A1[Double](List(1.0, 2.0)) :: Nil)
+    val t1 = t2.getAtN(0)
+    Then("the returned 1d array should implement both IsArray and Is1d")
+    implicitly[IsArray[A1[Double]]](t1)
+    implicitly[Is1d[A1[Double]]](t1)
   }
 }
 
