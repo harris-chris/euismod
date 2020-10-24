@@ -142,7 +142,7 @@ object ArrayDefs {
       isArr: IsArray[A],
     ) = new GetILoc[A, List[Int]] {
       def iloc(self: A, ref: List[Int]) = {
-        val data: List[isArr.E] = ref.map(isArr.getAtN(self, _)).toList
+        val data: List[isArr.E] = ref.map(isArr.getAtN(self, _)).toList.reverse
         data.foldLeft(isArr.getEmpty(self))((a, b) => isArr.::(a, b)) 
       }
     }

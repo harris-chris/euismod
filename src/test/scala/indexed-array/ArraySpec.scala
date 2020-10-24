@@ -219,10 +219,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     ) (implicit aIsArr: IsArray[A] { type E = _E },
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
-      val len = a.length
-      (0 to len - 2).forall(n => f(a, List(n, n + 1)) == 
+      (0 to a.length - 2).forall(n => f(a, List(n, n + 1)) == { 
+        println(f(a, List(n, n + 1)))
+        println(a.getAtN(n) :: a.getAtN(n + 1) :: a.getEmpty)
         a.getAtN(n) :: a.getAtN(n + 1) :: a.getEmpty
-      )
+      })
     }
     scenario("getILoc is called with null to return the entire array") {
       Given("A 1-dimensional arraylike")
@@ -248,6 +249,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       When("getILoc is called with an Int on a 2d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
       assert(checkGetILocWithInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i)))
+    }
+    scenario("getILoc is called with a List of Ints to return the appropriate elements") {
+      import ArrayDefs.IsArraySyntax._
+      When("getILoc is called with an List of Ints on a 1d arraylike")
+      Then("it returns a same-dimensional array with the top dimension reduced down to the references")
+      assert(checkGetILocWithListInt[List1d[Double], Double](list1d, (l, i) => l.getILoc(i)))
+
+      When("getILoc is called with an List of Ints on a 2d arraylike")
+      Then("it returns a same-dimensional array with the top dimension reduced down to the references")
+      assert(checkGetILocWithListInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i)))
     }
     //"Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
       //import ArrayDefs.IsSpArrSyntax._
