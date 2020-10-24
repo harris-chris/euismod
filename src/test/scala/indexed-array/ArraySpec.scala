@@ -18,9 +18,9 @@ import ListOfListsObj._
 
 class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   import ArrayDefs._
+
   info("types that are able to implement IsArray should type check; otherwise not")
-  feature("IsArray typeclass") {
-    Given("A 1-d arraylike type and an implicit conversion to IsArray")
+  feature("A 1-dimensional IsArray object") {
     case class A1[T](data: List[T])
     implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
       self => A1[T](Nil: List[T]),
@@ -28,120 +28,166 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       self => self.data.length,
       (self, o) => A1[T](o :: self.data),
     )
+    scenario("A 1d type that can implement IsArray, implements IsArray") {
+      Given("A 1-d arraylike type and an implicit conversion to IsArray")
 
-    When("A valid IsElement is used")
-    Then("It should compile")
-    val _ = implicitly[IsArray[A1[Double]]]
-     
-    When("A bad IsElement is used")
-    case class BadElem()
+      When("A valid IsElement is used")
+      Then("It should compile")
+      "implicitly[IsArray[A1[Double]]]" should compile
+    }
+    scenario("An invalid element is used for a type that then tries to implement IsArray") {
+      When("A bad IsElement is used")
+      case class BadElem()
 
-    Then("It should not compile")
-    "implicitly[IsArray[A1[BadElem]]]" shouldNot typeCheck
+      Then("It should not compile")
+      "implicitly[IsArray[A1[BadElem]]]" shouldNot typeCheck
+    }
+  }
 
-    Given("A 1dOf1d arraylike type and an implicit conversion to IsArray")
-    case class A1OfA1[T](data: List[A1[T]])
-    implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
-      self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+  feature("A 2-dimensional IsArray object") {
+    case class A1[T](data: List[T])
+    implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
+      self => A1[T](Nil: List[T]),
       (self, n) => self.data(n),
       self => self.data.length,
-      (self, o) => A1OfA1[T](o :: self.data),
+      (self, o) => A1[T](o :: self.data),
     )
+    scenario("A 2d 1dOf1d type that can implement IsArray, implements IsArray") {
+      Given("A 1dOf1d arraylike type and an implicit conversion to IsArray")
+      case class A1OfA1[T](data: List[A1[T]])
+      implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+        self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+        (self, n) => self.data(n),
+        self => self.data.length,
+        (self, o) => A1OfA1[T](o :: self.data),
+      )
+      When("A valid IsElement is used")
+      Then("It should compile")
+      "implicitly[IsArray[A1OfA1[Double]]]" should compile
 
-    When("A valid IsElement is used")
-    Then("It should compile")
-    val _ = implicitly[IsArray[A1OfA1[Double]]]
+      When("A bad IsElement is used")
+      Then("It should not compile")
+      "implicitly[IsArray[A1OfA1[BadElem]]]" shouldNot typeCheck
+    }
+    scenario("A 2d list-of-list type that can implement IsArray, implements IsArray") {
+      Given("A 2d list-of-list type and an implicit conversion to IsArray")
+      case class A2[T](data: List[List[T]])
+      implicit def a2ev[T: IsElement] = IsArray[A2[T], A1[T]](
+        self => A2[T](List(List())),
+        (self, n) => A1[T](self.data(n)),
+        self => self.data.length,
+        (self, o) => A2[T](a1ev.toList(o) :: self.data),
+      )
+      When("A valid IsElement is used")
+      Then("It should compile")
+      "implicitly[IsArray[A2[Double]]]" should compile
      
-    When("A bad IsElement is used")
-    Then("It should not compile")
-    "implicitly[IsArray[A1OfA1[BadElem]]]" shouldNot typeCheck
-
-    Given("A 2d arraylike type and an implicit conversion to IsArray")
-    case class A2[T](data: List[List[T]])
-    implicit def a2ev[T: IsElement] = IsArray[A2[T], A1[T]](
-      self => A2[T](List(List())),
-      (self, n) => A1[T](self.data(n)),
-      self => self.data.length,
-      (self, o) => A2[T](a1ev.toList(o) :: self.data),
-    )
-
-    When("A valid IsElement is used")
-    Then("It should compile")
-    val _ = implicitly[IsArray[A2[Double]]]
-     
-    When("A bad IsElement is used")
-    Then("It should not compile")
-    "implicitly[IsArray[A2[BadElem]]]" shouldNot typeCheck
+      When("A bad IsElement is used")
+      Then("It should not compile")
+      "implicitly[IsArray[A2[BadElem]]]" shouldNot typeCheck
+    }
   }
 
   info("Implicit class conversions and typeclass syntax should work for IsArray implementations")
   feature("IsArray typeclass") {
-    Given("An arraylike value and an implicit conversion to IsArray")
-    case class A1[T](data: List[T])
-    implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
-      self => A1[T](Nil: List[T]),
-      (self, n) => {println("HERE"); self.data(n)},
-      self => self.data.length,
-      (self, o) => A1[T](o :: self.data),
-    )
-    val t1 = A1[Double](List(1, 2, 3))
-    When("Implicit conversion is in scope")
-    import IsArraySyntax._
-    Then("IsArray syntax should be available")
-    val c = implicitly[A1[Double] => IsArrayOps[A1[Double], Double]]
-    assert(t1.data.zipWithIndex.forall(t => t1.getAtN(t._2) == t._1))
+    scenario("The user tries to access IsArray methods from the implementing type") {
+      Given("An arraylike value and an implicit conversion to IsArray")
+      case class A1[T](data: List[T])
+      implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
+        self => A1[T](Nil: List[T]),
+        (self, n) => self.data(n),
+        self => self.data.length,
+        (self, o) => A1[T](o :: self.data),
+      )
+      val t1 = A1[Double](List(1, 2, 3))
+      When("Implicit conversion is in scope")
+      import IsArraySyntax._
+      Then("IsArray syntax should be available")
+      val c = implicitly[A1[Double] => IsArrayOps[A1[Double], Double]]
+      assert(t1.data.zipWithIndex.forall(t => t1.getAtN(t._2) == t._1))
+    }
   }
+
   info("IsXd typeclasses are a way to set the dimensionality of a given array")
   feature("IsXd typeclass") {
-    Given("An 2-d arraylike which returns a 1-d arraylike")
-    case class A1[T](data: List[T])
-    implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
-      self => A1[T](Nil: List[T]),
-      (self, n) => self.data(n),
-      self => self.data.length,
-      (self, o) => A1[T](o :: self.data),
-    )
-    //implicit def a1Is1d[T: Element] = Is1d[A1[T], T]
-    case class A1OfA1[T](data: List[A1[T]])
-    implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
-      self => A1OfA1[T](List(A1[T](Nil: List[T]))),
-      (self, n) => self.data(n),
-      self => self.data.length,
-      (self, o) => A1OfA1[T](o :: self.data),
-    )
-    
-    When("Implementation of Is2d is attempted without Is1d implemented for the 1-d array")
-    Then("It should fail to compile")
-    "implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]" shouldNot typeCheck
-    
-    When("Implementation of Is2d is attempted with Is1d implemented for the 1-d array")
-    Then("It should compile")
-    implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
-    implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]
+    scenario("An Is2d arraylike returns a value") {
+      Given("An 2-d arraylike which returns a 1-d arraylike")
+      case class A1[T](data: List[T])
+      implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
+        self => A1[T](Nil: List[T]),
+        (self, n) => self.data(n),
+        self => self.data.length,
+        (self, o) => A1[T](o :: self.data),
+      )
+      //implicit def a1Is1d[T: Element] = Is1d[A1[T], T]
+      case class A1OfA1[T](data: List[A1[T]])
+      implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+        self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+        (self, n) => self.data(n),
+        self => self.data.length,
+        (self, o) => A1OfA1[T](o :: self.data),
+      )
+      When("Implementation of Is2d is attempted without Is1d implemented for the 1-d array")
+      Then("It should fail to compile")
+      "implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]" shouldNot typeCheck
+      
+      When("Implementation of Is2d is attempted with Is1d implemented for the 1-d array")
+      Then("It should compile")
+      implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
+      "implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]" should compile
+    }
   }
+
   feature("Multi-dimensional arrays") {
-    Given("A 1-dimensional arraylike, and a 2d list of 1d arraylike 2d array implementation")
-    case class A1[T](data: List[T])
-    implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
-      self => A1[T](Nil: List[T]),
-      (self, n) => self.data(n),
-      self => self.data.length,
-      (self, o) => A1[T](o :: self.data),
-    )
-    case class A1OfA1[T](data: List[A1[T]])
-    implicit def a1ofa1IsArray[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
-      self => A1OfA1[T](List(A1[T](Nil: List[T]))),
-      (self, n) => self.data(n),
-      self => self.data.length,
-      (self, o) => A1OfA1[T](o :: self.data),
-    )
-    implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
-    implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]
-    When("getAtN is called on a concrete instance of the 2d arraylike")
-    import ArrayDefs.IsArraySyntax._
-    val t2 = A1OfA1[Double](A1[Double](List(1.0, 2.0)) :: Nil)
-    Then("the returned value should be the 1d arraylike")
-    val t1: A1[Double] = t2.getAtN(0)
+    scenario("An value is returned from a 2d-dimensional array using getAtN") {
+      Given("A 1-dimensional arraylike, and a 2d list of 1d arraylike 2d array implementation")
+      case class A1[T](data: List[T])
+      implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
+        self => A1[T](Nil: List[T]),
+        (self, n) => self.data(n),
+        self => self.data.length,
+        (self, o) => A1[T](o :: self.data),
+      )
+      case class A1OfA1[T](data: List[A1[T]])
+      implicit def a1ofa1IsArray[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+        self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+        (self, n) => self.data(n),
+        self => self.data.length,
+        (self, o) => A1OfA1[T](o :: self.data),
+      )
+      implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
+      implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]
+      When("getAtN is called on a concrete instance of the 2d arraylike")
+      import ArrayDefs.IsArraySyntax._
+      val t2 = A1OfA1[Double](A1[Double](List(1.0, 2.0)) :: Nil)
+      Then("the returned value should be the 1d arraylike")
+      val t1: A1[Double] = t2.getAtN(0)
+    }
+  }
+
+  feature("IsArray methods") {
+    val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
+    scenario("getAtN is called on a 1d Array to recover its original elements") {
+      Given("A 1d arraylike")
+      import ArrayDefs.IsArraySyntax._
+      val list1d = List1d[Double](values1d)
+      When("getAtN is called for its elements")
+      Then("It should return the originally input values")
+      assert(values1d.zipWithIndex.forall({case(x, i) => x == list1d.getAtN(i)}))
+    }
+    scenario("IsArray objects are constructed from individual values using cons") {
+      Given("A list of values implementing IsElement")
+      import ArrayDefs.IsArraySyntax._
+      val lst0 = List1d[Double](Nil)
+      When("A 1d arraylike is constructed by cons-ing these values")
+      val lst1 = values1d(4) :: lst0
+      val lst2 = values1d(3) :: lst1
+      val lst3 = values1d(2) :: lst2
+      val lst4 = values1d(1) :: lst3
+      val lst5 = values1d(0) :: lst4
+      Then("It should reconcile with the original values")
+      assert(lst5 == List1d[Double](values1d))
+    }
   }
 }
 
@@ -187,18 +233,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         //}
       //}
     //)
-  //}
-  //"List1d" should "implement the Is1dSpArr typeclass" in {
-    //import ArrayDefs._
-    //import ArrayDefs.IsArraySyntax._
-    //list1dIsSpArr[Double]
-    ////println(implicitly[Is1dSpArr[List1d[PositionsData, Dim2T], PositionsData, Dim2T]])
-    ////println(implicitly[List1d[PositionsData, Dim2T] => Is1dSpArrOps[List1d[PositionsData, Dim2T], PositionsData, Dim2T]])
-  //}
-  //"Arr1d" should "return correct datum with .getElem" in {
-    //import ArrayDefs.IsArraySyntax._
-    //val list1d = List1d[Dim2T, Double](dim2, values1d)
-    //assert(values1d.zipWithIndex.forall({case(x, i) => x == list1d.getElem(i)}))
   //}
   //"Arr1d" should "be constructable from cons" in {
     //import ArrayDefs.IsSpArrSyntax._
