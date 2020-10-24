@@ -207,33 +207,21 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     )
     val list1d = List1d[Double](values1d)
     val list2d = List2d[Double](values2d)
-    def checkListWithInt[A: IsArray](
+    def checkGetILocWithInt[A, _E: IsBase](
       a: A, f:(A, Int) => A,
-    ) (implicit aIsArr: IsArray[A],
+    ) (implicit aIsArr: IsArray[A] { type E = _E },
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
-      (0 to aIsArr.length(a) - 1).forall({case(n) => f(a, n) == 
-        aIsArr.::(aIsArr.getEmpty(a), aIsArr.getAtN(a, n)) 
-      })
+      (0 to a.length - 1).forall(n => f(a, n) == a.getAtN(n) :: a.getEmpty)
     }
-    def checkList1dWithListInt[T: IsElement](
-      data: List[T], f:(List1d[T], List[Int]) => List1d[T],
+    def checkGetILocWithListInt[A, _E: IsBase](
+      a: A, f:(A, List[Int]) => A,
+    ) (implicit aIsArr: IsArray[A] { type E = _E },
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
-      val list1d = List1d[T](data)
-      data.zipWithIndex.forall(
-        {
-          case(x, i) => i match {
-            case i if i < 4 => {
-              val actual = f(list1d, List(i, i+1))
-              val expected = List1d[T](
-                List(data(i), data(i+1))
-              )
-              actual == expected
-            }
-            case i if i == 4 => true
-          }
-        }
+      val len = a.length
+      (0 to len - 2).forall(n => f(a, List(n, n + 1)) == 
+        a.getAtN(n) :: a.getAtN(n + 1) :: a.getEmpty
       )
     }
     scenario("getILoc is called with null to return the entire array") {
@@ -255,11 +243,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       import ArrayDefs.IsArraySyntax._
       When("getILoc is called with an Int on a 1d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
-      assert(checkListWithInt[List1d[Double]](list1d, (l, i) => l.getILoc(i)))
+      assert(checkGetILocWithInt[List1d[Double], Double](list1d, (l, i) => l.getILoc(i)))
 
       When("getILoc is called with an Int on a 2d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
-      assert(checkListWithInt[List2d[Double]](list2d, (l, i) => l.getILoc(i)))
+      assert(checkGetILocWithInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i)))
     }
     //"Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
       //import ArrayDefs.IsSpArrSyntax._
