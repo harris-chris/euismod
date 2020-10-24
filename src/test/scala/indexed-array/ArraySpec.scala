@@ -286,12 +286,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         checkGetILocWithListInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
       )
     }
-    //"Arr1d" should "return the appropriate data with .iloc using an HList of List[Int]" in {
-      //import ArrayDefs.IsSpArrSyntax._
-      //assert(
-        //checkList1dWithListInt[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
-      //)
-    //}
   }
 }
 

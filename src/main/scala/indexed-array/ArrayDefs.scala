@@ -82,6 +82,14 @@ object ArrayDefs {
     ) = new Is2d[A] {} 
   }
 
+  abstract class Is3d[A] private {}
+  object Is3d {
+    def apply[A, _E]( implicit 
+      aIsArray: IsArray[A] { type E = _E },
+      eIs2d: Is2d[_E],
+    ) = new Is3d[A] {} 
+  }
+
   //abstract class Is2dArray[A] private extends IsArray[A]
   //object Is2dSpArr {
     //def apply[A, _A1: Is1dSpArr]: Is2dSpArr[A] = new Is2dSpArr[A] { type Self = A; type M1 = _A1 } 
