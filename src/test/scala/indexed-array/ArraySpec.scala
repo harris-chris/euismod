@@ -88,7 +88,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     When("Implicit conversion is in scope")
     import IsArraySyntax._
     Then("IsArray syntax should be available")
-    val c = implicitly[A1[Double] => IsArrayOps[A1[Double]]]
+    val c = implicitly[A1[Double] => IsArrayOps[A1[Double], Double]]
     assert(t1.data.zipWithIndex.forall(t => t1.getAtN(t._2) == t._1))
   }
   info("IsXd typeclasses are a way to set the dimensionality of a given array")
@@ -140,69 +140,12 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     When("getAtN is called on a concrete instance of the 2d arraylike")
     import ArrayDefs.IsArraySyntax._
     val t2 = A1OfA1[Double](A1[Double](List(1.0, 2.0)) :: Nil)
-    val t1 = t2.getAtN(0)
-    Then("the returned 1d array should implement both IsArray and Is1d")
-    implicitly[IsArray[A1[Double]]](t1)
-    implicitly[Is1d[A1[Double]]](t1)
+    Then("the returned value should be the 1d arraylike")
+    val t1: A1[Double] = t2.getAtN(0)
   }
 }
 
 
-    //When("An 1-d array is returned from it")
-    //val t2 = A1OfA1[Double](A1[Double](List(1.0, 2.0)) :: Nil)
-    //val t1 = the[IsArray[A1OfA1[Double]]].getAtN(t2, 0)
-    //Then("This should also implement IsArray")
-    //the[IsArray[A1[Double]]](t1)
-    //case class A1OfA1[T](data: List[A1[T]])
-    //implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
-      //self => A1OfA1[T](List(A1[T](Nil: List[T]))),
-      //(self, n) => self.data(n),
-      //self => self.data.length,
-      //(self, o) => A1OfA1[T](o :: self.data),
-    //)
-    //the[IsArray[A1OfA1[Double]]]
-
-    //case class A2[T](data: List[List[T]])
-    //implicit def a2ev[T: IsElement] = IsArray[A2[T], A1[T]](
-      //self => A2[T](List(List())),
-      //(self, n) => A1[T](self.data(n)),
-      //self => self.data.length,
-      //(self, o) => A2[T](a1ev.toList(o) :: self.data),
-    //)
-    //the[IsArray[A2[Double]]]
-
-
-    //"Implementing IsArray with an Element of IsBase" should "compile" in {
-      //import ArrayDefs._
-      //import ArrayDefs.IsArraySyntax._
-    //}
-  //"Implementing IsArray with an Element that is not IsBase" should "not compile" in {
-    //import ArrayDefs._
-    //import ArrayDefs.IsArraySyntax._
-    //case class _E()
-    //case class A1[_E](data: List[_E])
-    //implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
-      //self => A1[T](Nil: List[T]),
-      //(self, n) => self.data(n),
-      //self => self.data.length,
-      //(self, o) => A1[T](o :: self.data),
-    //)
-    //case class A1OfA1[T](data: List[A1[T]])
-    //implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
-      //self => A1OfA1[T](List(A1[T](Nil: List[T]))),
-      //(self, n) => self.data(n),
-      //self => self.data.length,
-      //(self, o) => A1OfA1[T](o :: self.data),
-    //)
-    //case class A2[T](data: List[List[T]])
-    //implicit def a2ev[T: IsElement] = IsArray[A2[T], A1[T]](
-      //self => A2[T](List(List())),
-      //(self, n) => A1[T](self.data(n)),
-      //self => self.data.length,
-      //(self, o) => A2[T](a1ev.toList(o) :: self.data),
-    //)
-  //}
-//}
   //val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
   //val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))
   //val values3d = List(

@@ -39,9 +39,9 @@ object ArrayDefs {
       type E = _E 
       implicit val eIsBase = _eIsBase
       def getEmpty(self: A): A = fgetEmpty(self)
-      def getAtN(self: A, n: Int) = fgetAtN(self, n)
-      def length(self: A) = flength(self)
-      def ::(self: A, other: _E) = fcons(self, other)
+      def getAtN(self: A, n: Int): E = fgetAtN(self, n)
+      def length(self: A): Int = flength(self)
+      def ::(self: A, other: _E): A = fcons(self, other)
     }
   }
 
@@ -162,15 +162,15 @@ object ArrayDefs {
   }
 
   object IsArraySyntax {
-    implicit class IsArrayOps[A](self: A)(implicit 
-      val tc: IsArray[A],
+    implicit class IsArrayOps[A, _E](self: A)(implicit 
+      val tc: IsArray[A] { type E = _E },
     ) {
       def getEmpty = tc.getEmpty(self)
-      def getAtN(n: Int) = tc.getAtN(self, n)
+      def getAtN(n: Int): _E = tc.getAtN(self, n)
       def getILoc[R](r: R)(implicit getILoc: GetILoc[A, R]) = tc.getILoc(self, r)
-      def ::(other: tc.E): A = tc.::(self, other)
+      def ::(other: _E): A = tc.::(self, other)
       def length: Int = tc.length(self)
-      def toList: List[tc.E] = tc.toList(self)
+      def toList: List[_E] = tc.toList(self)
       //def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
     }
   }

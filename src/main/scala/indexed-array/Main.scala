@@ -16,7 +16,7 @@ object Main extends App {
   val t1 = A1[Double](List(1, 2, 3))
   import IsArraySyntax._
   println("Imported Syntax")
-  val c = implicitly[A1[Double] => IsArrayOps[A1[Double]]]
+  val c = implicitly[A1[Double] => IsArrayOps[A1[Double], Double]]
   println("Defined implicit conv")
   println(implicitly[IsArray[A1[Double]]].getAtN(t1, 1))
 }
