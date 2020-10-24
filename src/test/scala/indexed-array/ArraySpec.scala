@@ -260,15 +260,32 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       Then("it returns a same-dimensional array with the top dimension reduced down to the references")
       assert(checkGetILocWithListInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i)))
     }
-    //"Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
-      //import ArrayDefs.IsSpArrSyntax._
-      ////implicitly[IsSpArr[List1d[PositionsData, Dim2T], _, Dim2T]]
-      ////implicitly[ILoc[Int, List1d[PositionsData, Dim2T], Dim2T]]
-      ////implicitly[ILoc[HNil, List1d[PositionsData, Dim2T], Dim2T]]
-      //assert(
-        //checkList1dWithSingle[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
-      //)
-    //}
+    scenario("getILoc is called with an HList of Ints to return the appropriate elements") {
+      import ArrayDefs.IsArraySyntax._
+      When("getILoc is called with an HList of Ints on a 1d arraylike")
+      Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
+      assert(
+        checkGetILocWithInt[List1d[Double], Double](list1d, (l, i) => l.getILoc(i :: HNil))
+      )
+      When("getILoc is called with an HList of Ints on a 2d arraylike")
+      Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
+      assert(
+        checkGetILocWithInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
+      )
+    }
+    scenario("getILoc is called with an HList of List[Int] to return the appropriate elements") {
+      import ArrayDefs.IsArraySyntax._
+      When("getILoc is called with an HList of List[Int] on a 1d arraylike")
+      Then("it returns a same-dimensional array with the top dimension reduced down to the references")
+      assert(
+        checkGetILocWithListInt[List1d[Double], Double](list1d, (l, i) => l.getILoc(i :: HNil))
+      )
+      When("getILoc is called with an HList of List[Int] on a 2d arraylike")
+      Then("it returns a same-dimensional array with the top dimension reduced down to the references")
+      assert(
+        checkGetILocWithListInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
+      )
+    }
     //"Arr1d" should "return the appropriate data with .iloc using an HList of List[Int]" in {
       //import ArrayDefs.IsSpArrSyntax._
       //assert(
