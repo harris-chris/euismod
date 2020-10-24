@@ -19,8 +19,7 @@ import ListOfListsObj._
 class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   import ArrayDefs._
 
-  info("types that are able to implement IsArray should type check; otherwise not")
-  feature("A 1-dimensional IsArray object") {
+  feature("Arraylike objects should be able to implement IsArray") {
     case class A1[T](data: List[T])
     implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
       self => A1[T](Nil: List[T]),
@@ -28,30 +27,19 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       self => self.data.length,
       (self, o) => A1[T](o :: self.data),
     )
+
     scenario("A 1d type that can implement IsArray, implements IsArray") {
       Given("A 1-d arraylike type and an implicit conversion to IsArray")
-
       When("A valid IsElement is used")
       Then("It should compile")
       "implicitly[IsArray[A1[Double]]]" should compile
-    }
-    scenario("An invalid element is used for a type that then tries to implement IsArray") {
+
       When("A bad IsElement is used")
       case class BadElem()
-
       Then("It should not compile")
       "implicitly[IsArray[A1[BadElem]]]" shouldNot typeCheck
     }
-  }
 
-  feature("A 2-dimensional IsArray object") {
-    case class A1[T](data: List[T])
-    implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
-      self => A1[T](Nil: List[T]),
-      (self, n) => self.data(n),
-      self => self.data.length,
-      (self, o) => A1[T](o :: self.data),
-    )
     scenario("A 2d 1dOf1d type that can implement IsArray, implements IsArray") {
       Given("A 1dOf1d arraylike type and an implicit conversion to IsArray")
       case class A1OfA1[T](data: List[A1[T]])
@@ -69,6 +57,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       Then("It should not compile")
       "implicitly[IsArray[A1OfA1[BadElem]]]" shouldNot typeCheck
     }
+
     scenario("A 2d list-of-list type that can implement IsArray, implements IsArray") {
       Given("A 2d list-of-list type and an implicit conversion to IsArray")
       case class A2[T](data: List[List[T]])
@@ -88,8 +77,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  info("Implicit class conversions and typeclass syntax should work for IsArray implementations")
-  feature("IsArray typeclass") {
+  feature("Implicit class conversions and typeclass syntax for IsArray implementations") {
     scenario("The user tries to access IsArray methods from the implementing type") {
       Given("An arraylike value and an implicit conversion to IsArray")
       case class A1[T](data: List[T])
@@ -290,62 +278,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
 }
 
 
-  //def checkList1dWithSingle[T: IsElement](
-    //data: List[T], f:(List1d[T], Int) => List1d[T],
-  //): Boolean = {
-    //import ArrayDefs.IsArraySyntax._
-    //data.zipWithIndex.forall({case(x, i) => f(List1d[T](data),i) == 
-      //List1d[T](List(x))
-    //})
-  //}
-  //def checkList1dWithListInt[T: IsElement](
-    //data: List[T], f:(List1d[T], List[Int]) => List1d[T],
-  //): Boolean = {
-    //import ArrayDefs.IsArraySyntax._
-    //val list1d = List1d[T](data)
-    //data.zipWithIndex.forall(
-      //{
-        //case(x, i) => i match {
-          //case i if i < 4 => {
-            //val actual = f(list1d, List(i, i+1))
-            //val expected = List1d[T](
-              //List(data(i), data(i+1))
-            //)
-            //actual == expected
-          //}
-          //case i if i == 4 => true
-        //}
-      //}
-    //)
-  //}
-  //"Arr1d" should "return correct datum with .iloc using Int" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    //assert(checkList1dWithSingle[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i)))
-  //}
-  //"Arr1d" should "return correct 1dSpArr with .iloc using List[Int]" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    //assert(checkList1dWithListInt[Dim2T, Double](dim2, values1d, (l, r) => l.iloc(r)))
-  //}
-  //"Arr1d" should "return all data with .iloc using null" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    //val list1d = List1d[Dim2T, Double](dim2, values1d)
-    //assert(list1d.iloc(null) == list1d)
-  //}
-  //"Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    ////implicitly[IsSpArr[List1d[PositionsData, Dim2T], _, Dim2T]]
-    ////implicitly[ILoc[Int, List1d[PositionsData, Dim2T], Dim2T]]
-    ////implicitly[ILoc[HNil, List1d[PositionsData, Dim2T], Dim2T]]
-    //assert(
-      //checkList1dWithSingle[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
-    //)
-  //}
-  //"Arr1d" should "return the appropriate data with .iloc using an HList of List[Int]" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    //assert(
-      //checkList1dWithListInt[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
-    //)
-  //}
   //"Arr1d" should "have shape(0) == length" in {
     //import ArrayDefs.IsSpArrSyntax._
     //val list1d = List1d[Dim2T, Double](dim2, values1d)
@@ -359,38 +291,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     //val c = list1d.fmap(_: String => 'a')
     //assert(listmapped.toList.forall(_ == 'a'))
   //}
-  //"Arr2d" should "return a 1d array with .getElem" in {
-    //import ArrayDefs._
-    //import ArrayDefs.IsSpArrSyntax._
-    //val list2d = List2d[Dim1T, Dim2T, Double]((dim1, dim2), values2d)
-    //assert(
-      //values2d.zipWithIndex.forall({case(x, i) => 
-        //list2d.getElem(i) == List1d[Dim2T, Double](dim2, x)
-      //})
-    //)
-  //}
-  //"Arr2d" should "return a 2d array with .iloc using Int on the first dimension" in {
-    //import ArrayDefs._
-    //import ArrayDefs.IsSpArrSyntax._
-    //val list2d = List2d[Dim1T, Dim2T, Double]((dim1, dim2), values2d)
-    //println(list2d.iloc(0))
-    //println(List2d[Dim1T, Dim2T, Double]((dim1, dim2), List(values2d(0))))
-    //assert(
-      //values2d.zipWithIndex.forall({case(x, i) => 
-        //list2d.iloc(i) == List2d[Dim1T, Dim2T, Double]((dim1, dim2), List(values2d(i)))
-      //})
-    //)
-  //}
-  ////"Arr2d" should "return a 2d array with .iloc using Int on the first dimension" in {
-    ////import ArrayDefs._
-    ////import ArrayDefs.IsSpArrSyntax._
-    ////val list2d = List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), values2d)
-    ////assert(
-      ////values2d.zipWithIndex.forall({case(x, i) => 
-        ////list2d.iloc(i) == List2d[PositionsData, Dim1T, Dim2T]((dim1, dim2), List(values2d(i)))
-      ////})
-    ////)
-  ////}
   ////"Arr1d" should "return correct Datum with .loc" in {
     ////import ArrayDefs._
     ////import ArrayDefs.IsSpArrSyntax._
