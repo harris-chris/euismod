@@ -189,23 +189,58 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(lst5 == List1d[Double](values1d))
     }
   }
+
+  feature("Using the getILoc method to reduce down an IsArray using integer references") {
+    val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
+    val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))
+    val values3d = List(
+      List(
+        List(0.1, 0.2, 0.3, 0.4, 0.5),
+        List(1.1, 1.2, 1.3, 1.4, 1.5),
+        List(2.1, 2.2, 2.3, 2.4, 2.5),
+      ),
+      List(
+        List(3.1, 3.2, 3.3, 3.4, 3.5),
+        List(4.1, 4.2, 4.3, 4.4, 4.5),
+        List(5.1, 5.2, 5.3, 5.4, 5.5),
+      ),
+    )
+    val list1d = List1d[Double](values1d)
+    val list2d = List2d[Double](values2d)
+    scenario("The user calls getILoc with null to return the entire array") {
+      Given("A 1-dimensional arraylike")
+      When("getILoc is called with a null argument")
+      import ArrayDefs.IsArraySyntax._
+      val t1 = list1d.getILoc(null)
+      Then("the entire array should be returned")
+      assert(t1 == list1d)
+      
+      Given("A 2-dimensional arraylike")
+      When("getILoc is called with a null argument")
+      import ArrayDefs.IsArraySyntax._
+      val t2 = list2d.getILoc(null)
+      Then("the entire array should be returned")
+      assert(t2 == list2d)
+    }
+  //"Arr1d" should "return the appropriate data with .iloc using an HList of Ints" in {
+    //import ArrayDefs.IsSpArrSyntax._
+    ////implicitly[IsSpArr[List1d[PositionsData, Dim2T], _, Dim2T]]
+    ////implicitly[ILoc[Int, List1d[PositionsData, Dim2T], Dim2T]]
+    ////implicitly[ILoc[HNil, List1d[PositionsData, Dim2T], Dim2T]]
+    //assert(
+      //checkList1dWithSingle[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
+    //)
+  //}
+  //"Arr1d" should "return the appropriate data with .iloc using an HList of List[Int]" in {
+    //import ArrayDefs.IsSpArrSyntax._
+    //assert(
+      //checkList1dWithListInt[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i :: HNil))
+    //)
+  //}
+  }
 }
 
 
-  //val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
-  //val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))
-  //val values3d = List(
-    //List(
-      //List(0.1, 0.2, 0.3, 0.4, 0.5),
-      //List(1.1, 1.2, 1.3, 1.4, 1.5),
-      //List(2.1, 2.2, 2.3, 2.4, 2.5),
-    //),
-    //List(
-      //List(3.1, 3.2, 3.3, 3.4, 3.5),
-      //List(4.1, 4.2, 4.3, 4.4, 4.5),
-      //List(5.1, 5.2, 5.3, 5.4, 5.5),
-    //),
-  //)
   //def checkList1dWithSingle[T: IsElement](
     //data: List[T], f:(List1d[T], Int) => List1d[T],
   //): Boolean = {
@@ -234,25 +269,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       //}
     //)
   //}
-  //"Arr1d" should "be constructable from cons" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    //val lst0 = List1d[Dim2T, Double](Index[Dim2T](Nil), Nil)
-    //val lst1 = (dim2(0), values1d(0)) :: lst0
-    //val lst2 = (dim2(1), values1d(1)) :: lst1
-    //val lst3 = (dim2(2), values1d(2)) :: lst2
-    //val lst4 = (dim2(3), values1d(3)) :: lst3
-    //val lst5 = (dim2(4), values1d(4)) :: lst4
-    //assert(lst5 == List1d[Dim2T, Double](dim2, values1d))
-  //}
-  //////"Arr1d" should "decompose using cons" in {
-    //////import ArrayDefs._
-    //////import ArrayDefs.IsSpArrSyntax._
-    //////val lst = List1d[Dim2T, PositionsData](dim2, values1d)
-    //////lst match {
-      //////case h :: t => {assert(h == lst.head); assert(l == lst.tail)}
-      //////case _ => assert(false)
-    //////}
-  //////}
   //"Arr1d" should "return correct datum with .iloc using Int" in {
     //import ArrayDefs.IsSpArrSyntax._
     //assert(checkList1dWithSingle[Dim2T, Double](dim2, values1d, (l, i) => l.iloc(i)))

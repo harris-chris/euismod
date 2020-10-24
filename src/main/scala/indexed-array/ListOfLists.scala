@@ -18,6 +18,15 @@ object ListOfListsObj {
     flength = self => self.data.length,
     fcons = (self, elem) => List1d(elem :: self.data),
   )
+  case class List2d[T: IsElement] ( 
+    data: List[List[T]],
+  )
+  implicit def list2dIsSpArr[T: IsElement] = IsArray[List2d[T], List1d[T]] (
+    fgetEmpty = self => List2d[T](List(List())),
+    fgetAtN = (self, n) => List1d(self.data(n)),
+    flength = self => self.data.length,
+    fcons = (self, elem) => List2d(elem.data :: self.data),
+  )
 
   //val l1d = List1d[Char, Double](Index(List('a', 'b', 'c')), List(1.0, 2.0, 3.0))
   //implicitly[IsSpArr[List1d[Char, Double]]]
