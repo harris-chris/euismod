@@ -66,13 +66,13 @@ object ArrayDefs {
     def getLoc[R](self: A, ref: R)(implicit get: GetLoc[A, R]): A  
   }
 
-  abstract class Is1d[A](implicit aIsArray: IsArray[A])
+  abstract class Is1d[A] private {}
   object Is1d {
     def apply[A: IsArray, _E: IsElement] = 
       new Is1d[A] {} 
   }
 
-  abstract class Is2d[A](implicit aIsArray: IsArray[A])
+  abstract class Is2d[A] private {}
   object Is2d {
     def apply[A: IsArray, _E: Is1d]: Is2d[A] = 
       new Is2d[A] {}

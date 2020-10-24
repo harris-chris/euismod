@@ -109,12 +109,15 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       self => self.data.length,
       (self, o) => A1OfA1[T](o :: self.data),
     )
+    
     When("Implementation of Is2d is attempted without Is1d implemented for the 1-d array")
     Then("It should fail to compile")
     "implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]" shouldNot typeCheck
-    val _ = the[Is1d[A1[Double]]](a1)
-    val a2 = A1OfA1[Double](List(A1[Double](List(1, 2)),A1[Double](List(3, 4))))
-    val a1 = a2.getAtN(1)
+    
+    When("Implementation of Is2d is attempted with Is1d implemented for the 1-d array")
+    Then("It should compile")
+    implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
+    implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]
   }
 }
 
