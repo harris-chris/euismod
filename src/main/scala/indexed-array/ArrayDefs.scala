@@ -45,16 +45,20 @@ object ArrayDefs {
     }
   }
 
-  abstract class Updatable[A](implicit aIsArray: IsArray[A]) {
-    def setAtIndex(self: A, i: Int, setTo: aIsArray.E): A
-    def setILoc[R](self: A, r: R)(implicit set: SetILoc[A, R]): A
-    def setLoc[R](self: A, r: R) = ???
+  abstract class IsUpdatable[A] private (implicit isArr: IsArray[A]) {
+    def setAtN(self: A, n: Int, setTo: isArr.E): A = {
+      val newData = for(i <- 0 to isArr.length(self) - 1) yield (if(i == n) setTo else isArr.getAtN(self, i))
+      newData.foldLeft(isArr.getEmpty(self))((a, b) => isArr.::(a, b)) 
+    }
+    def setILoc[R](self: A, r: R)(implicit set: SetILoc[A, R]): A = ???
+    def setLoc[R](self: A, r: R): A = ???
     //def map[E1](self: A, f: E => E1)(implicit 
       //mIsSpBase: IsBase[E1],
       //outIsArr: IsArray[A] {type E = E1},
     //): A = getEmpty(self).foldLeft( fromList(self,
         //toListWithIndex(self).map((t: (I0, M1)) => (t._1, f(t._2)))
       //)
+    def apply[A](implicit isArr: IsArray[A]): IsUpdatable[A] = new IsUpdatable[A] {}
   }
 
   abstract class Indexed[A](implicit aIsArray: IsArray[A]) {
@@ -89,16 +93,6 @@ object ArrayDefs {
       eIs2d: Is2d[_E],
     ) = new Is3d[A] {} 
   }
-
-  //abstract class Is2dArray[A] private extends IsArray[A]
-  //object Is2dSpArr {
-    //def apply[A, _A1: Is1dSpArr]: Is2dSpArr[A] = new Is2dSpArr[A] { type Self = A; type M1 = _A1 } 
-  //}
-
-  //abstract class Is3dSpArr[A] private extends IsSpArr[A]
-  //object Is3dSpArr {
-    //def apply[A, _A2: Is2dSpArr]: Is3dSpArr[A] = new Is3dSpArr[A] { type Self = A; type M1 = _A2 }
-  //}
 
   //trait FMap[A[_, _], I, M1, B, C] {
     //type Out

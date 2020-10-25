@@ -308,6 +308,24 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(list3d.length == list3d.data.length)
     }
   }
+
+  feature("An Updatable array can be updated with .setElem") {
+    scenario("Using setElem with a new valid value creates a new array of the same type") {
+      import Dummy._
+      import ArrayDefs.IsUpdatable
+      When(".setElem with a 1d Array")
+      implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable[List1d[T], T]
+      val t1 = list1d.setElem(1, 2.2) 
+      assert(t1.data(1) == 2.2)
+    }
+    scenario("Using setElem with an invalid value does not compile") {
+    }
+  }
+
+  feature("An Updatable array can be updated with .setILoc") {
+    scenario("A 1d array returns a same-size 1d array if .setILoc is used") {
+    }
+  }
 }
 
 
