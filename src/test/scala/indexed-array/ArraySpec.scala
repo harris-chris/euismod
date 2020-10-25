@@ -16,6 +16,27 @@ import shapeless.ops.hlist._
 
 import ListOfListsObj._
 
+object Dummy {
+  val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
+  val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))
+  val values3d = List(
+    List(
+      List(0.1, 0.2, 0.3, 0.4, 0.5),
+      List(1.1, 1.2, 1.3, 1.4, 1.5),
+      List(2.1, 2.2, 2.3, 2.4, 2.5),
+    ),
+    List(
+      List(3.1, 3.2, 3.3, 3.4, 3.5),
+      List(4.1, 4.2, 4.3, 4.4, 4.5),
+      List(5.1, 5.2, 5.3, 5.4, 5.5),
+    ),
+  )
+  val list1d = List1d[Double](values1d)
+  val list2d = List2d[Double](values2d)
+  val list3d = List3d[Double](values3d)
+}
+  
+
 class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   import ArrayDefs._
 
@@ -127,34 +148,42 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("Multi-dimensional arrays") {
-    scenario("An value is returned from a 2d-dimensional array using getAtN") {
+    case class A1[T](data: List[T])
+    implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
+      self => A1[T](Nil: List[T]),
+      (self, n) => self.data(n),
+      self => self.data.length,
+      (self, o) => A1[T](o :: self.data),
+    )
+    case class A1OfA1[T](data: List[A1[T]])
+    implicit def a1ofa1IsArray[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+      self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+      (self, n) => self.data(n),
+      self => self.data.length,
+      (self, o) => A1OfA1[T](o :: self.data),
+    )
+    implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
+    implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]
+    scenario("A value is returned from a 2d-dimensional array using getAtN") {
       Given("A 1-dimensional arraylike, and a 2d list of 1d arraylike 2d array implementation")
-      case class A1[T](data: List[T])
-      implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
-        self => A1[T](Nil: List[T]),
-        (self, n) => self.data(n),
-        self => self.data.length,
-        (self, o) => A1[T](o :: self.data),
-      )
-      case class A1OfA1[T](data: List[A1[T]])
-      implicit def a1ofa1IsArray[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
-        self => A1OfA1[T](List(A1[T](Nil: List[T]))),
-        (self, n) => self.data(n),
-        self => self.data.length,
-        (self, o) => A1OfA1[T](o :: self.data),
-      )
-      implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
-      implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]
       When("getAtN is called on a concrete instance of the 2d arraylike")
       import ArrayDefs.IsArraySyntax._
       val t2 = A1OfA1[Double](A1[Double](List(1.0, 2.0)) :: Nil)
       Then("the returned value should be the 1d arraylike")
       val t1: A1[Double] = t2.getAtN(0)
     }
+    scenario("A value is returned from a 3d-dimensional array using getAtN") {
+      Given("A 3d arraylike")
+      val t3 = List3d[Double](Dummy.values3d)
+      When("getAtN is called on a concrete instance of the 3d arraylike")
+      import ArrayDefs.IsArraySyntax._
+      Then("the returned value should be the 1d arraylike")
+      val t2: List2d[Double] = t3.getAtN(0)
+    }
   }
 
   feature("IsArray methods") {
-    val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
+    import Dummy._
     scenario("getAtN is called on a 1d Array to recover its original elements") {
       Given("A 1d arraylike")
       import ArrayDefs.IsArraySyntax._
@@ -179,20 +208,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("Using the getILoc method to reduce down an IsArray using integer references") {
-    val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
-    val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))
-    val values3d = List(
-      List(
-        List(0.1, 0.2, 0.3, 0.4, 0.5),
-        List(1.1, 1.2, 1.3, 1.4, 1.5),
-        List(2.1, 2.2, 2.3, 2.4, 2.5),
-      ),
-      List(
-        List(3.1, 3.2, 3.3, 3.4, 3.5),
-        List(4.1, 4.2, 4.3, 4.4, 4.5),
-        List(5.1, 5.2, 5.3, 5.4, 5.5),
-      ),
-    )
+    import Dummy._
     val list1d = List1d[Double](values1d)
     val list2d = List2d[Double](values2d)
     def checkGetILocWithInt[A, _E: IsBase](
@@ -273,6 +289,23 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(
         checkGetILocWithListInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
       )
+    }
+  }
+
+  feature("The IsArray.length method returns the length of the top dimension") {
+    import Dummy._
+    import ArrayDefs.IsArraySyntax._
+    scenario("An xd array of y elements should return .length of y")
+    {
+      When(".length is run on list1d")
+      Then("It should return the correct length")
+      assert(list1d.length == list1d.data.length)
+      When(".length is run on list2d")
+      Then("It should return the correct length")
+      assert(list2d.length == list2d.data.length)
+      When(".length is run on list3d")
+      Then("It should return the correct length")
+      assert(list3d.length == list3d.data.length)
     }
   }
 }
