@@ -19,7 +19,6 @@ object ListOfListsObj {
     fcons = (self, elem) => List1d(elem :: self.data),
   )
   implicit def list1dIs1d[T: IsElement] = Is1d[List1d[T], T]
-  implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable[List1d[T], T]
 
   case class List2d[T: IsElement] ( 
     data: List[List[T]],
@@ -43,3 +42,4 @@ object ListOfListsObj {
   )
   implicit def list3dIs3d[T: IsElement] = Is3d[List3d[T], List2d[T]]
 }
+

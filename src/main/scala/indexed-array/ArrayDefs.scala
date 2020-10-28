@@ -10,7 +10,7 @@ import shapeless.ops.hlist._
 
 object ArrayDefs {
 
-  abstract class IsArray[A] private extends IsBase[A] {
+  abstract class IsArray[A] extends IsBase[A] {
     type E
     implicit val eIsBase: IsBase[E]
 
@@ -45,10 +45,24 @@ object ArrayDefs {
     }
   }
 
-  abstract class IsUpdatable[A] private (implicit isArr: IsArray[A]) {
-    def setAtN(self: A, n: Int, setTo: isArr.E): A = {
-      val newData = for(i <- 0 to isArr.length(self) - 1) yield (if(i == n) setTo else isArr.getAtN(self, i))
-      newData.foldLeft(isArr.getEmpty(self))((a, b) => isArr.::(a, b)) 
+  object IsArraySyntax {
+    implicit class IsArrayOps[A, _E](self: A)(implicit 
+      val tc: IsArray[A] { type E = _E },
+    ) {
+      def getEmpty = tc.getEmpty(self)
+      def getAtN(n: Int): _E = tc.getAtN(self, n)
+      def getILoc[R](r: R)(implicit getILoc: GetILoc[A, R]) = tc.getILoc(self, r)
+      def ::(other: _E): A = tc.::(self, other)
+      def length: Int = tc.length(self)
+      def toList: List[_E] = tc.toList(self)
+      //def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
+    }
+  }
+
+  abstract class IsUpdatable[A] private extends IsArray[A] {
+    def setAtN(self: A, n: Int, setTo: E): A = {
+      val newData = for(i <- 0 to length(self) - 1) yield (if(i == n) setTo else getAtN(self, i))
+      newData.foldLeft(getEmpty(self))((a, b) => ::(a, b)) 
     }
     def setILoc[R](self: A, r: R)(implicit set: SetILoc[A, R]): A = ???
     def setLoc[R](self: A, r: R): A = ???
@@ -58,7 +72,48 @@ object ArrayDefs {
     //): A = getEmpty(self).foldLeft( fromList(self,
         //toListWithIndex(self).map((t: (I0, M1)) => (t._1, f(t._2)))
       //)
-    def apply[A](implicit isArr: IsArray[A]): IsUpdatable[A] = new IsUpdatable[A] {}
+  }
+  object IsUpdatable {
+    def fromArray[A, _E](
+      fsetAtN: (A, Int, _E) => A,
+    ) (implicit 
+      _eIsBase: IsBase[_E],
+      isArr: IsArray[A] { type E = _E },
+    ): IsUpdatable[A] { type E = _E } = new IsUpdatable[A] { 
+      type E = _E
+      implicit val eIsBase = _eIsBase
+      override def setAtN(self: A, n: Int, setTo: _E): A = fsetAtN(self, n, setTo)
+      def getEmpty(self: A): A = isArr.getEmpty(self)
+      def getAtN(self: A, n: Int): E = isArr.getAtN(self, n)
+      def length(self: A): Int = isArr.length(self)
+      def ::(self: A, other: E): A = isArr.::(self, other)
+    }
+    def apply[A, _E](
+      fgetEmpty: A => A,
+      fgetAtN: (A, Int) => _E,
+      flength: A => Int,
+      fcons: (A, _E) => A,
+      fsetAtN: (A, Int, _E) => A,
+    ) (implicit 
+      _eIsBase: IsBase[_E],
+    ): IsUpdatable[A] { type E = _E } = new IsUpdatable[A] { 
+      type E = _E
+      implicit val eIsBase = _eIsBase
+      override def setAtN(self: A, n: Int, setTo: _E): A = fsetAtN(self, n, setTo)
+      def getEmpty(self: A): A = fgetEmpty(self)
+      def getAtN(self: A, n: Int): E = fgetAtN(self, n)
+      def length(self: A): Int = flength(self)
+      def ::(self: A, other: E): A = fcons(self, other)
+    }
+  }
+
+  object IsUpdatableSyntax {
+    implicit class IsUpdatableOps[A, _E](self: A)(implicit 
+      val isUpd: IsUpdatable[A] { type E = _E },
+    ) {
+      def setAtN(n: Int, setTo: _E): A = isUpd.setAtN(self, n, setTo)
+      //def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
+    }
   }
 
   abstract class Indexed[A](implicit aIsArray: IsArray[A]) {
@@ -163,19 +218,6 @@ object ArrayDefs {
     }
   }
 
-  object IsArraySyntax {
-    implicit class IsArrayOps[A, _E](self: A)(implicit 
-      val tc: IsArray[A] { type E = _E },
-    ) {
-      def getEmpty = tc.getEmpty(self)
-      def getAtN(n: Int): _E = tc.getAtN(self, n)
-      def getILoc[R](r: R)(implicit getILoc: GetILoc[A, R]) = tc.getILoc(self, r)
-      def ::(other: _E): A = tc.::(self, other)
-      def length: Int = tc.length(self)
-      def toList: List[_E] = tc.toList(self)
-      //def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
-    }
-  }
 
   abstract class GetLoc[A, R] {
     def loc(self: A, ref: R): A = ???

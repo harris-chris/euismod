@@ -14,26 +14,62 @@ import shapeless._
 //import shapeless.test.{illTyped}
 import shapeless.ops.hlist._
 
-import ListOfListsObj._
-
 object Dummy {
-  val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
-  val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))
-  val values3d = List(
-    List(
-      List(0.1, 0.2, 0.3, 0.4, 0.5),
-      List(1.1, 1.2, 1.3, 1.4, 1.5),
-      List(2.1, 2.2, 2.3, 2.4, 2.5),
-    ),
-    List(
-      List(3.1, 3.2, 3.3, 3.4, 3.5),
-      List(4.1, 4.2, 4.3, 4.4, 4.5),
-      List(5.1, 5.2, 5.3, 5.4, 5.5),
-    ),
-  )
-  val list1d = List1d[Double](values1d)
-  val list2d = List2d[Double](values2d)
-  val list3d = List3d[Double](values3d)
+  object Types {
+    case class List1d[T: IsElement] (
+      data: List[T],
+    )
+    case class List2d[T: IsElement] ( 
+      data: List[List[T]],
+    )
+    case class List3d[T: IsElement] ( 
+      data: List[List[List[T]]],
+    )
+  }
+  object Values {
+    import Types._
+    val values1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
+    val values2d = List(values1d, values1d.map(_ + 1), values1d.map(_ + 2))
+    val values3d = List(
+      List(
+        List(0.1, 0.2, 0.3, 0.4, 0.5),
+        List(1.1, 1.2, 1.3, 1.4, 1.5),
+        List(2.1, 2.2, 2.3, 2.4, 2.5),
+      ),
+      List(
+        List(3.1, 3.2, 3.3, 3.4, 3.5),
+        List(4.1, 4.2, 4.3, 4.4, 4.5),
+        List(5.1, 5.2, 5.3, 5.4, 5.5),
+      ),
+    )
+    val list1d = List1d[Double](values1d)
+    val list2d = List2d[Double](values2d)
+    val list3d = List3d[Double](values3d)
+  }
+  object Syntax {
+    import Types._
+    import Values._
+    import ArrayDefs._
+    import ArrayDefs.IsArraySyntax._
+    implicit def list1dIsArray[T: IsElement] = IsArray[List1d[T], T](
+      fgetEmpty = self => List1d[T](List()),
+      fgetAtN = (self, n) => self.data(n),
+      flength = self => self.data.length,
+      fcons = (self, elem) => List1d(elem :: self.data),
+    )
+    implicit def list2dIsArray[T: IsElement] = IsArray[List2d[T], List1d[T]] (
+      fgetEmpty = self => List2d[T](List(List())),
+      fgetAtN = (self, n) => List1d(self.data(n)),
+      flength = self => self.data.length,
+      fcons = (self, elem) => List2d(elem.data :: self.data),
+    )
+    implicit def list3dIsArray[T: IsElement] = IsArray[List3d[T], List2d[T]] (
+      fgetEmpty = self => List3d[T](List(List(List()))),
+      fgetAtN = (self, n) => List2d(self.data(n)),
+      flength = self => self.data.length,
+      fcons = (self, elem) => List3d(elem.data :: self.data),
+    )
+  }
 }
   
 
@@ -148,6 +184,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("Multi-dimensional arrays") {
+    import Dummy._
     case class A1[T](data: List[T])
     implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
       self => A1[T](Nil: List[T]),
@@ -174,16 +211,19 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
     scenario("A value is returned from a 3d-dimensional array using getAtN") {
       Given("A 3d arraylike")
-      val t3 = List3d[Double](Dummy.values3d)
+      val t3 = Dummy.Types.List3d[Double](Dummy.Values.values3d)
       When("getAtN is called on a concrete instance of the 3d arraylike")
+      import Dummy.Syntax._
       import ArrayDefs.IsArraySyntax._
       Then("the returned value should be the 1d arraylike")
-      val t2: List2d[Double] = t3.getAtN(0)
+      val t2: Dummy.Types.List2d[Double] = t3.getAtN(0)
     }
   }
 
   feature("IsArray methods") {
-    import Dummy._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.Syntax._
     scenario("getAtN is called on a 1d Array to recover its original elements") {
       Given("A 1d arraylike")
       import ArrayDefs.IsArraySyntax._
@@ -208,7 +248,9 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("Using the getILoc method to reduce down an IsArray using integer references") {
-    import Dummy._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.Syntax._
     val list1d = List1d[Double](values1d)
     val list2d = List2d[Double](values2d)
     def checkGetILocWithInt[A, _E: IsBase](
@@ -224,8 +266,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
       (0 to a.length - 2).forall(n => f(a, List(n, n + 1)) == { 
-        println(f(a, List(n, n + 1)))
-        println(a.getAtN(n) :: a.getAtN(n + 1) :: a.getEmpty)
         a.getAtN(n) :: a.getAtN(n + 1) :: a.getEmpty
       })
     }
@@ -293,7 +333,9 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("The IsArray.length method returns the length of the top dimension") {
-    import Dummy._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.Syntax._
     import ArrayDefs.IsArraySyntax._
     scenario("An xd array of y elements should return .length of y")
     {
@@ -309,18 +351,50 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("An Updatable array can be updated with .setElem") {
-    scenario("Using setElem with a new valid value creates a new array of the same type") {
-      import Dummy._
-      import ArrayDefs.IsUpdatable
-      When(".setElem with a 1d Array")
-      implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable[List1d[T], T]
-      val t1 = list1d.setElem(1, 2.2) 
-      assert(t1.data(1) == 2.2)
-    }
-    scenario("Using setElem with an invalid value does not compile") {
+  feature("The IsUpdatable Typeclass") { 
+    import Dummy.Types._
+    import Dummy.Values._
+    import ArrayDefs.IsArraySyntax._
+    import ArrayDefs.IsUpdatableSyntax._
+    scenario("An Updatable array can implement IsUpdatable") {
+      {
+        When("An implicit conversion to IsUpdatable is in scope")
+        implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable[List1d[T], T](
+          fgetEmpty = self => List1d[T](List()),
+          fgetAtN = (self, n) => self.data(n),
+          flength = self => self.data.length,
+          fcons = (self, elem) => List1d(elem :: self.data),
+          fsetAtN = (self, n, setTo) => List1d(self.data.updated(n, setTo))
+        )
+        Then("Implicit conversion should occur")
+        "implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
+      }
+      {
+        When("An implicit conversion to IsUpdatable is in scope, based on IsArray")
+        import Dummy.Syntax._
+        implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List1d[T], T](
+          fsetAtN = (self, n, setTo) => List1d(self.data.updated(n, setTo))
+        )
+        Then("Implicit conversion should occur")
+        "implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
+      }
     }
   }
+
+  //feature("An Updatable array can be updated with .setAtN") {
+    //import Dummy._
+    //When(".setAtN with a 1d Array")
+    //implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable[List1d[T], T](
+      //fsetAtN = (self, n, setTo) => List1d(self.data.updated(n, setTo))
+    //)
+    //scenario("Using.setAtN with a new valid value creates a new array of the same type") {
+      //val t1 = list1d.setAtN(1, 2.2) 
+      //assert(t1.data(1) == 2.2)
+    //}
+    //scenario("Using setAtN with an invalid value does not compile") {
+      //"list1d.setAtN(1, 'c')" shouldNot typeCheck
+    //}
+  //}
 
   feature("An Updatable array can be updated with .setILoc") {
     scenario("A 1d array returns a same-size 1d array if .setILoc is used") {
