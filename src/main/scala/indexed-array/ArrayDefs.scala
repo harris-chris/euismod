@@ -61,11 +61,15 @@ object ArrayDefs {
 
   abstract class IsUpdatable[A] private extends IsArray[A] {
     def setAtN(self: A, n: Int, setTo: E): A = {
-      val newData = for(i <- 0 to length(self) - 1) yield (if(i == n) setTo else getAtN(self, i))
-      newData.foldLeft(getEmpty(self))((a, b) => ::(a, b)) 
+      val newData = toList(self).updated(n, setTo)
+      newData.foldLeft(getEmpty(self))((s, o) => ::(s, o)) 
     }
+    def map[B, C](self: A, f: B => C)(implicit aMap: ArrMap[A, B, C]):A = aMap.map(self, f)
     def setILoc[R](self: A, r: R)(implicit set: SetILoc[A, R]): A = ???
     def setLoc[R](self: A, r: R): A = ???
+    def mapList[C](self: A, f: E => C)(implicit 
+      cIsArrayable: IsUpdatable[A] { type E = C },
+    ): A = toList(self).foldLeft(getEmpty(self))((s, o) => ::(s, o))
     //def map[E1](self: A, f: E => E1)(implicit 
       //mIsSpBase: IsBase[E1],
       //outIsArr: IsArray[A] {type E = E1},
@@ -149,38 +153,28 @@ object ArrayDefs {
     ) = new Is3d[A] {} 
   }
 
-  //trait FMap[A[_, _], I, M1, B, C] {
-    //type Out
-    //def fmap(self: A[I, M1], f: B => C): Out 
-  //}
-
-  //object FMap {
-    //implicit def fMapIfM1IsB[A[_, _], I, M1, B, C](implicit 
-      //isArr: Lazy[IsSpArr[A, I, M1]], 
-      //cIsSpBase: IsSpBase[C],
-      //outIsArr: IsSpArr[A, I, C],
-      //outIsSpBase: IsSpBase[A[I, C]],
-    //) = new FMap[A, I, M1, M1, C] {
-      //type Out = A[I, C]
-      //def fmap(self: A[I, M1], f: M1 => C): A[I, C] = 
-        //isArr.value.mapList(self, f)
-    //}
-    //implicit def fMapIfM1IsNotB[A[_, _], I0, I1, M1C[_, _], M2, B, C, M1O](implicit 
-      //isArr: Lazy[IsSpArr[A, I0, M1C[I1, M2]]], 
-      //m1IsSpBase: IsSpBase[M1C[I1, M2]],
-      //m1IsArr: IsSpArr[M1C, I1, M2],
-      //fMapForM1: FMap[M1C, I1, M2, B, C] {type Out = M1O},
-      //outIsArr: IsSpArr[A, I0, M1O],
-      //m1OutIsSpBase: IsSpBase[M1O],
-    //) = new FMap[A, I0, M1C[I1, M2], B, C] {
-      //type Out = A[I0, M1O]
-      //def fmap(self: A[I0, M1C[I1, M2]], f: B => C): Out = isArr.value.mapList(
-        //self, b => fMapForM1.fmap(b, f))
-        ////val aList: List[(I0O, M1O)] = isArr.value.toListWithIndex(self)
-        ////val m1List: List[(I0O, M1O)] = aList.map((t: (I0O, M1O)) => (t._1, m1IsArr.fmap(t._2, f)))
-        ////m1List.foldLeft(isArr.value.getNil(self))((b, a) => isArr.value.::(b, a))
-    //}
-  //}
+  trait ArrMap[A, B, C] {
+    def map(self: A, f: B => C): A 
+  }
+  object ArrMap {
+    type Aux[A, _E] = IsUpdatable[A] { type E = _E } 
+    implicit def mapIfEIsBase[A, B, C](implicit 
+      isArr: IsUpdatable[A] { type E = B }, 
+      eIsBase: IsBase[B],
+      cIsArrayable: IsUpdatable[A] { type E = C },
+    ): ArrMap[A, B, C] = new ArrMap[A, B, C] {
+      def map(self: A, f: B => C): A = isArr.mapList(self, f)
+    }
+    implicit def mapIfEIsArr[A, _E, B, C](implicit 
+      isArr: IsUpdatable[A] { type E = _E },
+      eIsArr: IsUpdatable[_E],
+      eArrMap: ArrMap[_E, B, C],
+    ): ArrMap[A, B, C] = new ArrMap[A, B, C] {
+      def map(self: A, f: B => C): A = isArr.mapList(
+        self, e => eIsArr.map(e, f)
+      )
+    }
+  }
 
   trait GetILoc[A, R] {
     def iloc(self: A, ref: R): A
