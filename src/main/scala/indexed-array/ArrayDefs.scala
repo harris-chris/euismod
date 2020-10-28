@@ -60,50 +60,48 @@ object ArrayDefs {
   }
 
   abstract class IsUpdatable[A] private extends IsArray[A] {
+    type CN[_]
+    implicit val ev1: CN[A] =:= A
+    implicit val ev2: A =:= CN[A]
+    def getNew[_E]: CN[_E]
     def setAtN(self: A, n: Int, setTo: E): A = {
       val newData = toList(self).updated(n, setTo)
       newData.foldLeft(getEmpty(self))((s, o) => ::(s, o)) 
     }
-    def map[B, C](self: A, f: B => C)(implicit aMap: ArrMap[A, B, C]):A = aMap.map(self, f)
+    def map[B, C](self: A, f: B => C)(implicit 
+      aMap: ArrMap[A, B, C],
+    ): CN[C] = aMap.map(self, f)(this)
     def setILoc[R](self: A, r: R)(implicit set: SetILoc[A, R]): A = ???
     def setLoc[R](self: A, r: R): A = ???
     def mapList[C](self: A, f: E => C)(implicit 
-      cIsArrayable: IsUpdatable[A] { type E = C },
-    ): A = toList(self).foldLeft(getEmpty(self))((s, o) => ::(s, o))
-    //def map[E1](self: A, f: E => E1)(implicit 
-      //mIsSpBase: IsBase[E1],
-      //outIsArr: IsArray[A] {type E = E1},
-    //): A = getEmpty(self).foldLeft( fromList(self,
-        //toListWithIndex(self).map((t: (I0, M1)) => (t._1, f(t._2)))
-      //)
+      cIsUpd: IsUpdatable[CN[C]] { type E = C },
+    ): CN[C] = toList(self).map(f).foldLeft(getNew[C])((s, o) => cIsUpd.::(s, o))
   }
   object IsUpdatable {
-    def fromArray[A, _E](
-      fsetAtN: (A, Int, _E) => A,
+    def fromArray[A, _E, CN[_]](
     ) (implicit 
       _eIsBase: IsBase[_E],
       isArr: IsArray[A] { type E = _E },
     ): IsUpdatable[A] { type E = _E } = new IsUpdatable[A] { 
       type E = _E
+      type C = CN[_]
       implicit val eIsBase = _eIsBase
-      override def setAtN(self: A, n: Int, setTo: _E): A = fsetAtN(self, n, setTo)
       def getEmpty(self: A): A = isArr.getEmpty(self)
       def getAtN(self: A, n: Int): E = isArr.getAtN(self, n)
       def length(self: A): Int = isArr.length(self)
       def ::(self: A, other: E): A = isArr.::(self, other)
     }
-    def apply[A, _E](
+    def apply[A, _E, CN[_]](
       fgetEmpty: A => A,
       fgetAtN: (A, Int) => _E,
       flength: A => Int,
       fcons: (A, _E) => A,
-      fsetAtN: (A, Int, _E) => A,
     ) (implicit 
       _eIsBase: IsBase[_E],
     ): IsUpdatable[A] { type E = _E } = new IsUpdatable[A] { 
       type E = _E
+      type C = CN[_]
       implicit val eIsBase = _eIsBase
-      override def setAtN(self: A, n: Int, setTo: _E): A = fsetAtN(self, n, setTo)
       def getEmpty(self: A): A = fgetEmpty(self)
       def getAtN(self: A, n: Int): E = fgetAtN(self, n)
       def length(self: A): Int = flength(self)
@@ -116,7 +114,7 @@ object ArrayDefs {
       val isUpd: IsUpdatable[A] { type E = _E },
     ) {
       def setAtN(n: Int, setTo: _E): A = isUpd.setAtN(self, n, setTo)
-      //def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
+      def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
     }
   }
 
@@ -154,16 +152,16 @@ object ArrayDefs {
   }
 
   trait ArrMap[A, B, C] {
-    def map(self: A, f: B => C): A 
+    def map(self: A, f: B => C)(implicit aIsUpd: IsUpdatable[A]): aIsUpd.CN[C] 
   }
   object ArrMap {
-    type Aux[A, _E] = IsUpdatable[A] { type E = _E } 
     implicit def mapIfEIsBase[A, B, C](implicit 
-      isArr: IsUpdatable[A] { type E = B }, 
-      eIsBase: IsBase[B],
+      isUpd: IsUpdatable[A] { type E = B }, 
+      eIsBase: IsElement[B],
+      cIsBase: IsElement[C],
       cIsArrayable: IsUpdatable[A] { type E = C },
     ): ArrMap[A, B, C] = new ArrMap[A, B, C] {
-      def map(self: A, f: B => C): A = isArr.mapList(self, f)
+      def map(self: A, f: B => C): isUpd.CN[C] = isUpd.mapList(self, f)
     }
     implicit def mapIfEIsArr[A, _E, B, C](implicit 
       isArr: IsUpdatable[A] { type E = _E },

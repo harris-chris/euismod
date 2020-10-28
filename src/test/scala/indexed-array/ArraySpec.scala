@@ -46,7 +46,7 @@ object Dummy {
     val list2d = List2d[Double](values2d)
     val list3d = List3d[Double](values3d)
   }
-  object Syntax {
+  object IsArrayImplicits {
     import Types._
     import Values._
     import ArrayDefs._
@@ -68,6 +68,21 @@ object Dummy {
       fgetAtN = (self, n) => List2d(self.data(n)),
       flength = self => self.data.length,
       fcons = (self, elem) => List3d(elem.data :: self.data),
+    )
+  }
+  object IsUpdatableImplicits {
+    import Types._
+    import Values._
+    import ArrayDefs._
+    import IsArrayImplicits._
+    implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List1d[T], T](
+      fsetAtN = (self, n, setTo) => List1d(self.data.updated(n, setTo))
+    )
+    implicit def list2dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List2d[T], List1d[T]](
+      fsetAtN = (self, n, setTo) => List2d(self.data.updated(n, setTo.data))
+    )
+    implicit def list3dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List3d[T], List2d[T]](
+      fsetAtN = (self, n, setTo) => List3d(self.data.updated(n, setTo.data))
     )
   }
 }
@@ -213,7 +228,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       Given("A 3d arraylike")
       val t3 = Dummy.Types.List3d[Double](Dummy.Values.values3d)
       When("getAtN is called on a concrete instance of the 3d arraylike")
-      import Dummy.Syntax._
+      import Dummy.IsArrayImplicits._
       import ArrayDefs.IsArraySyntax._
       Then("the returned value should be the 1d arraylike")
       val t2: Dummy.Types.List2d[Double] = t3.getAtN(0)
@@ -223,7 +238,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("IsArray methods") {
     import Dummy.Types._
     import Dummy.Values._
-    import Dummy.Syntax._
+    import Dummy.IsArrayImplicits._
     scenario("getAtN is called on a 1d Array to recover its original elements") {
       Given("A 1d arraylike")
       import ArrayDefs.IsArraySyntax._
@@ -250,7 +265,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("Using the getILoc method to reduce down an IsArray using integer references") {
     import Dummy.Types._
     import Dummy.Values._
-    import Dummy.Syntax._
+    import Dummy.IsArrayImplicits._
     val list1d = List1d[Double](values1d)
     val list2d = List2d[Double](values2d)
     def checkGetILocWithInt[A, _E: IsBase](
@@ -335,7 +350,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("The IsArray.length method returns the length of the top dimension") {
     import Dummy.Types._
     import Dummy.Values._
-    import Dummy.Syntax._
+    import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
     scenario("An xd array of y elements should return .length of y")
     {
@@ -359,26 +374,31 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("An Updatable array can implement IsUpdatable") {
       {
         When("An implicit conversion to IsUpdatable is in scope")
-        implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable[List1d[T], T](
+        implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable[List1d[T], T, List1d](
           fgetEmpty = self => List1d[T](List()),
           fgetAtN = (self, n) => self.data(n),
           flength = self => self.data.length,
           fcons = (self, elem) => List1d(elem :: self.data),
-          fsetAtN = (self, n, setTo) => List1d(self.data.updated(n, setTo))
         )
         Then("Implicit conversion should occur")
         "implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
       }
       {
         When("An implicit conversion to IsUpdatable is in scope, based on IsArray")
-        import Dummy.Syntax._
-        implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List1d[T], T](
-          fsetAtN = (self, n, setTo) => List1d(self.data.updated(n, setTo))
-        )
+        import Dummy.IsArrayImplicits._
+        implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List1d[T], T, List1d]
         Then("Implicit conversion should occur")
         "implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
       }
     }
+    //scenario("IsUpdatable is used with .map for a 1d Array") {
+      //import Dummy.IsArrayImplicits._
+      //import Dummy.IsUpdatableImplicits._
+      //implicit val intIsElement: IsElement[Int] = new IsElement[Int] {}
+      //the[IsUpdatable[List1d[Int] { type E = Int }]]
+      //ArrMap.mapIfEIsBase[List1d[Double], Double, Int]
+      //val list1dInt = list1d.map((d: Double) => d.toInt)
+    //}
   }
 
   //feature("An Updatable array can be updated with .setAtN") {
