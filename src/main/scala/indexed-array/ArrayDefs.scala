@@ -7,77 +7,85 @@ import IndicesObj.Index
 import java.time.LocalDate
 import shapeless.{HList, HNil, Lazy, :: => #:}
 import shapeless.ops.hlist._
+import shapeless._
 
 object ArrayDefs {
 
-  abstract class IsArray[A] extends IsBase[A] {
-    type E
-    implicit val eIsBase: IsBase[E]
+  abstract class IsArray[A[_]] extends IsBase[A[_]] {
+    type T
+    type S
+    implicit val tIsElem: IsElement[T]
+    implicit val sIsBase: IsBase[S]
 
-    def getEmpty(self: A): A
-    def getAtN(self: A, n: Int): E
-    def length(self: A): Int
-    def ::(self: A, other: E): A
+    def getEmpty(self: A[T]): A[T]
+    def getAtN(self: A[T], n: Int): S
+    def length(self: A[T]): Int
+    def cons(self: A[T], other: S): A[T]
+    def ::[R](self: A[T], other: R)(implicit c: Cons[A[_], T, R]): c.Out = c.cons(self, other)  
 
-    def ++(self: A, other: A): A = toList(other) match {
-      case e :: es => ::(self, e)
-      case Nil => self
-    }
-    def getILoc[R](self: A, r: R)(implicit getILoc: GetILoc[A, R]): A = getILoc.iloc(self, r)
-    def toList(self: A): List[E] = (for(i <- 0 to length(self)) yield (getAtN(self, i))).toList
-    def ndims(self: A): Int = ???
-    def shape(self: A): Int = ???
+    def flatten(self: A[T]): List[T] = ???
+    def reshape[O](self: A[T], shape: List[Int]): Option[O] = ??? 
+    // for ++, we do not want to specify the actual implementation of other; any IsArray with the
+    // same shape should be fine.
+    def ++[B[_]](self: A[T], other: B[T])(implicit bIsArr: IsArray[B]): A[T] = ???
+    def getILoc[R](self: A[T], r: R)(implicit getILoc: GetILoc[A, T, R]): A[T] = getILoc.iloc(self, r)
+    def toList(self: A[T]): List[S] = (for(i <- 0 to length(self)) yield (getAtN(self, i))).toList
+    def ndims(self: A[T]): Int = ???
+    def shape(self: A[T]): List[Int] = ???
   }
   object IsArray {
-    def apply[A, _E: IsBase](
-      fgetEmpty: A => A,
-      fgetAtN: (A, Int) => _E,
-      flength: A => Int,
-      fcons: (A, _E) => A,
-    ) (implicit _eIsBase: IsBase[_E],
-    ): IsArray[A] { type E = _E } = new IsArray[A] { 
-      type E = _E 
-      implicit val eIsBase = _eIsBase
-      def getEmpty(self: A): A = fgetEmpty(self)
-      def getAtN(self: A, n: Int): E = fgetAtN(self, n)
-      def length(self: A): Int = flength(self)
-      def ::(self: A, other: _E): A = fcons(self, other)
+    def apply[A[_], _T, _S](
+      fgetEmpty: A[_T] => A[_T],
+      fgetAtN: (A[_T], Int) => _S,
+      flength: A[_T] => Int,
+      fcons: (A[_T], _S) => A[_T],
+    ) (implicit 
+      _tIsElem: IsElement[_T],
+      _sIsBase: IsBase[_S],
+    ): IsArray[A] { type T = _T; type S = _S } = new IsArray[A] { 
+      type T = _T
+      type S = _S 
+      implicit val tIsElem = _tIsElem
+      implicit val sIsBase = _sIsBase
+      def getEmpty(self: A[T]): A[T] = fgetEmpty(self)
+      def getAtN(self: A[T], n: Int): S = fgetAtN(self, n)
+      def length(self: A[T]): Int = flength(self)
+      def cons(self: A[T], other: S): A[T] = fcons(self, other)
     }
   }
 
   object IsArraySyntax {
-    implicit class IsArrayOps[A, _E](self: A)(implicit 
-      val tc: IsArray[A] { type E = _E },
+    implicit class IsArrayOps[A[_], _T, _S](self: A[_T])(implicit 
+      val tc: IsArray[A] { type T = _T; type S = _S },
     ) {
       def getEmpty = tc.getEmpty(self)
-      def getAtN(n: Int): _E = tc.getAtN(self, n)
-      def getILoc[R](r: R)(implicit getILoc: GetILoc[A, R]) = tc.getILoc(self, r)
-      def ::(other: _E): A = tc.::(self, other)
+      def getAtN(n: Int): _S = tc.getAtN(self, n)
+      def getILoc[R](r: R)(implicit getILoc: GetILoc[A, _T, R]) = tc.getILoc(self, r)
+      def ::[R](other: R)(implicit cons: Cons[A, _T, R]) = cons.cons(self, other)
       def length: Int = tc.length(self)
-      def toList: List[_E] = tc.toList(self)
+      def toList: List[_S] = tc.toList(self)
       //def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
     }
   }
 
-  abstract class IsUpdatable[A] extends IsArray[A] {
-    def getNew[_E](self: A)(implicit newIsUpd: IsUpdatable[A] { type E = _E }): A
-    def setAtN(self: A, n: Int, setTo: E): A = {
-      val newData = toList(self).updated(n, setTo)
-      newData.foldLeft(getEmpty(self))((s, o) => ::(s, o)) 
-    }
-    def map[B, C](self: A, f: B => C)(implicit 
-      aMap: ArrMap[A, B, C],
-    ): A = aMap.map(self, f)
-    def setILoc[R](self: A, r: R)(implicit set: SetILoc[A, R]): A = ???
-    def setLoc[R](self: A, r: R): A = ???
-    def mapList[C](self: A, f: E => C)(implicit 
-      cIsUpd: IsUpdatable[A] { type E = C },
-    ): A = {
-      val newEmpty = getNew[C](self)
-      val newData: List[C] = toList(self).map(f)
-      newData.foldLeft(newEmpty)((s, o) => cIsUpd.::(s, o))
-    }
-  }
+  //abstract class IsUpdatable[A[_]] extends IsArray[A] {
+    //def setAtN(self: A, n: Int, setTo: E): A = {
+      //val newData = toList(self).updated(n, setTo)
+      //newData.foldLeft(getEmpty(self))((s, o) => ::(s, o)) 
+    //}
+    //def map[B, C](self: A, f: B => C)(implicit 
+      //aMap: ArrMap[A, B, C],
+    //): A = aMap.map(self, f)
+    //def setILoc[R](self: A, r: R)(implicit set: SetILoc[A, R]): A = ???
+    //def setLoc[R](self: A, r: R): A = ???
+    //def mapList[C](self: A, f: E => C)(implicit 
+      //cIsUpd: IsUpdatable[A] { type E = C },
+    //): A = {
+      //val newEmpty = getNew[C](self)
+      //val newData: List[C] = toList(self).map(f)
+      //newData.foldLeft(newEmpty)((s, o) => cIsUpd.::(s, o))
+    //}
+  //}
   //object IsUpdatable {
     //def fromArray[A, _E, N: IsElement](
       //fgetNew: apply[E] { (A, N) => A }, 
@@ -111,103 +119,93 @@ object ArrayDefs {
     //}
   //}
 
-  object IsUpdatableSyntax {
-    implicit class IsUpdatableOps[A, _E](self: A)(implicit 
-      val isUpd: IsUpdatable[A] { type E = _E },
-    ) {
-      def setAtN(n: Int, setTo: _E): A = isUpd.setAtN(self, n, setTo)
-      def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
-    }
-  }
+  //object IsUpdatableSyntax {
+    //implicit class IsUpdatableOps[A, _E](self: A)(implicit 
+      //val isUpd: IsUpdatable[A] { type E = _E },
+    //) {
+      //def setAtN(n: Int, setTo: _E): A = isUpd.setAtN(self, n, setTo)
+      //def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
+    //}
+  //}
 
-  abstract class Indexed[A](implicit aIsArray: IsArray[A]) {
-    type I
-    type E0
-    type E = (I, E0)
-    def getIdx(self: A): Index[I]
-    def getIdxElem(self: A, i: Int): I = getIdx(self)(i)
-    def getLoc[R](self: A, ref: R)(implicit get: GetLoc[A, R]): A  
-  }
-
-  abstract class Is1d[A] private {}
+  abstract class Is1d[A[_]] private {}
   object Is1d {
-    def apply[A, _E]( implicit 
-      aIsArray: IsArray[A] { type E = _E },
-      eIsElement: IsElement[_E],
+    def apply[A[_], _T, _S]( implicit 
+      aIsArray: IsArray[A] { type T = _T; type S = _S },
     ) = new Is1d[A] {} 
   }
 
-  abstract class Is2d[A] private {}
+  abstract class Is2d[A[_]] private {}
   object Is2d {
-    def apply[A, _E]( implicit 
-      aIsArray: IsArray[A] { type E = _E },
-      eIs1d: Is1d[_E],
+    def apply[A[_], _T, _S[_]]( implicit 
+      aIsArray: IsArray[A] { type T = _T; type S = _S[T] },
+      eIs1d: Is1d[_S] { type T = _T },
     ) = new Is2d[A] {} 
   }
 
-  abstract class Is3d[A] private {}
+  abstract class Is3d[A[_]] private {}
   object Is3d {
-    def apply[A, _E]( implicit 
-      aIsArray: IsArray[A] { type E = _E },
-      eIs2d: Is2d[_E],
+    def apply[A[_], _T, _S[_]]( implicit 
+      aIsArray: IsArray[A] { type T = _T; type S = _S[T] },
+      eIs2d: Is2d[_S] { type T = _T },
     ) = new Is3d[A] {} 
   }
 
-  abstract class ArrMap[A, B, C] {
-    def map(self: A, f: B => C): A 
-  }
-  object ArrMap {
-    implicit def mapIfEIsBase[A, B, C](implicit 
-      aIsUpd: IsUpdatable[A] { type E = B }, 
-      cIsUpd: IsUpdatable[A] { type E = C },
-    ): ArrMap[A, B, C] = new ArrMap[A, B, C] {
-      def map(self: A, f: B => C): A = aIsUpd.mapList[C](self, f)
-    }
-    //implicit def mapIfEIsArr[A, _E, B, C](implicit 
-      //isArr: IsUpdatable[A] { type E = _E },
-      //eIsArr: IsUpdatable[_E],
-      //eArrMap: ArrMap[_E, B, C],
+  //abstract class ArrMap[A, B, C] {
+    //def map(self: A, f: B => C): A 
+  //}
+  //object ArrMap {
+    //implicit def mapIfEIsBase[A, B, C](implicit 
+      //aIsUpd: IsUpdatable[A] { type E = B }, 
+      //cIsUpd: IsUpdatable[A] { type E = C },
     //): ArrMap[A, B, C] = new ArrMap[A, B, C] {
-      //def map(self: A, f: B => C): A = isArr.mapList(
-        //self, e => eIsArr.map(e, f)
-      //)
+      //def map(self: A, f: B => C): A = aIsUpd.mapList[C](self, f)
     //}
+    ////implicit def mapIfEIsArr[A, _E, B, C](implicit 
+      ////isArr: IsUpdatable[A] { type E = _E },
+      ////eIsArr: IsUpdatable[_E],
+      ////eArrMap: ArrMap[_E, B, C],
+    ////): ArrMap[A, B, C] = new ArrMap[A, B, C] {
+      ////def map(self: A, f: B => C): A = isArr.mapList(
+        ////self, e => eIsArr.map(e, f)
+      ////)
+    ////}
+  //}
+
+  trait Cons[A[_], T, R] {
+    type Out
+    def cons(self: A[_], other: R): Out
   }
 
-  trait GetILoc[A, R] {
-    def iloc(self: A, ref: R): A
+  trait GetILoc[A[_], T, R] {
+    def iloc(self: A[T], ref: R): A[T]
   }
   object GetILoc {
-    def apply[A, R](implicit tc: GetILoc[A, R]): GetILoc[A, R] = tc
-    implicit def GetILocForInt[A](implicit 
-      isArr: IsArray[A], 
-    ) = new GetILoc[A, Int] {
-      override def iloc(self: A, ref: Int) = isArr.::(
-        isArr.getEmpty(self), 
-        isArr.getAtN(self, ref)
-      )
+    def instance[A[_], T, R](f: (A[T], R) => A[T]): GetILoc[A, T, R] = new GetILoc[A, T, R] {
+      def iloc(self: A[T], ref: R): A[T] = f(self, ref)
     }
-    implicit def iLocForListOfInts[A](implicit 
-      isArr: IsArray[A],
-    ) = new GetILoc[A, List[Int]] {
-      def iloc(self: A, ref: List[Int]) = {
-        val data: List[isArr.E] = ref.map(isArr.getAtN(self, _)).toList.reverse
-        data.foldLeft(isArr.getEmpty(self))((a, b) => isArr.::(a, b)) 
+    implicit def iLocInt[A[_], _T](implicit 
+      isArr: IsArray[A] { type T = _T },
+    ): GetILoc[A, _T, Int] = instance(
+      (s, r) => isArr.cons(isArr.getEmpty(s), isArr.getAtN(s, r))
+    )
+    implicit def iLocListInt[A[_], _T](implicit 
+      isArr: IsArray[A] { type T = _T },
+    ): GetILoc[A, _T, List[Int]] = instance(
+      (s, r) => {
+        val data: List[isArr.S] = r.map(isArr.getAtN(s, _)).toList.reverse
+        data.foldLeft(isArr.getEmpty(s))((a, b) => isArr.cons(a, b)) 
       }
-    }
-    implicit def iLocForNull[A] = new GetILoc[A, Null] {
-      def iloc(self: A, ref: Null) = self
-    }
-    implicit def iLocForHNil[A] = new GetILoc[A, HNil] {
-      def iloc(self: A, ref: HNil) = self
-    }
-    implicit def iLocForHList[A, H, T <: HList](implicit 
-      isArr: IsArray[A],
-      ilocHead: Lazy[GetILoc[A, H]],
-      ilocTail: GetILoc[A, T],
-    ) = new GetILoc[A, H #: T] {
-      def iloc(self: A, ref: H #: T) = ilocHead.value.iloc(self, ref.head)
-    }
+    )
+    implicit def iLocNull[A[_], _T](implicit isArr: IsArray[A] { type T = _T },
+    ): GetILoc[A, _T, Null] = instance((s, r) => s)
+    implicit def iLocHNil[A[_], _T](implicit isArr: IsArray[A] { type T = _T },
+    ): GetILoc[A, _T, HNil] = instance((s, r) => s)
+    implicit def iLocForHList[A[_], _T, Hd, Tl <: HList](implicit 
+      isArr: IsArray[A] { type T = _T },
+      ilocHead: Lazy[GetILoc[A, _T, Hd]],
+      ilocTail: GetILoc[A, _T, Tl],
+    ): GetILoc[A, _T, Hd #: Tl] = instance((s, r) => ilocHead.value.iloc(s, r.head))
   }
 
 
