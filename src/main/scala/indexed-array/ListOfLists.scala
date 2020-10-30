@@ -12,18 +12,20 @@ object ListOfListsObj {
   case class List1d[T: IsElement] (
     data: List[T],
   )
-  implicit def list1dIsArray[T: IsElement] = IsArray[List1d[T], T](
+  implicit def list1dIsArray[T: IsElement] = IsArray[List1d, T, T](
     fgetEmpty = self => List1d[T](List()),
     fgetAtN = (self, n) => self.data(n),
     flength = self => self.data.length,
     fcons = (self, elem) => List1d(elem :: self.data),
   )
-  implicit def list1dIs1d[T: IsElement] = Is1d[List1d[T], T]
+  implicit def list1dIs1d[T: IsElement] = Is1d[List1d, T, T]
+
+  implicitly[IsBase[List1d[Int]]]
 
   case class List2d[T: IsElement] ( 
     data: List[List[T]],
   )
-  implicit def list2dIsArray[T: IsElement] = IsArray[List2d[T], List1d[T]] (
+  implicit def list2dIsArray[T: IsElement] = IsArray[List2d, T, List1d[T]] (
     fgetEmpty = self => List2d[T](List(List())),
     fgetAtN = (self, n) => List1d(self.data(n)),
     flength = self => self.data.length,

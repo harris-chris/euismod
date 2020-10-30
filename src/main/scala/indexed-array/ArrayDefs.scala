@@ -11,7 +11,7 @@ import shapeless._
 
 object ArrayDefs {
 
-  abstract class IsArray[A[_]] extends IsBase[A[_]] {
+  abstract class IsArray[A[X]] extends IsBase[A[_]] {
     type T
     type S
     implicit val tIsElem: IsElement[T]
@@ -21,7 +21,7 @@ object ArrayDefs {
     def getAtN(self: A[T], n: Int): S
     def length(self: A[T]): Int
     def cons(self: A[T], other: S): A[T]
-    def ::[R](self: A[T], other: R)(implicit c: Cons[A[_], T, R]): c.Out = c.cons(self, other)  
+    def ::[R](self: A[T], other: R)(implicit c: Cons[A, T, R]): c.Out = c.cons(self, other)  
 
     def flatten(self: A[T]): List[T] = ???
     def reshape[O](self: A[T], shape: List[Int]): Option[O] = ??? 
