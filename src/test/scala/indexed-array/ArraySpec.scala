@@ -374,12 +374,12 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("An Updatable array can implement IsUpdatable") {
       {
         When("An implicit conversion to IsUpdatable is in scope")
-        implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable[List1d[T], T, List1d](
+        implicit def list1dIsUpdatable[T: IsElement] = new IsUpdatable[List1d[T], T, List1d] {
           fgetEmpty = self => List1d[T](List()),
           fgetAtN = (self, n) => self.data(n),
           flength = self => self.data.length,
           fcons = (self, elem) => List1d(elem :: self.data),
-        )
+        }
         Then("Implicit conversion should occur")
         "implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
       }
