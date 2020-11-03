@@ -75,12 +75,12 @@ object Dummy {
     import Values._
     import ArrayDefs._
     import IsArrayImplicits._
-    implicit def list1dReshapes[T: IsElement]: Reshapes[List1d, T, T] = 
-      new Reshapes[List1d, T, T] {}
-    implicit def list2dReshapes[T: IsElement]: Reshapes[List2d, T, List1d[T]] = 
-      new Reshapes[List2d, T, List1d[T]] {}
-    implicit def list3dReshapes[T: IsElement]: Reshapes[List3d, T, List2d[T]] = 
-      new Reshapes[List3d, T, List2d[T]] {}
+    implicit def list1dReshapes[T: IsElement]: Reshapes[List1d, T] { type S = T } = 
+      Reshapes[List1d, T, T]
+    implicit def list2dReshapes[T: IsElement]: Reshapes[List2d, T] { type S = List1d[T] } = 
+      Reshapes[List2d, T, List1d[T]]
+    implicit def list3dReshapes[T: IsElement]: Reshapes[List3d, T] { type S = List2d[T] } = 
+      Reshapes[List3d, T, List2d[T]]
   }
   //object IsUpdatableImplicits {
     //import Types._
@@ -391,6 +391,9 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       When(".flatten is called on a 1d Array")
       Then("A List[T] should be returned")
       assert(list1d.flatten == list1d.data)
+      When(".flatten is called on a 3d Array")
+      Then("A List[T] should be returned")
+      assert(list3d.flatten == list3d.data.flatten)
     }
   }
 

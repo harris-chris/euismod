@@ -33,8 +33,6 @@ object ArrayDefs {
     def cons(self: A[T], other: S): A[T]
 
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
-    def flatten(self: A[T]): List[T] = ???
-    def reshape[O](self: A[T], shape: List[Int]): Option[O] = ??? 
     // for ++, we do not want to specify the actual implementation of other; any IsArray with the
     // same shape should be fine.
     def ++[B[_]](self: A[T], other: B[T])(implicit bIsArr: IsArray[B, T]): A[T] = ???
@@ -75,16 +73,23 @@ object ArrayDefs {
     }
   }
 
-  abstract class Reshapes[A[_], T, _S](implicit 
-    val aIsArr: IsArray[A, T] { type S = _S },
-  ) {self =>
-    def flatten(a: A[T])(implicit flatten: Flatten[A, T, _S]): List[T] = flatten.flatten(a)
+  abstract class Reshapes[A[_], T] {self =>
+    type S
+    implicit val aIsArr: IsArray[A, T] { type S = self.S }
+    def flatten(a: A[T])(implicit flatten: Flatten[A, T, S]): List[T] = flatten.flatten(a)
     def reshape[R](a: A[T], to: R)(implicit reshape: Reshape[A, T]): reshape.Out = reshape.reshape(a, to)
+  }
+  object Reshapes {
+    def apply[A[_], T, _S](implicit _aIsArr: IsArray[A, T] { type S = _S }): Reshapes[A, T] { type S = _S } =
+      new Reshapes[A, T] { 
+        type S = _S
+        implicit val aIsArr = _aIsArr
+      }
   }
   object ReshapesSyntax {
     implicit class ReshapesOps[A[_], T, _S](a: A[T])(implicit 
       aIsArr: IsArray[A, T] { type S = _S },
-      aRes: Reshapes[A, T, _S],
+      aRes: Reshapes[A, T] { type S = _S },
     ) { self =>
       def flatten(implicit flatten: Flatten[A, T, _S]): List[T] = aRes.flatten(a)
       def reshape[R](to: R)(implicit reshape: Reshape[A, T]) = aRes.reshape[R](a, to)
@@ -101,12 +106,12 @@ object ArrayDefs {
     ): Flatten[A, T, T] = new Flatten[A, T, T] {
       def flatten(a: A[T]): List[T] = aIsArr.toList(a)
     }
-    implicit def flattenIfSIsNotT[A[_], T, _S[_]](implicit 
-      aIsArr: IsArray[A, T] { type S = _S[T] },
-      sIsArr: IsArray[_S, T], 
-    ): Flatten[A, T, _S[T]] = new Flatten[A, T, _S[T]] {
-      def flatten(a: A[T]): List[T] = aIsArr.toList(a).map(sIsArr.flatten(_)).flatten
-    }
+    //implicit def flattenIfSIsNotT[A[_], T, _S[_]](implicit 
+      //aIsArr: IsArray[A, T] { type S = _S[T] },
+      //sRes: Reshapes[_S, T], 
+    //): Flatten[A, T, _S[T]] = new Flatten[A, T, _S[T]] {
+      //def flatten(a: A[T]): List[T] = aIsArr.toList(a).map(sRes.flatten(_)).flatten
+    //}
   }
 
   trait Reshape[A[_], T] {
