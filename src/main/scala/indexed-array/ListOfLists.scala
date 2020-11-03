@@ -20,6 +20,8 @@ object ListOfListsObj {
   )
   implicit def list1dIs1d[T: IsElement] = Is1d[List1d, T]
 
+  def list1dIsUpdatable[T: IsElement](other: T): List1d[T] = List1d[T](Nil: List[T]) 
+
   case class List2d[T: IsElement] ( 
     data: List[List[T]],
   )

@@ -15,9 +15,13 @@ object ArrayDefs {
     get: T
   ) extends IsBase[Element[T]]
 
-  abstract class IsArrBase[A, T] extends IsBase[A] { type S }
-
-  case class ArrNil() extends IsBase[Nothing]
+  abstract class IsArrBase[A, T] extends IsBase[A] { 
+    type S 
+    def getEmpty(self: A): A
+    def getAtN(self: A, n: Int): S
+    def length(self: A): Int
+    def cons(self: A, other: S): A
+  }
 
   abstract class IsArray[A[_], T] extends IsArrBase[A[T], T] {
     type S
@@ -27,8 +31,8 @@ object ArrayDefs {
     def getAtN(self: A[T], n: Int): S
     def length(self: A[T]): Int
     def cons(self: A[T], other: S): A[T]
-    def ::[R](self: A[T], other: R)(implicit c: Cons[A, T, R]): c.Out = c.cons(self, other)  
 
+    def ::[R](self: A[T], other: R)(implicit c: Cons[A, T, R]): c.Out = c.cons(self, other)  
     def flatten(self: A[T]): List[T] = ???
     def reshape[O](self: A[T], shape: List[Int]): Option[O] = ??? 
     // for ++, we do not want to specify the actual implementation of other; any IsArray with the
@@ -71,48 +75,64 @@ object ArrayDefs {
     }
   }
 
-  abstract class IsUpdatable[A[_], T] extends IsArray[A, T] {
-    def setAtN(self: A[T], n: Int, setTo: S): A[T] = {
-      val newData = toList(self).updated(n, setTo)
-      newData.foldLeft(getEmpty(self))((s, o) => cons(s, o)) 
-    }
-    //def map[_T](self: A[T], f: T => _T)(implicit 
-      //aMap: ArrMap[A, B, C],
-    //): A[T] = aMap.map(self, f)
-    def setILoc[R](self: A[T], r: R)(implicit set: SetILoc[A, T, R]): A[T] = ???
-    def setLoc[R](self: A[T], r: R): A[T] = ???
-    def mapList(self: A[T], f: S => S): A[T] = {
-      val newEmpty = getEmpty(self)
-      val newData: List[S] = toList(self).map(f)
-      newData.foldLeft(newEmpty)((s, o) => cons(s, o))
-    }
+  abstract class Reshapes[A[_], T, R](implicit 
+    val aIsArr: IsArray[A, T],
+  ) { 
+    def flatten(a: A[T])(implicit flatten: Flatten[A, T, aIsArr.S]): List[T] = flatten.flatten(a)
+    def reshape(a: A[T], to: R)(implicit reshape: Reshape[A, T]): reshape.Out = reshape.reshape(a, to)
   }
-  object IsUpdatable {
-    def apply[A[_], T, _S](
-      fgetEmpty: A[T] => A[T],
-      fgetAtN: (A[T], Int) => _S,
-      flength: A[T] => Int,
-      fcons: (A[T], _S) => A[T],
-    ) (implicit 
-      _eIsBase: IsBase[_S],
-    ): IsUpdatable[A, T] { type S = _S } = new IsUpdatable[A, T] { 
-      type S = _S
-      implicit val eIsBase = _eIsBase
-      def getEmpty(self: A[T]): A[T] = fgetEmpty(self)
-      def getAtN(self: A[T], n: Int): S = fgetAtN(self, n)
-      def length(self: A[T]): Int = flength(self)
-      def ::(self: A[T], other: S): A[T] = fcons(self, other)
+
+  trait Flatten[A[_], T, S] {
+    def flatten(a: A[T]): List[T]
+  }
+  object Flatten {
+    def flattenIfSIsT[A[_], T, _S](implicit 
+      aRes: IsArray[A, T] { type S = T },
+    ): Flatten[A, T, _S] = new Flatten[A, T, _S] {
+      def flatten(a: A[T]): List[T] = aRes.toList(a)
+    }
+    def flattenIfSIsNotT[A[_], T, _S[_]](implicit 
+      aRes: IsArray[A, T] { type S = _S[T] },
+      sRes: IsArray[_S, T], 
+    ): Flatten[A, T, _S[T]] = new Flatten[A, T, _S[T]] {
+      def flatten(a: A[T]): List[T] = aRes.toList(a).map(sRes.flatten(_)).flatten
     }
   }
 
-  object IsUpdatableSyntax {
-    implicit class IsUpdatableOps[A[_], T, _S](self: A[T])(implicit 
-      val isUpd: IsUpdatable[A, T] { type S = _S },
-    ) {
-      def setAtN(n: Int, setTo: _S): A[T] = isUpd.setAtN(self, n, setTo)
-      //def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
-    }
+  trait Reshape[A[_], T] {
+    type Out
+    def reshape[R](a: A[T], to: R): Out
   }
+  object Reshape {
+  }
+
+  //abstract class IsUpdatable[A[_], T](implicit 
+    //val aIsArr: IsArray[A, T],
+  //) {
+    //type S = aIsArr.S
+    //def getNew[_T]: A[_T] 
+
+    //def map[_T, _S[_]](a: A[T], f: T => _T): A[_T] = {
+      //val newEmpty = getNew[_T]
+      //val newData: List[S] = aIsArr.toList(a).map(s => sIsUpd.map(s, f))
+      //newData.foldLeft(newEmpty)((s, o) => aIsArr.cons(s, o))
+    //}
+    //def setAtN(self: A[T], n: Int, setTo: S): A[T] = {
+      //val newData = aIsArr.toList(self).updated(n, setTo)
+      //newData.foldLeft(aIsArr.getEmpty(self))((s, o) => aIsArr.cons(s, o)) 
+    //}
+    //def setILoc[R](self: A[T], r: R)(implicit set: SetILoc[A, T, R]): A[T] = ???
+    //def setLoc[R](self: A[T], r: R): A[T] = ???
+  //}
+
+  //object IsUpdatableSyntax {
+    //implicit class IsUpdatableOps[A[_], T, _S](a: A[T])(implicit 
+      //isUpd: IsUpdatable[A, T] { type S = _S },
+    //) { self =>
+      //def setAtN(n: Int, setTo: _S): A[T] = isUpd.setAtN(a, n, setTo)
+      ////def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
+    //}
+  //}
 
   abstract class Is1d[A] private {}
   object Is1d {

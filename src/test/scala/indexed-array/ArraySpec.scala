@@ -51,40 +51,37 @@ object Dummy {
     import Values._
     import ArrayDefs._
     import ArrayDefs.IsArraySyntax._
-    implicit def list1dIsArray[T: IsElement] = IsArray[List1d[T], T](
+    implicit def list1dIsArray[T: IsElement] = IsArray[List1d, T, T](
       fgetEmpty = self => List1d[T](List()),
       fgetAtN = (self, n) => self.data(n),
       flength = self => self.data.length,
       fcons = (self, elem) => List1d(elem :: self.data),
     )
-    implicit def list2dIsArray[T: IsElement] = IsArray[List2d[T], List1d[T]] (
+    implicit def list2dIsArray[T: IsElement] = IsArray[List2d, T, List1d[T]] (
       fgetEmpty = self => List2d[T](List(List())),
       fgetAtN = (self, n) => List1d(self.data(n)),
       flength = self => self.data.length,
       fcons = (self, elem) => List2d(elem.data :: self.data),
     )
-    implicit def list3dIsArray[T: IsElement] = IsArray[List3d[T], List2d[T]] (
+    implicit def list3dIsArray[T: IsElement] = IsArray[List3d, T, List2d[T]] (
       fgetEmpty = self => List3d[T](List(List(List()))),
       fgetAtN = (self, n) => List2d(self.data(n)),
       flength = self => self.data.length,
       fcons = (self, elem) => List3d(elem.data :: self.data),
     )
   }
-  object IsUpdatableImplicits {
-    import Types._
-    import Values._
-    import ArrayDefs._
-    import IsArrayImplicits._
-    implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List1d[T], T](
-      fsetAtN = (self, n, setTo) => List1d(self.data.updated(n, setTo))
-    )
-    implicit def list2dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List2d[T], List1d[T]](
-      fsetAtN = (self, n, setTo) => List2d(self.data.updated(n, setTo.data))
-    )
-    implicit def list3dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List3d[T], List2d[T]](
-      fsetAtN = (self, n, setTo) => List3d(self.data.updated(n, setTo.data))
-    )
-  }
+  //object IsUpdatableImplicits {
+    //import Types._
+    //import Values._
+    //import ArrayDefs._
+    //import IsArrayImplicits._
+    //implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable.fromArr[List1d, T, T](
+    //)
+    //implicit def list2dIsUpdatable[T: IsElement] = IsUpdatable.fromArr[List2d, T, List1d[T]](
+    //)
+    //implicit def list3dIsUpdatable[T: IsElement] = IsUpdatable.fromArr[List3d, T, List2d[T]](
+    //)
+  //}
 }
   
 
@@ -93,7 +90,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
 
   feature("Arraylike objects should be able to implement IsArray") {
     case class A1[T](data: List[T])
-    implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
+    implicit def a1ev[T: IsElement] = IsArray[A1, T, T](
       self => A1[T](Nil: List[T]),
       (self, n) => self.data(n),
       self => self.data.length,
@@ -115,7 +112,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("A 2d 1dOf1d type that can implement IsArray, implements IsArray") {
       Given("A 1dOf1d arraylike type and an implicit conversion to IsArray")
       case class A1OfA1[T](data: List[A1[T]])
-      implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+      implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1, T, A1[T]](
         self => A1OfA1[T](List(A1[T](Nil: List[T]))),
         (self, n) => self.data(n),
         self => self.data.length,
@@ -133,7 +130,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("A 2d list-of-list type that can implement IsArray, implements IsArray") {
       Given("A 2d list-of-list type and an implicit conversion to IsArray")
       case class A2[T](data: List[List[T]])
-      implicit def a2ev[T: IsElement] = IsArray[A2[T], A1[T]](
+      implicit def a2ev[T: IsElement] = IsArray[A2, T, A1[T]](
         self => A2[T](List(List())),
         (self, n) => A1[T](self.data(n)),
         self => self.data.length,
@@ -153,7 +150,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("The user tries to access IsArray methods from the implementing type") {
       Given("An arraylike value and an implicit conversion to IsArray")
       case class A1[T](data: List[T])
-      implicit def a1ev[T: IsElement] = IsArray[A1[T], T](
+      implicit def a1ev[T: IsElement] = IsArray[A1, T, T](
         self => A1[T](Nil: List[T]),
         (self, n) => self.data(n),
         self => self.data.length,
@@ -163,7 +160,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       When("Implicit conversion is in scope")
       import IsArraySyntax._
       Then("IsArray syntax should be available")
-      val c = implicitly[A1[Double] => IsArrayOps[A1[Double], Double]]
+      val c = implicitly[A1[Double] => IsArrayOps[A1, Double, Double]]
       assert(t1.data.zipWithIndex.forall(t => t1.getAtN(t._2) == t._1))
     }
   }
@@ -173,7 +170,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("An Is2d arraylike returns a value") {
       Given("An 2-d arraylike which returns a 1-d arraylike")
       case class A1[T](data: List[T])
-      implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
+      implicit def a1IsArray[T: IsElement] = IsArray[A1, T, T](
         self => A1[T](Nil: List[T]),
         (self, n) => self.data(n),
         self => self.data.length,
@@ -181,7 +178,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       //implicit def a1Is1d[T: Element] = Is1d[A1[T], T]
       case class A1OfA1[T](data: List[A1[T]])
-      implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+      implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1, T, A1[T]](
         self => A1OfA1[T](List(A1[T](Nil: List[T]))),
         (self, n) => self.data(n),
         self => self.data.length,
@@ -193,7 +190,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       
       When("Implementation of Is2d is attempted with Is1d implemented for the 1-d array")
       Then("It should compile")
-      implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
+      implicit def a1Is1d[T: IsElement] = Is1d[A1, T] 
       "implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]" should compile
     }
   }
@@ -201,21 +198,21 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("Multi-dimensional arrays") {
     import Dummy._
     case class A1[T](data: List[T])
-    implicit def a1IsArray[T: IsElement] = IsArray[A1[T], T](
+    implicit def a1IsArray[T: IsElement] = IsArray[A1, T, T](
       self => A1[T](Nil: List[T]),
       (self, n) => self.data(n),
       self => self.data.length,
       (self, o) => A1[T](o :: self.data),
     )
     case class A1OfA1[T](data: List[A1[T]])
-    implicit def a1ofa1IsArray[T: IsElement] = IsArray[A1OfA1[T], A1[T]](
+    implicit def a1ofa1IsArray[T: IsElement] = IsArray[A1OfA1, T, A1[T]](
       self => A1OfA1[T](List(A1[T](Nil: List[T]))),
       (self, n) => self.data(n),
       self => self.data.length,
       (self, o) => A1OfA1[T](o :: self.data),
     )
-    implicit def a1Is1d[T: IsElement] = Is1d[A1[T], T] 
-    implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1[T], A1[T]]
+    implicit def a1Is1d[T: IsElement] = Is1d[A1, T] 
+    implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1, T, A1[T]]
     scenario("A value is returned from a 2d-dimensional array using getAtN") {
       Given("A 1-dimensional arraylike, and a 2d list of 1d arraylike 2d array implementation")
       When("getAtN is called on a concrete instance of the 2d arraylike")
@@ -268,16 +265,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     val list1d = List1d[Double](values1d)
     val list2d = List2d[Double](values2d)
-    def checkGetILocWithInt[A, _E: IsBase](
-      a: A, f:(A, Int) => A,
-    ) (implicit aIsArr: IsArray[A] { type E = _E },
+    def checkGetILocWithInt[A[_], T, _S: IsBase](
+      a: A[T], f:(A[T], Int) => A[T],
+    ) (implicit aIsArr: IsArray[A, T] { type S = _S },
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
       (0 to a.length - 1).forall(n => f(a, n) == a.getAtN(n) :: a.getEmpty)
     }
-    def checkGetILocWithListInt[A, _E: IsBase](
-      a: A, f:(A, List[Int]) => A,
-    ) (implicit aIsArr: IsArray[A] { type E = _E },
+    def checkGetILocWithListInt[A[_], T, _S: IsBase](
+      a: A[T], f:(A[T], List[Int]) => A[T],
+    ) (implicit aIsArr: IsArray[A, T] { type S = _S },
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
       (0 to a.length - 2).forall(n => f(a, List(n, n + 1)) == { 
@@ -303,33 +300,33 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       import ArrayDefs.IsArraySyntax._
       When("getILoc is called with an Int on a 1d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
-      assert(checkGetILocWithInt[List1d[Double], Double](list1d, (l, i) => l.getILoc(i)))
+      assert(checkGetILocWithInt[List1d, Double, Double](list1d, (l, i) => l.getILoc(i)))
 
       When("getILoc is called with an Int on a 2d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
-      assert(checkGetILocWithInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i)))
+      assert(checkGetILocWithInt[List2d, Double, List1d[Double]](list2d, (l, i) => l.getILoc(i)))
     }
     scenario("getILoc is called with a List of Ints to return the appropriate elements") {
       import ArrayDefs.IsArraySyntax._
       When("getILoc is called with an List of Ints on a 1d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the references")
-      assert(checkGetILocWithListInt[List1d[Double], Double](list1d, (l, i) => l.getILoc(i)))
+      assert(checkGetILocWithListInt[List1d, Double, Double](list1d, (l, i) => l.getILoc(i)))
 
       When("getILoc is called with an List of Ints on a 2d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the references")
-      assert(checkGetILocWithListInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i)))
+      assert(checkGetILocWithListInt[List2d, Double, List1d[Double]](list2d, (l, i) => l.getILoc(i)))
     }
     scenario("getILoc is called with an HList of Ints to return the appropriate elements") {
       import ArrayDefs.IsArraySyntax._
       When("getILoc is called with an HList of Ints on a 1d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
       assert(
-        checkGetILocWithInt[List1d[Double], Double](list1d, (l, i) => l.getILoc(i :: HNil))
+        checkGetILocWithInt[List1d, Double, Double](list1d, (l, i) => l.getILoc(i :: HNil))
       )
       When("getILoc is called with an HList of Ints on a 2d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
       assert(
-        checkGetILocWithInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
+        checkGetILocWithInt[List2d, Double, List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
       )
     }
     scenario("getILoc is called with an HList of List[Int] to return the appropriate elements") {
@@ -337,12 +334,12 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       When("getILoc is called with an HList of List[Int] on a 1d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the references")
       assert(
-        checkGetILocWithListInt[List1d[Double], Double](list1d, (l, i) => l.getILoc(i :: HNil))
+        checkGetILocWithListInt[List1d, Double, Double](list1d, (l, i) => l.getILoc(i :: HNil))
       )
       When("getILoc is called with an HList of List[Int] on a 2d arraylike")
       Then("it returns a same-dimensional array with the top dimension reduced down to the references")
       assert(
-        checkGetILocWithListInt[List2d[Double], List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
+        checkGetILocWithListInt[List2d, Double, List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
       )
     }
   }
@@ -366,31 +363,31 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The IsUpdatable Typeclass") { 
-    import Dummy.Types._
-    import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
-    import ArrayDefs.IsUpdatableSyntax._
-    scenario("An Updatable array can implement IsUpdatable") {
-      {
-        When("An implicit conversion to IsUpdatable is in scope")
-        implicit def list1dIsUpdatable[T: IsElement] = new IsUpdatable[List1d[T], T, List1d] {
-          fgetEmpty = self => List1d[T](List()),
-          fgetAtN = (self, n) => self.data(n),
-          flength = self => self.data.length,
-          fcons = (self, elem) => List1d(elem :: self.data),
-        }
-        Then("Implicit conversion should occur")
-        "implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
-      }
-      {
-        When("An implicit conversion to IsUpdatable is in scope, based on IsArray")
-        import Dummy.IsArrayImplicits._
-        implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List1d[T], T, List1d]
-        Then("Implicit conversion should occur")
-        "implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
-      }
-    }
+  //feature("The IsUpdatable Typeclass") { 
+    //import Dummy.Types._
+    //import Dummy.Values._
+    //import ArrayDefs.IsArraySyntax._
+    //import ArrayDefs.IsUpdatableSyntax._
+    //scenario("An Updatable array can implement IsUpdatable") {
+      //{
+        //When("An implicit conversion to IsUpdatable is in scope")
+        //implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable[List1d, T, List1d[T]] (
+          //fgetEmpty = self => List1d[T](List()),
+          //fgetAtN = (self, n) => self.data(n),
+          //flength = self => self.data.length,
+          //fcons = (self, elem) => List1d(elem :: self.data),
+        //)
+        //Then("Implicit conversion should occur")
+        //"implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
+      //}
+      //{
+        //When("An implicit conversion to IsUpdatable is in scope, based on IsArray")
+        //import Dummy.IsArrayImplicits._
+        //implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List1d[T], T, List1d]
+        //Then("Implicit conversion should occur")
+        //"implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
+      //}
+    //}
     //scenario("IsUpdatable is used with .map for a 1d Array") {
       //import Dummy.IsArrayImplicits._
       //import Dummy.IsUpdatableImplicits._
@@ -399,7 +396,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       //ArrMap.mapIfEIsBase[List1d[Double], Double, Int]
       //val list1dInt = list1d.map((d: Double) => d.toInt)
     //}
-  }
+  //}
 
   //feature("An Updatable array can be updated with .setAtN") {
     //import Dummy._
@@ -416,11 +413,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     //}
   //}
 
-  feature("An Updatable array can be updated with .setILoc") {
-    scenario("A 1d array returns a same-size 1d array if .setILoc is used") {
-    }
-  }
-}
+  //feature("An Updatable array can be updated with .setILoc") {
+    //scenario("A 1d array returns a same-size 1d array if .setILoc is used") {
+    //}
+  //}
+//}
 
 
   //"Arr1d" should "have shape(0) == length" in {
@@ -484,4 +481,4 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       ////arr3d.loc(dim2.vals(2)) == Some(Arr2d[Dim0T, Dim1T, PositionsData]((dim0, dim1), dim2sliceat2))
     ////)
   ////}
-//}
+}
