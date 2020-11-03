@@ -76,8 +76,11 @@ object ArrayDefs {
   abstract class Reshapes[A[_], T] {self =>
     type S
     implicit val aIsArr: IsArray[A, T] { type S = self.S }
-    def flatten(a: A[T])(implicit flatten: Flatten[A, T]): List[T] = flatten.flatten(a)
-    def reshape[R](a: A[T], to: R)(implicit reshape: Reshape[A, T]): reshape.Out = reshape.reshape(a, to)
+    def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
+    def reshape[R](a: A[T], to: R)(implicit 
+      rs: Reshape[A, T, R],
+      fl: Flatten[A, T],
+    ): rs.Out = rs.reshape(fl.flatten(a), to)
   }
   object Reshapes {
     def apply[A[_], T, _S](implicit _aIsArr: IsArray[A, T] { type S = _S }): Reshapes[A, T] { type S = _S } =
@@ -92,9 +95,30 @@ object ArrayDefs {
       aRes: Reshapes[A, T] { type S = _S },
     ) { self =>
       def flatten(implicit flatten: Flatten[A, T]): List[T] = aRes.flatten(a)
-      def reshape[R](to: R)(implicit reshape: Reshape[A, T]) = aRes.reshape[R](a, to)
+      def reshape[R](to: R)(implicit rs: Reshape[A, T, R], fl: Flatten[A, T]) = aRes.reshape[R](a, to)
       //def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
     }
+  }
+
+  trait Reshape[A[_], T, R] {
+    type Out
+    def reshape[A[_], T](a: A[T], l: List[T], to: R): Out
+  }
+  object Reshape {
+    def instance[A[_], T, R, O](f: (List[_], R) => O): Reshape[A, T, R] = new Reshape[A, T, R] {
+      type Out = O
+      def reshape(a: A[T], l: List[_], ref: R): Out = f(l, ref)
+    }
+    implicit def reshapeHNil[A[_], T]: Reshape[A, T, HNil] = 
+      instance[A, T, HNil, A[T]]((s, r) => s)
+    implicit def reshapeHList[A[_], T, Hd, Tl <: HList]: Reshape[A, T, Hd #: Tl] = 
+      instance[A, T, HNil, A[T]]((s, r) => s)
+
+    //implicit def iLocForHList[A[_], T, Hd, Tl <: HList](implicit 
+      //isArr: IsArray[A, T],
+      //ilocHead: Lazy[GetILoc[A, T, Hd]],
+      //ilocTail: GetILoc[A, T, Tl],
+    //): GetILoc[A, T, Hd #: Tl] = instance((s, r) => ilocHead.value.iloc(s, r.head))
   }
 
   trait Flatten[A[_], T] { self =>
@@ -115,12 +139,6 @@ object ArrayDefs {
     }
   }
 
-  trait Reshape[A[_], T] {
-    type Out
-    def reshape[R](a: A[T], to: R): Out
-  }
-  object Reshape {
-  }
 
   //abstract class IsUpdatable[A[_], T](implicit 
     //val aIsArr: IsArray[A, T],

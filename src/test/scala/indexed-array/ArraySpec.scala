@@ -391,9 +391,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       When(".flatten is called on a 1d Array")
       Then("A List[T] should be returned")
       assert(list1d.flatten == list1d.data)
+      When(".flatten is called on a 2d Array")
+      Then("A List[T] should be returned")
+      assert(list2d.flatten == list2d.data.flatten)
       When(".flatten is called on a 3d Array")
       Then("A List[T] should be returned")
       assert(list3d.flatten == list3d.data.flatten.flatten)
+    }
+    scenario(".reshape is called on a 1d array") {
+      When(".reshape with (1) is called on a 2d array")
+      
     }
   }
 
