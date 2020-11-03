@@ -1,7 +1,7 @@
 package sportarray
 
 //import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
-import Skeleton.{IsBase, PositionsData}
+import Skeleton.{IsBase, IsElement, PositionsData}
 import IndicesObj.Index
 
 import java.time.LocalDate
@@ -75,11 +75,21 @@ object ArrayDefs {
     }
   }
 
-  abstract class Reshapes[A[_], T, R](implicit 
-    val aIsArr: IsArray[A, T],
+  abstract class Reshapes[A[_], T, _S](implicit 
+    val aIsArr: IsArray[A, T] { type S = _S },
   ) { 
-    def flatten(a: A[T])(implicit flatten: Flatten[A, T, aIsArr.S]): List[T] = flatten.flatten(a)
-    def reshape(a: A[T], to: R)(implicit reshape: Reshape[A, T]): reshape.Out = reshape.reshape(a, to)
+    def flatten(a: A[T])(implicit flatten: Flatten[A, T, _S]): List[T] = flatten.flatten(a)
+    def reshape[R](a: A[T], to: R)(implicit reshape: Reshape[A, T]): reshape.Out = reshape.reshape(a, to)
+  }
+  object ReshapesSyntax {
+    implicit class ReshapesOps[A[_], T, _S](a: A[T])(implicit 
+      aIsArr: IsArray[A, T] { type S = _S },
+      aRes: Reshapes[A, T, _S],
+    ) { self =>
+      def flatten(a: A[T])(implicit flatten: Flatten[A, T, _S]): List[T] = aRes.flatten(a)
+      def reshape[R](to: R)(implicit reshape: Reshape[A, T]) = aRes.reshape[R](a, to)
+      //def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
+    }
   }
 
   trait Flatten[A[_], T, S] {

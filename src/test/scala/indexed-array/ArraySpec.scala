@@ -70,6 +70,18 @@ object Dummy {
       fcons = (self, elem) => List3d(elem.data :: self.data),
     )
   }
+  object ReshapesImplicits {
+    import Types._
+    import Values._
+    import ArrayDefs._
+    import IsArrayImplicits._
+    implicit def list1dReshapes[T: IsElement]: Reshapes[List1d, T, T] = 
+      new Reshapes[List1d, T, T] {}
+    implicit def list2dReshapes[T: IsElement]: Reshapes[List2d, T, List1d[T]] = 
+      new Reshapes[List2d, T, List1d[T]] {}
+    implicit def list3dReshapes[T: IsElement]: Reshapes[List3d, T, List2d[T]] = 
+      new Reshapes[List3d, T, List2d[T]] {}
+  }
   //object IsUpdatableImplicits {
     //import Types._
     //import Values._
@@ -360,6 +372,24 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       When(".length is run on list3d")
       Then("It should return the correct length")
       assert(list3d.length == list3d.data.length)
+    }
+  }
+
+  feature("The Reshapes Typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.ReshapesSyntax._
+    scenario("An array can implement Reshapes") {
+      {
+        When("An implicit conversion to IsUpdatable is in scope")
+        import Dummy.ReshapesImplicits._
+        Then("Implicit conversion should occur")
+        val d = implicitly[List1d[Double] => IsArrayOps[List1d, Double, Double]]
+        val c = implicitly[List1d[Double] => ReshapesOps[List1d, Double, Double]]
+        //"implicitly[List1d[Double] => ReshapesOps[List1d, Double, Double]]" should compile
+      }
     }
   }
 
