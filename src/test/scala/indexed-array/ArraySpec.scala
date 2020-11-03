@@ -381,15 +381,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.ReshapesSyntax._
+    import Dummy.ReshapesImplicits._
     scenario("An array can implement Reshapes") {
-      {
-        When("An implicit conversion to IsUpdatable is in scope")
-        import Dummy.ReshapesImplicits._
-        Then("Implicit conversion should occur")
-        val d = implicitly[List1d[Double] => IsArrayOps[List1d, Double, Double]]
-        val c = implicitly[List1d[Double] => ReshapesOps[List1d, Double, Double]]
-        //"implicitly[List1d[Double] => ReshapesOps[List1d, Double, Double]]" should compile
-      }
+      When("An implicit conversion to IsUpdatable is in scope")
+      Then("Implicit conversion should occur")
+      "implicitly[List1d[Double] => ReshapesOps[List1d, Double, Double]]" should compile
+    }
+    scenario(".flatten is called") {
+      When(".flatten is called on a 1d Array")
+      Then("A List[T] should be returned")
+      assert(list1d.flatten == list1d.data)
     }
   }
 

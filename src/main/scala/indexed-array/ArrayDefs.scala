@@ -39,7 +39,7 @@ object ArrayDefs {
     // same shape should be fine.
     def ++[B[_]](self: A[T], other: B[T])(implicit bIsArr: IsArray[B, T]): A[T] = ???
     def getILoc[R](self: A[T], r: R)(implicit getILoc: GetILoc[A, T, R]): A[T] = getILoc.iloc(self, r)
-    def toList(self: A[T]): List[S] = (for(i <- 0 to length(self)) yield (getAtN(self, i))).toList
+    def toList(self: A[T]): List[S] = (for(i <- 0 to length(self) - 1) yield (getAtN(self, i))).toList
     def ndims(self: A[T]): Int = ???
     def shape(self: A[T]): List[Int] = ???
   }
@@ -77,7 +77,7 @@ object ArrayDefs {
 
   abstract class Reshapes[A[_], T, _S](implicit 
     val aIsArr: IsArray[A, T] { type S = _S },
-  ) { 
+  ) {self =>
     def flatten(a: A[T])(implicit flatten: Flatten[A, T, _S]): List[T] = flatten.flatten(a)
     def reshape[R](a: A[T], to: R)(implicit reshape: Reshape[A, T]): reshape.Out = reshape.reshape(a, to)
   }
@@ -86,26 +86,26 @@ object ArrayDefs {
       aIsArr: IsArray[A, T] { type S = _S },
       aRes: Reshapes[A, T, _S],
     ) { self =>
-      def flatten(a: A[T])(implicit flatten: Flatten[A, T, _S]): List[T] = aRes.flatten(a)
+      def flatten(implicit flatten: Flatten[A, T, _S]): List[T] = aRes.flatten(a)
       def reshape[R](to: R)(implicit reshape: Reshape[A, T]) = aRes.reshape[R](a, to)
       //def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
     }
   }
 
-  trait Flatten[A[_], T, S] {
+  trait Flatten[A[_], T, S] { self =>
     def flatten(a: A[T]): List[T]
   }
   object Flatten {
-    def flattenIfSIsT[A[_], T, _S](implicit 
-      aRes: IsArray[A, T] { type S = T },
-    ): Flatten[A, T, _S] = new Flatten[A, T, _S] {
-      def flatten(a: A[T]): List[T] = aRes.toList(a)
+    implicit def flattenIfSIsT[A[_], T, _S](implicit 
+      aIsArr: IsArray[A, T] { type S = T },
+    ): Flatten[A, T, T] = new Flatten[A, T, T] {
+      def flatten(a: A[T]): List[T] = aIsArr.toList(a)
     }
-    def flattenIfSIsNotT[A[_], T, _S[_]](implicit 
-      aRes: IsArray[A, T] { type S = _S[T] },
-      sRes: IsArray[_S, T], 
+    implicit def flattenIfSIsNotT[A[_], T, _S[_]](implicit 
+      aIsArr: IsArray[A, T] { type S = _S[T] },
+      sIsArr: IsArray[_S, T], 
     ): Flatten[A, T, _S[T]] = new Flatten[A, T, _S[T]] {
-      def flatten(a: A[T]): List[T] = aRes.toList(a).map(sRes.flatten(_)).flatten
+      def flatten(a: A[T]): List[T] = aIsArr.toList(a).map(sIsArr.flatten(_)).flatten
     }
   }
 
