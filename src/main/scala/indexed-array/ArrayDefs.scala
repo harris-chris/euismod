@@ -32,7 +32,7 @@ object ArrayDefs {
     def length(self: A[T]): Int
     def cons(self: A[T], other: S): A[T]
 
-    def ::[R](self: A[T], other: R)(implicit c: Cons[A, T, R]): c.Out = c.cons(self, other)  
+    def ::(a: A[T], o: S): A[T] = cons(a, o)  
     def flatten(self: A[T]): List[T] = ???
     def reshape[O](self: A[T], shape: List[Int]): Option[O] = ??? 
     // for ++, we do not want to specify the actual implementation of other; any IsArray with the
@@ -62,15 +62,15 @@ object ArrayDefs {
   }
 
   object IsArraySyntax {
-    implicit class IsArrayOps[A[_], T, _S](self: A[T])(implicit 
+    implicit class IsArrayOps[A[_], T, _S](a: A[T])(implicit 
       val tc: IsArray[A, T] { type S = _S },
     ) {
-      def getEmpty = tc.getEmpty(self)
-      def getAtN(n: Int): _S = tc.getAtN(self, n)
-      def getILoc[R](r: R)(implicit getILoc: GetILoc[A, T, R]) = tc.getILoc(self, r)
-      def ::[R](other: R)(implicit cons: Cons[A, T, R]) = cons.cons(self, other)
-      def length: Int = tc.length(self)
-      def toList: List[_S] = tc.toList(self)
+      def getEmpty = tc.getEmpty(a)
+      def getAtN(n: Int): _S = tc.getAtN(a, n)
+      def getILoc[R](r: R)(implicit getILoc: GetILoc[A, T, R]) = tc.getILoc(a, r)
+      def ::(other: _S) = tc.cons(a, other)
+      def length: Int = tc.length(a)
+      def toList: List[_S] = tc.toList(a)
       //def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
     }
   }
@@ -175,22 +175,6 @@ object ArrayDefs {
       ////)
     ////}
   //}
-
-  trait Cons[A[_], T, O] {
-    type Out
-    def cons(self: A[T], other: O): Out
-  }
-  object Cons {
-    def instance[A[_], T, O, _Out](f: (A[T], O) => _Out): Cons[A, T, O] = new Cons[A, T, O] {
-      type Out = _Out
-      def cons(self: A[T], other: O): Out = f(self, other)
-    }
-    implicit def consForSameT[A[_], T, _S](implicit aIsArr: IsArray[A, T] { type S = _S }) = 
-      instance[A, T, _S, A[T]] (
-        (s, o) => aIsArr.cons(s, o)
-      )
-  }
-
 
   trait GetILoc[A[_], T, R] {
     def iloc(self: A[T], ref: R): A[T]
