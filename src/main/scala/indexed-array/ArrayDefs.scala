@@ -76,7 +76,7 @@ object ArrayDefs {
   abstract class Reshapes[A[_], T] {self =>
     type S
     implicit val aIsArr: IsArray[A, T] { type S = self.S }
-    def flatten(a: A[T])(implicit flatten: Flatten[A, T, S]): List[T] = flatten.flatten(a)
+    def flatten(a: A[T])(implicit flatten: Flatten[A, T]): List[T] = flatten.flatten(a)
     def reshape[R](a: A[T], to: R)(implicit reshape: Reshape[A, T]): reshape.Out = reshape.reshape(a, to)
   }
   object Reshapes {
@@ -91,27 +91,28 @@ object ArrayDefs {
       aIsArr: IsArray[A, T] { type S = _S },
       aRes: Reshapes[A, T] { type S = _S },
     ) { self =>
-      def flatten(implicit flatten: Flatten[A, T, _S]): List[T] = aRes.flatten(a)
+      def flatten(implicit flatten: Flatten[A, T]): List[T] = aRes.flatten(a)
       def reshape[R](to: R)(implicit reshape: Reshape[A, T]) = aRes.reshape[R](a, to)
       //def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
     }
   }
 
-  trait Flatten[A[_], T, S] { self =>
+  trait Flatten[A[_], T] { self =>
     def flatten(a: A[T]): List[T]
   }
   object Flatten {
-    implicit def flattenIfSIsT[A[_], T, _S](implicit 
+    implicit def flattenIfSIsT[A[_], T: IsElement](implicit 
       aIsArr: IsArray[A, T] { type S = T },
-    ): Flatten[A, T, T] = new Flatten[A, T, T] {
+    ): Flatten[A, T] = new Flatten[A, T] {
       def flatten(a: A[T]): List[T] = aIsArr.toList(a)
     }
-    //implicit def flattenIfSIsNotT[A[_], T, _S[_]](implicit 
-      //aIsArr: IsArray[A, T] { type S = _S[T] },
-      //sRes: Reshapes[_S, T], 
-    //): Flatten[A, T, _S[T]] = new Flatten[A, T, _S[T]] {
-      //def flatten(a: A[T]): List[T] = aIsArr.toList(a).map(sRes.flatten(_)).flatten
-    //}
+    implicit def flattenIfSIsNotT[A[_], T, _S[T]](implicit 
+      aIsArr: IsArray[A, T] { type S = _S[T] },
+      sRes: Reshapes[_S, T], 
+      sFl: Flatten[_S, T],
+    ): Flatten[A, T] = new Flatten[A, T] {
+      def flatten(a: A[T]): List[T] = aIsArr.toList(a).map(sRes.flatten(_)).flatten 
+    }
   }
 
   trait Reshape[A[_], T] {

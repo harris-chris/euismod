@@ -393,7 +393,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(list1d.flatten == list1d.data)
       When(".flatten is called on a 3d Array")
       Then("A List[T] should be returned")
-      assert(list3d.flatten == list3d.data.flatten)
+      assert(list3d.flatten == list3d.data.flatten.flatten)
     }
   }
 
