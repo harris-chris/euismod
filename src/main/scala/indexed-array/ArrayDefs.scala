@@ -40,6 +40,7 @@ object ArrayDefs {
     def toList(self: A[T]): List[S] = (for(i <- 0 to length(self) - 1) yield (getAtN(self, i))).toList
     def ndims(self: A[T]): Int = ???
     def shape(self: A[T]): List[Int] = ???
+    def getArrays(self: A[T])(implicit gs: GetArrs[A, T, S]): HList = gs.getArrs(self, HNil)
   }
   object IsArray {
     def apply[A[_], T, _S](
@@ -73,14 +74,35 @@ object ArrayDefs {
     }
   }
 
+  trait GetArrs[A[_], T, _S] {self =>
+    def getArrs(a: A[T], l: HList): HList
+  }
+  object GetArrs {
+    implicit def getArrsIfSIsEle[A[_], T, _S](implicit 
+      sIsEle: IsElement[_S],
+      aIsArr: IsArray[A, T] { type S = _S },
+    ): GetArrs[A, T, _S] = new GetArrs[A, T, _S] {
+      def getArrs(a: A[T], l: HList): HList = aIsArr.getEmpty(a) :: l
+    }
+    implicit def getArrsIfSIsArr[A[_], T, _S[_], S1](implicit 
+      aIsArr: IsArray[A, T] { type S = _S[T] },
+      gaForS: GetArrs[_S, T, S1],
+    ): GetArrs[A, T, _S[T]] = new GetArrs[A, T, _S[T]] {
+      def getArrs(a: A[T], l: HList): HList = gaForS.getArrs(
+        aIsArr.getAtN(a, 0), 
+        aIsArr.getEmpty(a) :: l
+      )
+    }
+  }
+
   abstract class Reshapes[A[_], T] {self =>
     type S
     implicit val aIsArr: IsArray[A, T] { type S = self.S }
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
-    def reshape[R](a: A[T], to: R)(implicit 
-      rs: Reshape[A, T, R],
-      fl: Flatten[A, T],
-    ): rs.Out = rs.reshape(fl.flatten(a), to)
+    //def reshape[R](a: A[T], to: R)(implicit 
+      //rs: Reshape[A, T, R],
+      //fl: Flatten[A, T],
+    //): rs.Out = rs.reshape(fl.flatten(a), to)
   }
   object Reshapes {
     def apply[A[_], T, _S](implicit _aIsArr: IsArray[A, T] { type S = _S }): Reshapes[A, T] { type S = _S } =
@@ -95,31 +117,39 @@ object ArrayDefs {
       aRes: Reshapes[A, T] { type S = _S },
     ) { self =>
       def flatten(implicit flatten: Flatten[A, T]): List[T] = aRes.flatten(a)
-      def reshape[R](to: R)(implicit rs: Reshape[A, T, R], fl: Flatten[A, T]) = aRes.reshape[R](a, to)
+      //def reshape[R](to: R)(implicit rs: Reshape[A, T, R], fl: Flatten[A, T]) = aRes.reshape[R](a, to)
       //def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
     }
   }
 
-  trait Reshape[A[_], T, R] {
-    type Out
-    def reshape[A[_], T](a: A[T], l: List[T], to: R): Out
-  }
-  object Reshape {
-    def instance[A[_], T, R, O](f: (List[_], R) => O): Reshape[A, T, R] = new Reshape[A, T, R] {
-      type Out = O
-      def reshape(a: A[T], l: List[_], ref: R): Out = f(l, ref)
-    }
-    implicit def reshapeHNil[A[_], T]: Reshape[A, T, HNil] = 
-      instance[A, T, HNil, A[T]]((s, r) => s)
-    implicit def reshapeHList[A[_], T, Hd, Tl <: HList]: Reshape[A, T, Hd #: Tl] = 
-      instance[A, T, HNil, A[T]]((s, r) => s)
+  //trait Reshape[A[_], _S[_], T, R] {
+    //// lt: List[T], empty once bottom level has been put in place
+    //// ls: List[_S], list of populated IsArray objs passed up from level below
+    //// la: HList[_: IsArray], list of empty Array objects to be filled using List[_S]
+    //// to: R, reference 
+    //// la has to be 1onger than R (?)
+    //def reshape(a: A[T], ls: List[_S[T]], la: HList, to: HList): Option[A[T]]
+  //}
+  //object Reshape {
+    //def instance[A[_], _S[_], T, R <: HList](
+      //f: (A[T], List[_S[T]], HList, R) => Option[A[T]]
+    //): Reshape[A, _S, T, R] = new Reshape[A, _S, T, R] {
+      //def reshape(
+        //a: A[T], ls: List[_S[T]], la: HList, ref: R,
+      //): Option[A[T]] = f(a, ls, la, ref)
+    //}
+    //implicit def reshapeHNilIfLIsNil[A[_], _S[_], T]: Reshape[A, _S, T, HNil] = 
+      //instance[A, _S, T, HNil]((a, ls, la, r) => Some(a))
+    //implicit def reshapeHList[A[_], _S[_], T, RHd, RTl <: HList]: Reshape[A, _S, T, RHd #: RTl] = 
+      //instance[A, _S, T, RHd #: RTl]((a, ls, la, r) => 
+        //s)
 
-    //implicit def iLocForHList[A[_], T, Hd, Tl <: HList](implicit 
-      //isArr: IsArray[A, T],
-      //ilocHead: Lazy[GetILoc[A, T, Hd]],
-      //ilocTail: GetILoc[A, T, Tl],
-    //): GetILoc[A, T, Hd #: Tl] = instance((s, r) => ilocHead.value.iloc(s, r.head))
-  }
+    ////implicit def iLocForHList[A[_], T, Hd, Tl <: HList](implicit 
+      ////isArr: IsArray[A, T],
+      ////ilocHead: Lazy[GetILoc[A, T, Hd]],
+      ////ilocTail: GetILoc[A, T, Tl],
+    ////): GetILoc[A, T, Hd #: Tl] = instance((s, r) => ilocHead.value.iloc(s, r.head))
+  //}
 
   trait Flatten[A[_], T] { self =>
     def flatten(a: A[T]): List[T]
