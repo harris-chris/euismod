@@ -82,14 +82,14 @@ object ArrayDefs {
     implicit def getArrsIfSIsEle[A[_], T, _S, L <: HList](implicit 
       sIsEle: IsElement[_S],
       aIsArr: IsArray[A, T] { type S = _S },
-    ): GetArrs[A, T, L] = new GetArrs[A, T, L] {
+    ): GetArrs[A, T, L] { type Out = A[T] #: L } = new GetArrs[A, T, L] {
       type Out = A[T] #: L
       def getArrs(a: A[T], l: L): Out = shapeless.::(aIsArr.getEmpty(a), l)
     }
     implicit def getArrsIfSIsArr[A[_], T, _S[_], S1, L <: HList](implicit 
       aIsArr: IsArray[A, T] { type S = _S[T] },
       gaForS: GetArrs[_S, T, A[T] #: L],
-    ): GetArrs[A, T, L] = new GetArrs[A, T, L] {
+    ): GetArrs[A, T, L] { type Out = gaForS.Out } = new GetArrs[A, T, L] {
       type Out = gaForS.Out
       def getArrs(a: A[T], l: L): gaForS.Out = gaForS.getArrs(
         aIsArr.getAtN(a, 0), 
