@@ -10,6 +10,7 @@ import sportdate.{IsSportDateInstances, IsSportDateSyntax}
 
 import Skeleton.{IsBase, IsElement}
 import IndicesObj._
+
 import shapeless._
 //import shapeless.test.{illTyped}
 import shapeless.ops.hlist._
@@ -271,12 +272,23 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("Using the getILoc method to reduce down an IsArray using integer references") {
+  feature("getArrays") {
+    import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    val list1d = List1d[Double](values1d)
-    val list2d = List2d[Double](values2d)
+    scenario(".getArrays is called") {
+      When(".getArrays is called on a 1d array")
+      Then("It should return an empty version of itself")
+      val hlist = implicitly[IsArray[List1d, Double]].getArrays(list1d)
+      assert(hlist.head == list1d.getEmpty)
+    }
+  }
+
+  feature("getILoc") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
     def checkGetILocWithInt[A[_], T, _S: IsBase](
       a: A[T], f:(A[T], Int) => A[T],
     ) (implicit aIsArr: IsArray[A, T] { type S = _S },

@@ -40,7 +40,7 @@ object ArrayDefs {
     def toList(self: A[T]): List[S] = (for(i <- 0 to length(self) - 1) yield (getAtN(self, i))).toList
     def ndims(self: A[T]): Int = ???
     def shape(self: A[T]): List[Int] = ???
-    def getArrays(self: A[T])(implicit gs: GetArrs[A, T, S]): HList = gs.getArrs(self, HNil)
+    def getArrays(self: A[T])(implicit gs: GetArrs[A, T, HNil]): gs.Out = gs.getArrs(self, HNil)
   }
   object IsArray {
     def apply[A[_], T, _S](
@@ -74,21 +74,24 @@ object ArrayDefs {
     }
   }
 
-  trait GetArrs[A[_], T, _S] {self =>
-    def getArrs(a: A[T], l: HList): HList
+  sealed trait GetArrs[A[_], T, L <: HList] {self =>
+    type Out <: HList
+    def getArrs(a: A[T], l: L): Out
   }
   object GetArrs {
-    implicit def getArrsIfSIsEle[A[_], T, _S](implicit 
+    implicit def getArrsIfSIsEle[A[_], T, _S, L <: HList](implicit 
       sIsEle: IsElement[_S],
       aIsArr: IsArray[A, T] { type S = _S },
-    ): GetArrs[A, T, _S] = new GetArrs[A, T, _S] {
-      def getArrs(a: A[T], l: HList): HList = aIsArr.getEmpty(a) :: l
+    ): GetArrs[A, T, L] = new GetArrs[A, T, L] {
+      type Out = A[T] #: L
+      def getArrs(a: A[T], l: L): Out = shapeless.::(aIsArr.getEmpty(a), l)
     }
-    implicit def getArrsIfSIsArr[A[_], T, _S[_], S1](implicit 
+    implicit def getArrsIfSIsArr[A[_], T, _S[_], S1, L <: HList](implicit 
       aIsArr: IsArray[A, T] { type S = _S[T] },
-      gaForS: GetArrs[_S, T, S1],
-    ): GetArrs[A, T, _S[T]] = new GetArrs[A, T, _S[T]] {
-      def getArrs(a: A[T], l: HList): HList = gaForS.getArrs(
+      gaForS: GetArrs[_S, T, A[T] #: L],
+    ): GetArrs[A, T, L] = new GetArrs[A, T, L] {
+      type Out = gaForS.Out
+      def getArrs(a: A[T], l: L): gaForS.Out = gaForS.getArrs(
         aIsArr.getAtN(a, 0), 
         aIsArr.getEmpty(a) :: l
       )
