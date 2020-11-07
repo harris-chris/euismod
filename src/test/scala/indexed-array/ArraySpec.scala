@@ -12,6 +12,7 @@ import Skeleton.{IsBase, IsElement}
 import IndicesObj._
 
 import shapeless._
+import shapeless.{HList, HNil, Lazy, :: => #:}
 //import shapeless.test.{illTyped}
 import shapeless.ops.hlist._
 
@@ -415,10 +416,14 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       Then("A List[T] should be returned")
       assert(list3d.flatten == list3d.data.flatten.flatten)
     }
-    scenario(".reshape is called on a 1d array") {
-      When(".reshape with (1) is called on a 2d array")
+    scenario(".reshape is called") {
+      When(".reshape with (1) is called on a 1d array")
       Then("A 1d array with should be returned")
-      assert(list2d.reshape(1).toList = list2d.flatten)  
+      import ArrayDefs.ReshapeRT._
+      val isArr = implicitly[IsArray[List1d, Double] { type S = Double }]
+      val ga = the[GetArrs[List1d, Double, HNil] { type Out = List1d[Double] :: HNil}]
+      val rs = implicitly[ReshapeRT[Double, List1d[Double] :: HNil]] 
+      //assert(list1d.reshape(1).toList = list1d)  
     }
   }
 
