@@ -419,11 +419,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario(".reshape is called") {
       When(".reshape with (1) is called on a 1d array")
       Then("A 1d array with should be returned")
-      import ArrayDefs.ReshapeRT._
+      import ArrayDefs.ArrFromListRT._
+      import ArrayDefs.ReshapesSyntax._
       val isArr = implicitly[IsArray[List1d, Double] { type S = Double }]
-      val ga = the[GetArrs[List1d, Double, HNil] { type Out = List1d[Double] :: HNil}]
-      val rs = implicitly[ReshapeRT[Double, List1d[Double] :: HNil]] 
-      //assert(list1d.reshape(1).toList = list1d)  
+      val rshlist = implicitly[ArrFromListRT[Double, List1d[Double] :: HNil]]
+      val fl = implicitly[Flatten[List1d, Double]]
+      val ga = implicitly[GetArrs[List1d, Double, HNil]{ type Out = List1d[Double] :: HNil }] 
+      val rs = implicitly[ArrFromListRT[Double, List1d[Double] :: HNil]]
+      val l1 = implicitly[Reshapes[List1d, Double] { type S = Double }].reshape[
+        List1d[Double] :: HNil](
+        list1d, 1)(fl, ga, rs)
     }
   }
 
