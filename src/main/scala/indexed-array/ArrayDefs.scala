@@ -104,10 +104,14 @@ object ArrayDefs {
     type S
     implicit val aIsArr: IsArray[A, T] { type S = self.S }
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
-    def reshape[R](a: A[T], to: R)(implicit 
-      rs: Reshape[A, T, R],
+    def reshape[R, ArrHd, ArrTl <: HList](a: A[T], width: Int)(implicit 
       fl: Flatten[A, T],
-    ): rs.Out = rs.reshape(fl.flatten(a), to)
+      ga: GetArrs[A, T, HNil] { type Out = ArrHd :: ArrTl },
+      rs: ReshapeRT[T, ArrHd, ArrTl],
+    ) = {
+      ???
+    }
+
   }
   object Reshapes {
     def apply[A[_], T, _S](implicit _aIsArr: IsArray[A, T] { type S = _S }): Reshapes[A, T] { type S = _S } =
@@ -127,43 +131,50 @@ object ArrayDefs {
     }
   }
 
-  trait ReshapeRT[A, _S, LA <: HList] {
+  trait ReshapeRT[_S, Hd, Tl <: HList] {
     // lt: List[T], empty once bottom level has been put in place
     // ls: List[_S], list of populated IsArray objs passed up from level below
     // la: HList[_: IsArray], list of empty Array objects to be filled using List[_S]
     // to: R, reference 
     // la has to be 1onger than R (?)
-    def reshape(ls: List[_S], la: LA, width: Int): Option[A]
+    type Out 
+    def reshape(ls: List[_S], la: Hd :: Tl, width: Int): Option[Hd]
   }
   object ReshapeRT {
-    def instance[A, _S, LA <: HList](
-      f: (List[_S], LA, Int) => Option[A]
-    ): ReshapeRT[A, _S, LA] = new ReshapeRT[A, _S, LA] {
+    def instance[_S, Hd, Tl <: HList, O](
+      f: (List[_S], Hd :: Tl, Int) => O
+    ): ReshapeRT[_S, Hd, Tl] { type Out = O } = new ReshapeRT[_S, Hd, Tl] {
+      type Out = O
       def reshape(
-        ls: List[_S], la: LA, width: Int,
-      ): Option[A] = f(ls, la, width)
+        ls: List[_S], la: Hd :: Tl, width: Int,
+      ): Out = f(ls, la, width)
     }
-    implicit def ifLAIsHNil[A, _S, T]: ReshapeRT[A, A, HNil] = 
-      instance[A, A, HNil]((ls, la, r) => ls.length match {
+    implicit def ifLAIsHNil[A]: ReshapeRT[A, A, HNil] { type Out = Option[A] } = 
+      instance[A, A, HNil, Option[A]]((ls, la, r) => ls.length match {
         case 1 => Some(ls(1))
         case _ => None
       })
-    implicit def ifLAIsHList[A, _S, T, Hd, Tl <: HList, S1](implicit 
-      rsForS: ReshapeRT[Hd, _S, Tl],   
-    ): ReshapeRT[A, _S, Hd :: Tl] = instance[A, _S, Hd :: Tl]((ls, la, r) => {})
+    implicit def ifLAIsHList[_S, T, Hd, TlHd, TlTl <: HList](implicit 
+      hIsABs: IsArrBase[Hd, T] { type S = _S },
+      rsForS: ReshapeRT[Hd, TlHd, TlTl],   
+    ): ReshapeRT[_S, Hd, TlHd :: TlTl] { type Out = Option[TlHd] } = 
+    instance[_S, Hd, TlHd :: TlTl, Option[TlHd]]((ls, la, w) => {
+      val thisA: Hd = la.head
+      val thisArrs: List[Hd] = createArrs[Hd, T, _S](thisA, Nil, ls, w)
+      rsForS.reshape(thisArrs, la.tail, w)
+    })
 
-    def createArrs[A, T](
-      aEmpty: A, as: List[A], l: List[T], width: Int,
-    )(implicit aIsArr: IsArrBase[A, T] { type S = T }): List[A] = 
+    def createArrs[A, T, _S](
+      aEmpty: A, as: List[A], l: List[_S], width: Int,
+    )(implicit aIsABs: IsArrBase[A, T] { type S = _S }): List[A] = 
       (width, l.length) match {
         case (0, 0) => as
         case (_, _) => {
           val (ths, rst) = l.splitAt(width)
-          val thsA: A = ths.foldLeft(aEmpty)((s, o) => aIsArr.cons(s, o))
-          createArrs[A, T](aEmpty, thsA :: as, rst, width)
+          val thsA: A = ths.foldLeft(aEmpty)((s, o) => aIsABs.cons(s, o))
+          createArrs[A, T, _S](aEmpty, thsA :: as, rst, width)
         }
       }
-
   }
 
   trait Flatten[A[_], T] { self =>
