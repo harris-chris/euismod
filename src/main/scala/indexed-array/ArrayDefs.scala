@@ -86,7 +86,7 @@ object ArrayDefs {
       aIsABs: IsArrBase[A, T] { type S = _S },
     ): GetArrs[A, T, L] { type Out = A :: L } = new GetArrs[A, T, L] {
       type Out = A :: L
-      def getArrs(a: A, l: L): Out = shapeless.::(aIsABs.getEmpty(a), l)
+      def getArrs(a: A, l: L): Out = aIsABs.getEmpty(a) :: l
     }
     implicit def getArrsIfSIsArr[A, T, _S, L <: HList](implicit 
       aIsArr: IsArrBase[A, T] { type S = _S },
@@ -110,7 +110,7 @@ object ArrayDefs {
       rs: ArrFromListRT[T, GAOut],
     ): rs.Out = {
       val listT: List[T] = fl.flatten(a)
-      val arrHlist = ga.getArrs(a, HNil)
+      val arrHlist: GAOut = ga.getArrs(a, HNil)
       rs.fromList(listT, arrHlist, width)
     }
   }
@@ -137,6 +137,7 @@ object ArrayDefs {
   }
 
   trait ArrFromListRT[_S, Arrs <: HList] {
+    // for all elements of the hlist, you compose the array from IsArray[H0, T] { type S = H1 }
     // lt: List[T], empty once bottom level has been put in place
     // ls: List[_S], list of populated IsArray objs passed up from level below
     // la: HList[_: IsArray], list of empty Array objects to be filled using List[_S]
@@ -146,31 +147,27 @@ object ArrayDefs {
     def fromList(ls: List[_S], la: Arrs, width: Int): Out
   }
   object ArrFromListRT {
-    def instance[_S, L <: HList, O](
-      f: (List[_S], L, Int) => O
-    ): ArrFromListRT[_S, L] { type Out = O } = new ArrFromListRT[_S, L] {
-      type Out = O
-      def fromList(
-        ls: List[_S], la: L, width: Int,
-      ): Out = f(ls, la, width)
-    }
-    implicit def ifLAIsSingleElem[_S, T, Hd]( implicit 
-      hIsABs: IsArrBase[Hd, T] { type S = _S },
-      _sIsEle: IsElement[_S],
-    ): ArrFromListRT[_S, Hd :: HNil] { type Out = Option[Hd] } = 
-      instance[_S, Hd :: HNil, Option[Hd]]((ls, la, r) => 
-        Some(ls.reverse.foldLeft(la.head)((s, o) => hIsABs.cons(s, o)))
+    implicit def ifLAIsSingleElem[T, _S, H0]( implicit 
+      hIsABs: IsArrBase[H0, T] { type S = _S },
+    ): ArrFromListRT[_S, H0 :: HNil] { type Out = Option[H0] } = 
+    new ArrFromListRT[_S, H0 :: HNil] {
+      type Out = Option[H0] 
+      def fromList(ls: List[_S], la: H0 :: HNil, w: Int): Out = Some(
+        ls.reverse.foldLeft(la.head)((s, o) => hIsABs.cons(s, o))
       )
-    implicit def ifLAIsHList[_S, T, Hd, TlHd, TlTl <: HList](implicit 
-      hIsABs: IsArrBase[Hd, T] { type S = _S },
-      rsForS: ArrFromListRT[Hd, TlHd :: TlTl] { type Out = Option[TlHd] },   
-    ): ArrFromListRT[_S, Hd :: TlHd :: TlTl] { type Out = Option[TlHd] } = 
-    instance[_S, Hd :: TlHd :: TlTl, Option[TlHd]]((ls, la, w) => {
-      val thisA: Hd = la.head
-      val thisArrs: List[Hd] = createArrs[Hd, T, _S](thisA, Nil, ls, w)
-      rsForS.fromList(thisArrs, la.tail, w)
-    })
-
+    }
+    implicit def ifLAIsHList[T, _S, H0, H1, H2p <: HList](implicit 
+      hIsABs: IsArrBase[H0, T] { type S = _S},
+      rsForNxt: ArrFromListRT[H0, H1 :: H2p],   
+    ): ArrFromListRT[_S, H0 :: H1 :: H2p] { type Out = rsForNxt.Out } = 
+    new ArrFromListRT[_S, H0 :: H1 :: H2p] { 
+      type Out = rsForNxt.Out 
+      def fromList(ls: List[_S], la: H0 :: H1 :: H2p, w: Int) = {
+        val thisA: H0 = la.head
+        val thisArrs: List[H0] = createArrs[H0, T, _S](thisA, Nil, ls, w)
+        rsForNxt.fromList(thisArrs, la.tail, w)
+      }
+    }
     def createArrs[A, T, _S](
       aEmpty: A, as: List[A], l: List[_S], width: Int,
     )(implicit aIsABs: IsArrBase[A, T] { type S = _S }): List[A] = 
