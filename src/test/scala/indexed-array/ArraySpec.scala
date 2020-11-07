@@ -281,13 +281,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario(".getArrays is called") {
       When(".getArrays is called on a 1d array")
       Then("It should return an empty version of itself")
-      assert(list1d.getArrays.head == list1d.getEmpty)
+      val l1Arrs: List1d[Double] :: HNil = list1d.getArrays
+      assert(l1Arrs == list1d.getEmpty :: HNil)
       When(".getArrays is called on a 2d array")
       Then("It should return an empty 1d and 2d array")
-      assert(list2d.getArrays == list1d.getEmpty :: list2d.getEmpty :: HNil)
+      val l2Arrs: List1d[Double] :: List2d[Double] :: HNil = list2d.getArrays
+      assert(l2Arrs == list1d.getEmpty :: list2d.getEmpty :: HNil)
       When(".getArrays is called on a 3d array")
       Then("It should return an empty 1d, 2d and 3d array")
-      assert(list3d.getArrays == list1d.getEmpty :: list2d.getEmpty :: list3d.getEmpty :: HNil)
+      val l3Arrs: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = list3d.getArrays
+      assert(l3Arrs == list1d.getEmpty :: list2d.getEmpty :: list3d.getEmpty :: HNil)
     }
   }
 
@@ -424,11 +427,12 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val isArr = implicitly[IsArray[List1d, Double] { type S = Double }]
       val rshlist = implicitly[ArrFromListRT[Double, List1d[Double] :: HNil]]
       val fl = implicitly[Flatten[List1d, Double]]
-      val ga = implicitly[GetArrs[List1d, Double, HNil]{ type Out = List1d[Double] :: HNil }] 
+      val ga = implicitly[GetArrs[List1d[Double], Double, HNil]{ type Out = List1d[Double] :: HNil }] 
       val rs = implicitly[ArrFromListRT[Double, List1d[Double] :: HNil]]
       val l1 = implicitly[Reshapes[List1d, Double] { type S = Double }].reshape[
         List1d[Double] :: HNil](
         list1d, 1)(fl, ga, rs)
+      assert(l1 == Some(list1d))
     }
   }
 
