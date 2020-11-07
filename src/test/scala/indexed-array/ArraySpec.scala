@@ -280,8 +280,13 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario(".getArrays is called") {
       When(".getArrays is called on a 1d array")
       Then("It should return an empty version of itself")
-      val hlist = implicitly[IsArray[List1d, Double]].getArrays(list1d)
-      assert(hlist.head == list1d.getEmpty)
+      assert(list1d.getArrays.head == list1d.getEmpty)
+      When(".getArrays is called on a 2d array")
+      Then("It should return an empty 1d and 2d array")
+      assert(list2d.getArrays == list1d.getEmpty :: list2d.getEmpty :: HNil)
+      When(".getArrays is called on a 3d array")
+      Then("It should return an empty 1d, 2d and 3d array")
+      assert(list3d.getArrays == list1d.getEmpty :: list2d.getEmpty :: list3d.getEmpty :: HNil)
     }
   }
 
@@ -412,7 +417,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
     scenario(".reshape is called on a 1d array") {
       When(".reshape with (1) is called on a 2d array")
-      
+      Then("A 1d array with should be returned")
+      assert(list2d.reshape(1).toList = list2d.flatten)  
     }
   }
 
