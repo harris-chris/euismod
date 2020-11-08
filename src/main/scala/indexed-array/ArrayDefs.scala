@@ -111,7 +111,7 @@ object ArrayDefs {
     ): rs.Out = {
       val listT: List[T] = fl.flatten(a)
       val arrHlist: GAOut = ga.getArrs(a, HNil)
-      rs.fromList(listT, arrHlist, width)
+      rs.fromList(Some(listT), arrHlist, width)
     }
   }
   object Reshapes {
@@ -144,7 +144,7 @@ object ArrayDefs {
     // to: R, reference 
     // la has to be 1onger than R (?)
     type Out 
-    def fromList(ls: List[_S], la: Arrs, width: Int): Out
+    def fromList(ls: Option[List[_S]], la: Arrs, width: Int): Out
   }
   object ArrFromListRT {
     implicit def ifLAIsSingleElem[T, _S, H0]( implicit 
@@ -152,9 +152,9 @@ object ArrayDefs {
     ): ArrFromListRT[_S, H0 :: HNil] { type Out = Option[H0] } = 
     new ArrFromListRT[_S, H0 :: HNil] {
       type Out = Option[H0] 
-      def fromList(ls: List[_S], la: H0 :: HNil, w: Int): Out = Some(
-        ls.reverse.foldLeft(la.head)((s, o) => hIsABs.cons(s, o))
-      )
+      def fromList(ls: Option[List[_S]], la: H0 :: HNil, w: Int): Out = ls map {
+        ls => ls.reverse.foldLeft(la.head)((s, o) => hIsABs.cons(s, o))
+      }
     }
     implicit def ifLAIsHList[T, _S, H0, H1, H2p <: HList](implicit 
       hIsABs: IsArrBase[H0, T] { type S = _S},
@@ -162,22 +162,25 @@ object ArrayDefs {
     ): ArrFromListRT[_S, H0 :: H1 :: H2p] { type Out = rsForNxt.Out } = 
     new ArrFromListRT[_S, H0 :: H1 :: H2p] { 
       type Out = rsForNxt.Out 
-      def fromList(ls: List[_S], la: H0 :: H1 :: H2p, w: Int) = {
+      def fromList(ls: Option[List[_S]], la: H0 :: H1 :: H2p, w: Int) = {
         val thisA: H0 = la.head
-        val thisArrs: List[H0] = createArrs[H0, T, _S](thisA, Nil, ls, w)
+        val thisArrs: Option[List[H0]] = ls flatMap { ls => createArrs[H0, T, _S](thisA, Nil, ls, w) }
         rsForNxt.fromList(thisArrs, la.tail, w)
       }
     }
     def createArrs[A, T, _S](
       aEmpty: A, as: List[A], l: List[_S], width: Int,
-    )(implicit aIsABs: IsArrBase[A, T] { type S = _S }): List[A] = 
-      (width, l.length) match {
-        case (0, 0) => as
-        case (_, _) => {
+    )(implicit aIsABs: IsArrBase[A, T] { type S = _S }): Option[List[A]] = 
+      l.length match {
+        case 0 => {println("RETURNING ZERO"); Some(as)}
+        case x if x >= width => {
+          println("SPLITTING")
           val (ths, rst) = l.splitAt(width)
           val thsA: A = ths.foldLeft(aEmpty)((s, o) => aIsABs.cons(s, o))
+          println(f"LENGTH REMAINING ${rst.length}")
           createArrs[A, T, _S](aEmpty, thsA :: as, rst, width)
         }
+        case _ => {println("CREATEARRS RETURNING NONE"); None}
       }
   }
 
