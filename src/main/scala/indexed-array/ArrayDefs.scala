@@ -104,14 +104,14 @@ object ArrayDefs {
     type S
     implicit val aIsArr: IsArray[A, T] { type S = self.S }
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
-    def reshape[GAOut <: HList](a: A[T], width: Int)(implicit 
+    def reshape[GAOut <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
       ga: GetArrs[A[T], T, HNil] { type Out = GAOut },
-      rs: ArrFromListRT[T, GAOut],
+      rs: ArrFromListRT[T, GAOut, SH],
     ): rs.Out = {
       val listT: List[T] = fl.flatten(a)
       val arrHlist: GAOut = ga.getArrs(a, HNil)
-      rs.fromList(Some(listT), arrHlist, width)
+      rs.fromList(Some(listT), arrHlist, shape)
     }
   }
   object Reshapes {
@@ -127,52 +127,48 @@ object ArrayDefs {
       aRes: Reshapes[A, T] { type S = _S },
     ) { self =>
       def flatten(implicit flatten: Flatten[A, T]): List[T] = aRes.flatten(a)
-      def reshape[GAOut <: HList](width: Int)(implicit 
+      def reshape[GAOut <: HList, SH <: HList](shape: SH)(implicit 
         fl: Flatten[A, T],
         ga: GetArrs[A[T], T, HNil] { type Out = GAOut },
-        rs: ArrFromListRT[T, GAOut],
-      ) = aRes.reshape(a, width)
+        rs: ArrFromListRT[T, GAOut, SH],
+      ) = aRes.reshape(a, shape)
       //def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
     }
   }
 
-  trait ArrFromListRT[_S, Arrs <: HList] {
-    // for all elements of the hlist, you compose the array from IsArray[H0, T] { type S = H1 }
-    // lt: List[T], empty once bottom level has been put in place
-    // ls: List[_S], list of populated IsArray objs passed up from level below
-    // la: HList[_: IsArray], list of empty Array objects to be filled using List[_S]
-    // to: R, reference 
-    // la has to be 1onger than R (?)
+  trait ArrFromListRT[_S, Arrs <: HList, SH <: HList] {
     type Out 
-    def fromList(ls: Option[List[_S]], la: Arrs, width: Int): Out
+    def fromList(lsO: Option[List[_S]], la: Arrs, shape: SH): Out
   }
   object ArrFromListRT {
-    implicit def ifLAIsSingleElem[T, _S, H0]( implicit 
-      hIsABs: IsArrBase[H0, T] { type S = _S },
-    ): ArrFromListRT[_S, H0 :: HNil] { type Out = Option[H0] } = 
-    new ArrFromListRT[_S, H0 :: HNil] {
-      type Out = Option[H0] 
-      def fromList(ls: Option[List[_S]], la: H0 :: HNil, w: Int): Out = ls map {
-        ls => ls.reverse.foldLeft(la.head)((s, o) => hIsABs.cons(s, o))
-      }
+    implicit def ifSingleElemRemainingInShape[T, H0, H1, H2p <: HList](implicit 
+      hIsABs: IsArrBase[H1, T] { type S = H0 },
+    ): ArrFromListRT[H0, H1 :: H2p, Int :: HNil] { type Out = Option[H1] } = 
+    new ArrFromListRT[H0, H1 :: H2p, Int :: HNil] { 
+      type Out = Option[H1] 
+      def fromList(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: HNil) = lsO.flatMap( 
+        ls => createArrs[H1, T, H0](la.head, Nil, ls, sh.head)
+      ).flatMap(arrs => if(arrs.length == 1){Some(arrs(0))} else {None})
     }
-    implicit def ifLAIsHList[T, _S, H0, H1, H2p <: HList](implicit 
-      hIsABs: IsArrBase[H0, T] { type S = _S},
-      rsForNxt: ArrFromListRT[H0, H1 :: H2p],   
-    ): ArrFromListRT[_S, H0 :: H1 :: H2p] { type Out = rsForNxt.Out } = 
-    new ArrFromListRT[_S, H0 :: H1 :: H2p] { 
+
+    implicit def ifLAIsHList[T, H0, H1, H2p <: HList, SH1p <: HList](implicit 
+      hIsABs: IsArrBase[H1, T] { type S = H0 },
+      rsForNxt: ArrFromListRT[H1, H2p, Int :: SH1p],   
+    ): ArrFromListRT[H0, H1 :: H2p, Int :: SH1p] { type Out = rsForNxt.Out } = 
+    new ArrFromListRT[H0, H1 :: H2p, Int :: SH1p] { 
       type Out = rsForNxt.Out 
-      def fromList(ls: Option[List[_S]], la: H0 :: H1 :: H2p, w: Int) = {
-        val thisA: H0 = la.head
-        val thisArrs: Option[List[H0]] = ls flatMap { ls => createArrs[H0, T, _S](thisA, Nil, ls, w) }
-        rsForNxt.fromList(thisArrs, la.tail, w)
+      def fromList(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: SH1p) = {
+        println("RUNNING ifLAIsHList")
+        val thisA: H1 = la.head
+        val thisArrs: Option[List[H1]] = lsO flatMap { ls => createArrs[H1, T, H0](thisA, Nil, ls, sh.head) }
+        rsForNxt.fromList(thisArrs, la.tail, sh)
       }
     }
     def createArrs[A, T, _S](
       aEmpty: A, as: List[A], l: List[_S], width: Int,
     )(implicit aIsABs: IsArrBase[A, T] { type S = _S }): Option[List[A]] = 
       l.length match {
-        case 0 => {println("RETURNING ZERO"); Some(as)}
+        case 0 => {println(f"RETURNING FROM CREATEARRS ${as} "); Some(as)}
         case x if x >= width => {
           println("SPLITTING")
           val (ths, rst) = l.splitAt(width)

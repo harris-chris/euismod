@@ -422,10 +422,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario(".reshape is called") {
       When(".reshape with (1) is called on a 1d array")
       Then("A 1d array with should be returned")
-      assert(list1d.reshape(1) == Some(list1d))
+      //assert(list1d.reshape(list1d.data.length :: HNil) == Some(list1d))
       When(".reshape with (1) is called on a 2d array")
       Then("A 1d array with should be returned")
-      assert(list2d.reshape(1) == Some(List1d[Double](list2d.data.flatten)))
+      val list2dFlat = list2d.data.flatten
+      assert(list2d.reshape(list2dFlat.length :: HNil) == Some(List1d[Double](list2d.data.flatten)))
     }
   }
 
