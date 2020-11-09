@@ -111,7 +111,7 @@ object ArrayDefs {
     ): rs.Out = {
       val listT: List[T] = fl.flatten(a)
       val arrHlist: GAOut = ga.getArrs(a, HNil)
-      rs.fromList(Some(listT), arrHlist, shape)
+      rs.fromList(Some(listT.reverse), arrHlist, shape)
     }
   }
   object Reshapes {
@@ -151,17 +151,17 @@ object ArrayDefs {
       ).flatMap(arrs => if(arrs.length == 1){Some(arrs(0))} else {None})
     }
 
-    implicit def ifLAIsHList[T, H0, H1, H2p <: HList, SH1p <: HList](implicit 
+    implicit def ifMultipleElemsRemainingInShape[T, H0, H1, H2p <: HList, SH2p <: HList](implicit 
       hIsABs: IsArrBase[H1, T] { type S = H0 },
-      rsForNxt: ArrFromListRT[H1, H2p, Int :: SH1p],   
-    ): ArrFromListRT[H0, H1 :: H2p, Int :: SH1p] { type Out = rsForNxt.Out } = 
-    new ArrFromListRT[H0, H1 :: H2p, Int :: SH1p] { 
+      rsForNxt: ArrFromListRT[H1, H2p, Int :: SH2p],   
+    ): ArrFromListRT[H0, H1 :: H2p, Int :: Int :: SH2p] { type Out = rsForNxt.Out } = 
+    new ArrFromListRT[H0, H1 :: H2p, Int :: Int :: SH2p] { 
       type Out = rsForNxt.Out 
-      def fromList(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: SH1p) = {
+      def fromList(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: Int :: SH2p) = {
         println("RUNNING ifLAIsHList")
         val thisA: H1 = la.head
         val thisArrs: Option[List[H1]] = lsO flatMap { ls => createArrs[H1, T, H0](thisA, Nil, ls, sh.head) }
-        rsForNxt.fromList(thisArrs, la.tail, sh)
+        rsForNxt.fromList(thisArrs, la.tail, sh.tail)
       }
     }
     def createArrs[A, T, _S](

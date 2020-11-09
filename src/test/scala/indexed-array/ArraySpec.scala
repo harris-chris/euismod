@@ -419,14 +419,33 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       Then("A List[T] should be returned")
       assert(list3d.flatten == list3d.data.flatten.flatten)
     }
-    scenario(".reshape is called") {
-      When(".reshape with (1) is called on a 1d array")
+    scenario(".reshape(x) is called") {
+      When(".reshape with (x) is called on a 1d array")
       Then("A 1d array with should be returned")
-      //assert(list1d.reshape(list1d.data.length :: HNil) == Some(list1d))
-      When(".reshape with (1) is called on a 2d array")
+      assert(list1d.reshape(list1d.data.length :: HNil) == Some(list1d))
+      When(".reshape with (x) is called on a 2d array")
       Then("A 1d array with should be returned")
       val list2dFlat = list2d.data.flatten
-      assert(list2d.reshape(list2dFlat.length :: HNil) == Some(List1d[Double](list2d.data.flatten)))
+      assert(list2d.reshape(list2dFlat.length :: HNil) == Some(List1d[Double](list2dFlat)))
+      When(".reshape with (x) is called on a 3d array")
+      Then("A 1d array with should be returned")
+      val list3dFlat = list3d.data.flatten.flatten
+      assert(list3d.reshape(list3dFlat.length :: HNil) == Some(List1d[Double](list3dFlat)))
+    }
+    scenario(".reshape(x, y) is called") {
+      When(".reshape with (x, y) is called on a 2d array")
+      Then("A 2d array of the appropriate dimensions should be returned")
+      val list2dFlat = list2d.data.flatten
+      val half = list2dFlat.length / 2
+      val dims = 2 :: list2dFlat.length / 2 :: HNil
+      val list2dReshaped = List2d[Double](
+        List(list2dFlat.take(half), list2dFlat.takeRight(half))
+      )
+      assert(list2d.reshape(dims) == Some(list2dReshaped))
+      When(".reshape with (x) is called on a 3d array")
+      Then("A 1d array with should be returned")
+      val list3dFlat = list3d.data.flatten.flatten
+      assert(list3d.reshape(list3dFlat.length :: HNil) == Some(List1d[Double](list3dFlat)))
     }
   }
 
