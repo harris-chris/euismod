@@ -228,7 +228,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("getArrays") {
+  feature("IsArray.getArrays") {
     import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
@@ -447,7 +447,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     def addLevel[A](belowLst: Option[List[A]], length: Int, thisLst: List[List[A]]): Option[List[List[A]]] = 
       belowLst.flatMap( bLst => 
         bLst.length match {
-          case 0 => Some(thisLst)
+          case 0 => Some(thisLst.reverse)
           case x if x >= length => {
             val (ths, rst) = bLst.splitAt(length)
             addLevel(Some(rst), length, ths :: thisLst)
@@ -469,7 +469,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val list3dFlat = list3d.data.flatten.flatten
       assert(list3d.reshape(list3dFlat.length :: HNil) == Some(List1d[Double](list3dFlat)))
     }
-    scenario("list2d.reshape(2, 8) returns None, because list2d has 15 elements", ReshapesTest) {
+    scenario("list2d.reshape(2, 8) returns None, because list2d has 15 elements", ReshapesTest, Current) {
       assert(list2d.reshape(2 :: 8 :: HNil) === None)
     }
     scenario("list2d.reshape(5, 3) returns a 5, 3 shaped List2d", ReshapesTest) {

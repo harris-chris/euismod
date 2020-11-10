@@ -51,6 +51,10 @@ object ArrayDefs {
       ga: GetArrs[A[T], T, HNil] { type Out = GAOut },
       fr: FromElemsRT[T, GAOut, SH], 
     ): fr.Out = fr.fromElems(Some(listT.reverse), ga.getArrs(a, HNil), shape)
+    def fromElems[GAOut <: HList](a: A[T], listT: List[T])(implicit 
+      ga: GetArrs[A[T], T, HNil] { type Out = GAOut },
+      fr: FromElemsRT[T, GAOut, Int :: HNil], 
+    ): fr.Out = fr.fromElems(Some(listT.reverse), ga.getArrs(a, HNil), listT.length :: HNil)
     def reshape[GAOut <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
       ga: GetArrs[A[T], T, HNil] { type Out = GAOut },
@@ -177,7 +181,7 @@ object ArrayDefs {
     ): FromElemsRT[H0, H1 :: H2p, Int :: HNil] { type Out = Option[H1] } = 
     new FromElemsRT[H0, H1 :: H2p, Int :: HNil] { 
       type Out = Option[H1] 
-      def fromElems(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: HNil) = {
+      def fromElems(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: HNil): Out = {
         lsO.flatMap( 
           ls => createArrs[H1, T, H0](la.head, Nil, ls, sh.head)
         ).flatMap(arrs => if(arrs.length == 1){Some(arrs(0))} else {None})
@@ -201,7 +205,7 @@ object ArrayDefs {
       aEmpty: A, as: List[A], l: List[_S], width: Int,
     )(implicit aIsABs: IsArrBase[A, T] { type S = _S }): Option[List[A]] = 
       l.length match {
-        case 0 => Some(as)
+        case 0 => Some(as.reverse)
         case x if x >= width => {
           val (ths, rst) = l.splitAt(width)
           val thsA: A = ths.foldLeft(aEmpty)((s, o) => aIsABs.cons(s, o))
