@@ -113,19 +113,10 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     )
 
     scenario("A 1d type that can implement IsArray, implements IsArray") {
-      Given("A 1-d arraylike type and an implicit conversion to IsArray")
-      When("A valid IsElement is used")
-      Then("It should compile")
       "implicitly[IsArray[A1, Double]]" should compile
-
-      //When("A bad IsElement is used")
-      //case class BadElem()
-      //Then("It should not compile")
-      //"implicitly[IsArray[A1[BadElem]]]" shouldNot typeCheck
     }
 
     scenario("A 2d 1dOf1d type that can implement IsArray, implements IsArray") {
-      Given("A 1dOf1d arraylike type and an implicit conversion to IsArray")
       case class A1OfA1[T](data: List[A1[T]])
       implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1, T, A1[T]](
         self => A1OfA1[T](List(A1[T](Nil: List[T]))),
@@ -133,13 +124,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         self => self.data.length,
         (self, o) => A1OfA1[T](o :: self.data),
       )
-      When("A valid IsElement is used")
-      Then("It should compile")
       "implicitly[IsArray[A1OfA1, Double] { type S = A1[Double] }]" should compile
-
-      //When("A bad IsElement is used")
-      //Then("It should not compile")
-      //"implicitly[IsArray[A1OfA1[BadElem]]]" shouldNot typeCheck
     }
 
     scenario("A 2d list-of-list type that can implement IsArray, implements IsArray") {
@@ -402,8 +387,17 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    scenario("An 1d array of y elements should return .shape of 1 :: HNil") {
-      assert(list1d.shape === 1 :: HNil)
+    scenario("An 1d array of _ elements should return the correct shape") {
+      assert(list1d.shape === list1d.length :: HNil)
+    }
+    scenario("An 2d array of _ elements should return the correct shape") {
+      assert(list2d.shape === list2d.getAtN(0).length :: list2d.length :: HNil)
+    }
+    scenario("An 3d array of _ elements should return the correct shape") {
+      val l2d = list3d.getAtN(0).getAtN(0).length
+      val l1d = list3d.getAtN(0).length
+      val l0d = list3d.length
+      assert(list3d.shape === l2d :: l1d :: l0d :: HNil)
     }
   }
 

@@ -40,8 +40,8 @@ object ArrayDefs {
     def getILoc[R](self: A[T], r: R)(implicit getILoc: GetILoc[A, T, R]): A[T] = getILoc.iloc(self, r)
     def toList(self: A[T]): List[S] = (for(i <- 0 to length(self) - 1) yield (getAtN(self, i))).toList
     def ndims(self: A[T]): Int = ???
-    def shape[O <: HList](self: A[T]): O = ???
-    def getArrays(self: A[T])(implicit gs: GetArrs[A[T], T, HNil]): gs.Out = gs.getArrs(self, HNil)
+    def shape(self: A[T])(implicit gs: GetShape[A[T], T, HNil]): gs.Out = gs.getShape(self, HNil)
+    def getArrays(self: A[T])(implicit ga: GetArrs[A[T], T, HNil]): ga.Out = ga.getArrs(self, HNil)
   }
   object IsArray {
     def apply[A[_], T, _S](
@@ -71,7 +71,8 @@ object ArrayDefs {
       def ::(other: _S) = tc.cons(a, other)
       def length: Int = tc.length(a)
       def toList: List[_S] = tc.toList(a)
-      def getArrays(implicit gs: GetArrs[A[T], T, HNil]): gs.Out = tc.getArrays(a)
+      def getArrays(implicit ga: GetArrs[A[T], T, HNil]): ga.Out = tc.getArrays(a)
+      def shape(implicit gs: GetShape[A[T], T, HNil]): gs.Out = tc.shape(a)
       //def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
     }
   }
@@ -96,6 +97,30 @@ object ArrayDefs {
       def getArrs(a: A, l: L): gaForS.Out = gaForS.getArrs(
         aIsArr.getAtN(a, 0), 
         aIsArr.getEmpty(a) :: l
+      )
+    }
+  }
+
+  sealed trait GetShape[A, T, L <: HList] {self =>
+    type Out <: HList
+    def getShape(a: A, l: L): Out
+  }
+  object GetShape {
+    implicit def gsIfSIsEle[A, T, _S, L <: HList](implicit 
+      sIsEle: IsElement[_S],
+      aIsABs: IsArrBase[A, T] { type S = _S },
+    ): GetShape[A, T, L] { type Out = Int :: L } = new GetShape[A, T, L] {
+      type Out = Int :: L
+      def getShape(a: A, l: L): Out = aIsABs.length(a) :: l
+    }
+    implicit def gsIfSIsArr[A, T, _S, L <: HList](implicit 
+      aIsABs: IsArrBase[A, T] { type S = _S },
+      gsForS: GetShape[_S, T, Int :: L],
+    ): GetShape[A, T, L] { type Out = gsForS.Out } = new GetShape[A, T, L] {
+      type Out = gsForS.Out
+      def getShape(a: A, l: L): gsForS.Out = gsForS.getShape(
+        aIsABs.getAtN(a, 0), 
+        aIsABs.length(a) :: l
       )
     }
   }
@@ -147,7 +172,6 @@ object ArrayDefs {
     new ArrFromListRT[H0, H1 :: H2p, Int :: HNil] { 
       type Out = Option[H1] 
       def fromList(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: HNil) = {
-        println(f"RUNNING ifSingleElemRemainingInShape for shape ${sh}")
         lsO.flatMap( 
           ls => createArrs[H1, T, H0](la.head, Nil, ls, sh.head)
         ).flatMap(arrs => if(arrs.length == 1){Some(arrs(0))} else {None})
@@ -172,15 +196,13 @@ object ArrayDefs {
       aEmpty: A, as: List[A], l: List[_S], width: Int,
     )(implicit aIsABs: IsArrBase[A, T] { type S = _S }): Option[List[A]] = 
       l.length match {
-        case 0 => {println(f"RETURNING FROM CREATEARRS ${as} "); Some(as)}
+        case 0 => Some(as)
         case x if x >= width => {
           val (ths, rst) = l.splitAt(width)
-          println(f"LIST LENGTH IS ${l.length}, SPLITTING, CURR ${ths.length} LENGTH REMAINING ${rst.length}")
           val thsA: A = ths.foldLeft(aEmpty)((s, o) => aIsABs.cons(s, o))
-          println(f"FOLDED ${ths} INTO ${aEmpty} TO GET ${thsA}")
           createArrs[A, T, _S](aEmpty, thsA :: as, rst, width)
         }
-        case _ => {println("CREATEARRS RETURNING NONE"); None}
+        case _ => None
       }
   }
 
