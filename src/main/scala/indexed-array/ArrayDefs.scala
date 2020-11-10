@@ -146,9 +146,12 @@ object ArrayDefs {
     ): ArrFromListRT[H0, H1 :: H2p, Int :: HNil] { type Out = Option[H1] } = 
     new ArrFromListRT[H0, H1 :: H2p, Int :: HNil] { 
       type Out = Option[H1] 
-      def fromList(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: HNil) = lsO.flatMap( 
-        ls => createArrs[H1, T, H0](la.head, Nil, ls, sh.head)
-      ).flatMap(arrs => if(arrs.length == 1){Some(arrs(0))} else {None})
+      def fromList(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: HNil) = {
+        println(f"RUNNING ifSingleElemRemainingInShape for shape ${sh}")
+        lsO.flatMap( 
+          ls => createArrs[H1, T, H0](la.head, Nil, ls, sh.head)
+        ).flatMap(arrs => if(arrs.length == 1){Some(arrs(0))} else {None})
+      }
     }
 
     implicit def ifMultipleElemsRemainingInShape[T, H0, H1, H2p <: HList, SH2p <: HList](implicit 
@@ -160,7 +163,8 @@ object ArrayDefs {
       def fromList(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: Int :: SH2p) = {
         println("RUNNING ifLAIsHList")
         val thisA: H1 = la.head
-        val thisArrs: Option[List[H1]] = lsO flatMap { ls => createArrs[H1, T, H0](thisA, Nil, ls, sh.head) }
+        val h1Nil = Nil: List[H1]
+        val thisArrs: Option[List[H1]] = lsO flatMap { ls => createArrs[H1, T, H0](thisA, h1Nil, ls, sh.head) }
         rsForNxt.fromList(thisArrs, la.tail, sh.tail)
       }
     }
@@ -170,10 +174,10 @@ object ArrayDefs {
       l.length match {
         case 0 => {println(f"RETURNING FROM CREATEARRS ${as} "); Some(as)}
         case x if x >= width => {
-          println("SPLITTING")
           val (ths, rst) = l.splitAt(width)
+          println(f"LIST LENGTH IS ${l.length}, SPLITTING, CURR ${ths.length} LENGTH REMAINING ${rst.length}")
           val thsA: A = ths.foldLeft(aEmpty)((s, o) => aIsABs.cons(s, o))
-          println(f"LENGTH REMAINING ${rst.length}")
+          println(f"FOLDED ${ths} INTO ${aEmpty} TO GET ${thsA}")
           createArrs[A, T, _S](aEmpty, thsA :: as, rst, width)
         }
         case _ => {println("CREATEARRS RETURNING NONE"); None}

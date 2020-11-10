@@ -54,19 +54,19 @@ object Dummy {
     import ArrayDefs._
     import ArrayDefs.IsArraySyntax._
     implicit def list1dIsArray[T: IsElement] = IsArray[List1d, T, T](
-      fgetEmpty = self => List1d[T](List()),
+      fgetEmpty = self => List1d[T](Nil: List[T]),
       fgetAtN = (self, n) => self.data(n),
       flength = self => self.data.length,
       fcons = (self, elem) => List1d(elem :: self.data),
     )
     implicit def list2dIsArray[T: IsElement] = IsArray[List2d, T, List1d[T]] (
-      fgetEmpty = self => List2d[T](List(List())),
+      fgetEmpty = self => List2d[T](Nil: List[List[T]]),
       fgetAtN = (self, n) => List1d(self.data(n)),
       flength = self => self.data.length,
       fcons = (self, elem) => List2d(elem.data :: self.data),
     )
     implicit def list3dIsArray[T: IsElement] = IsArray[List3d, T, List2d[T]] (
-      fgetEmpty = self => List3d[T](List(List(List()))),
+      fgetEmpty = self => List3d[T](Nil: List[List[List[T]]]),
       fgetAtN = (self, n) => List2d(self.data(n)),
       flength = self => self.data.length,
       fcons = (self, elem) => List3d(elem.data :: self.data),
@@ -101,6 +101,7 @@ object Dummy {
 
 class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   import ArrayDefs._
+  object Current extends Tag("Current")
 
   feature("Arraylike objects should be able to implement IsArray") {
     case class A1[T](data: List[T])
@@ -403,49 +404,73 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     import ArrayDefs.ReshapesSyntax._
     import Dummy.ReshapesImplicits._
-    scenario("An array can implement Reshapes") {
+    object ReshapesTest extends Tag("ReshapesTest")
+    
+    trait ShapeList[A, D <: HList] {
+      type Out
+      def shapeList(lst: Option[List[A]], dims: D): Out
+    }
+    object ShapeList {
+      implicit def slIfNoDims[A]: ShapeList[A, HNil] { type Out = Option[A] } = new ShapeList[A, HNil] {
+        type Out = Option[A]
+        def shapeList(lst: Option[List[A]], dims: HNil): Out = lst.map(_(0))
+      }
+      implicit def slIfDims[A, D <: HList](implicit 
+        sl: ShapeList[List[A], D]
+      ): ShapeList[A, Int :: D] { type Out = sl.Out } = new ShapeList[A, Int :: D] {
+        type Out = sl.Out
+        def shapeList(lst: Option[List[A]], dims: Int :: D): Out = {
+          val newLvl: Option[List[List[A]]] = addLevel(lst, dims.head, List()) 
+          sl.shapeList(newLvl, dims.tail)
+        }
+      }
+    }
+    def addLevel[A](belowLst: Option[List[A]], length: Int, thisLst: List[List[A]]): Option[List[List[A]]] = 
+      belowLst.flatMap( bLst => 
+        bLst.length match {
+          case 0 => Some(thisLst)
+          case x if x >= length => {
+            val (ths, rst) = bLst.splitAt(length)
+            addLevel(Some(rst), length, ths :: thisLst)
+          }
+          case _ => None
+        }
+      )
+    def shapeList[A, D <: HList](lst: List[A], dims: D)(implicit ev: ShapeList[A, D]): ev.Out = 
+      ev.shapeList(Some(lst), dims)
+
+    scenario("An array can implement Reshapes", ReshapesTest) {
       When("An implicit conversion to IsUpdatable is in scope")
       Then("Implicit conversion should occur")
       "implicitly[List1d[Double] => ReshapesOps[List1d, Double, Double]]" should compile
     }
-    scenario(".flatten is called") {
-      When(".flatten is called on a 1d Array")
-      Then("A List[T] should be returned")
+    scenario("list1d.flatten returns the correct List[T]", ReshapesTest) {
       assert(list1d.flatten == list1d.data)
-      When(".flatten is called on a 2d Array")
-      Then("A List[T] should be returned")
+    }
+    scenario("list2d.flatten returns the correct List[T]", ReshapesTest) {
       assert(list2d.flatten == list2d.data.flatten)
-      When(".flatten is called on a 3d Array")
-      Then("A List[T] should be returned")
+    }
+    scenario("list3d.flatten returns the correct List[T]", ReshapesTest) {
       assert(list3d.flatten == list3d.data.flatten.flatten)
     }
-    scenario(".reshape(x) is called") {
-      When(".reshape with (x) is called on a 1d array")
-      Then("A 1d array with should be returned")
+    scenario("list1d.reshape(list1d.length) returns list1d", ReshapesTest) {
       assert(list1d.reshape(list1d.data.length :: HNil) == Some(list1d))
-      When(".reshape with (x) is called on a 2d array")
-      Then("A 1d array with should be returned")
+    }
+    scenario("list2d.reshape(list2d.flatten.length) returns a list1d", ReshapesTest) {
       val list2dFlat = list2d.data.flatten
       assert(list2d.reshape(list2dFlat.length :: HNil) == Some(List1d[Double](list2dFlat)))
-      When(".reshape with (x) is called on a 3d array")
-      Then("A 1d array with should be returned")
+    }
+    scenario("list3d.reshape(list3d.flatten.length) returns a list1d", ReshapesTest) {
       val list3dFlat = list3d.data.flatten.flatten
       assert(list3d.reshape(list3dFlat.length :: HNil) == Some(List1d[Double](list3dFlat)))
     }
-    scenario(".reshape(x, y) is called") {
-      When(".reshape with (x, y) is called on a 2d array")
-      Then("A 2d array of the appropriate dimensions should be returned")
+    scenario("list2d.reshape(2, 8) returns None, because list2d has 15 elements", ReshapesTest) {
+      assert(list2d.reshape(2 :: 8 :: HNil) === None)
+    }
+    scenario("list2d.reshape(5, 3) returns a 5, 3 shaped List2d", ReshapesTest, Current) {
       val list2dFlat = list2d.data.flatten
-      val half = list2dFlat.length / 2
-      val dims = 2 :: list2dFlat.length / 2 :: HNil
-      val list2dReshaped = List2d[Double](
-        List(list2dFlat.take(half), list2dFlat.takeRight(half))
-      )
-      assert(list2d.reshape(dims) == Some(list2dReshaped))
-      When(".reshape with (x) is called on a 3d array")
-      Then("A 1d array with should be returned")
-      val list3dFlat = list3d.data.flatten.flatten
-      assert(list3d.reshape(list3dFlat.length :: HNil) == Some(List1d[Double](list3dFlat)))
+      val list2dReshaped = shapeList(list2dFlat, 5 :: 3 :: HNil)
+      assert(list2d.reshape(5 :: 3 :: HNil) === list2dReshaped.map(List2d[Double](_)))
     }
   }
 
