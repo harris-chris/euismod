@@ -397,6 +397,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("The IsArray.shape method returns an HList of the total shape of the array") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    scenario("An 1d array of y elements should return .shape of 1 :: HNil") {
+      assert(list1d.shape === 1 :: HNil)
+    }
+  }
+
   feature("The Reshapes Typeclass") {
     import Dummy.Types._
     import Dummy.Values._
@@ -467,10 +477,23 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("list2d.reshape(2, 8) returns None, because list2d has 15 elements", ReshapesTest) {
       assert(list2d.reshape(2 :: 8 :: HNil) === None)
     }
-    scenario("list2d.reshape(5, 3) returns a 5, 3 shaped List2d", ReshapesTest, Current) {
+    scenario("list2d.reshape(5, 3) returns a 5, 3 shaped List2d", ReshapesTest) {
       val list2dFlat = list2d.data.flatten
       val list2dReshaped = shapeList(list2dFlat, 5 :: 3 :: HNil)
       assert(list2d.reshape(5 :: 3 :: HNil) === list2dReshaped.map(List2d[Double](_)))
+    }
+    scenario("list3d.reshape(2, 3, 6) returns a correctly shaped List3d", ReshapesTest) {
+      val list3dFlat = list3d.flatten
+      val list3dReshaped = shapeList(list3dFlat, 2 :: 3 :: 6 :: HNil)
+      assert(list3d.reshape(2 :: 3 :: 6 :: HNil) === list3dReshaped.map(List3d[Double](_)))
+    }
+    scenario("list3d.reshape(15, 2) returns a correctly shaped List2d", ReshapesTest) {
+      val list3dFlat = list3d.flatten
+      val list3dReshaped = shapeList(list3dFlat, 15 :: 2 :: HNil)
+      assert(list3d.reshape(15 :: 2 :: HNil) === list3dReshaped.map(List2d[Double](_)))
+    }
+    scenario("list3d.reshape(1, 1, 1, 1) does not compile", ReshapesTest) {
+      "list3d.reshape(1 :: 1 :: 1 :: 1 :: HNil)" shouldNot compile
     }
   }
 

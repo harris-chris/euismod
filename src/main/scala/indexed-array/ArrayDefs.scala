@@ -40,7 +40,7 @@ object ArrayDefs {
     def getILoc[R](self: A[T], r: R)(implicit getILoc: GetILoc[A, T, R]): A[T] = getILoc.iloc(self, r)
     def toList(self: A[T]): List[S] = (for(i <- 0 to length(self) - 1) yield (getAtN(self, i))).toList
     def ndims(self: A[T]): Int = ???
-    def shape(self: A[T]): List[Int] = ???
+    def shape[O <: HList](self: A[T]): O = ???
     def getArrays(self: A[T])(implicit gs: GetArrs[A[T], T, HNil]): gs.Out = gs.getArrs(self, HNil)
   }
   object IsArray {
