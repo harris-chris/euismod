@@ -73,7 +73,6 @@ object ArrayDefs {
       def toList: List[_S] = tc.toList(a)
       def getArrays(implicit ga: GetArrs[A[T], T, HNil]): ga.Out = tc.getArrays(a)
       def shape(implicit gs: GetShape[A[T], T, HNil]): gs.Out = tc.shape(a)
-      //def fmap[B, C](f: B => C)(implicit fMap: FMap[A, B, C]) = fMap.fmap(self, f)
     }
   }
 
@@ -129,11 +128,16 @@ object ArrayDefs {
     type S
     implicit val aIsArr: IsArray[A, T] { type S = self.S }
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
+    def fromList[GAOut <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
+      ga: GetArrs[A[T], T, HNil] { type Out = GAOut },
+      rs: ArrFromListRT[T, GAOut, SH], 
+    ): rs.Out = rs.fromList(Some(listT), ga.getArrs(a, HNil), shape)
     def reshape[GAOut <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
       ga: GetArrs[A[T], T, HNil] { type Out = GAOut },
       rs: ArrFromListRT[T, GAOut, SH],
     ): rs.Out = {
+      fromList(a, fl.flatten(a).reverse, shape)
       val listT: List[T] = fl.flatten(a)
       val arrHlist: GAOut = ga.getArrs(a, HNil)
       rs.fromList(Some(listT.reverse), arrHlist, shape)
@@ -157,9 +161,24 @@ object ArrayDefs {
         ga: GetArrs[A[T], T, HNil] { type Out = GAOut },
         rs: ArrFromListRT[T, GAOut, SH],
       ) = aRes.reshape(a, shape)
-      //def map[B, C](f: B => C)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
+      //def map[_T](f: T => _T)(implicit aMap: ArrMap[A, B, C]) = aMap.map(self, f)
     }
   }
+
+  //trait ArrMap[A, T, _T] {
+    //type Out
+    //def map(a: A, f: T => _T): Out
+  //}
+  //object ArrMap {
+    //implicit def ArrMapIfSIsT[A, T, _T](implicit 
+      //aIsABs: IsArrBase[A, T] { type S = T }
+    //): ArrMap[A, T, _T] { type Out = A[_T] { type S = _T } } = new ArrMap[A, T, _T] {
+      //type Out = A[_T] { type S = _T }
+      //def map(a: A, f: T => _T): Out = {
+        //val mappedTs: List[_T] = aIsABs.flatten.map(f)
+
+    //}
+
 
   trait ArrFromListRT[_S, Arrs <: HList, SH <: HList] {
     type Out 
@@ -185,7 +204,6 @@ object ArrayDefs {
     new ArrFromListRT[H0, H1 :: H2p, Int :: Int :: SH2p] { 
       type Out = rsForNxt.Out 
       def fromList(lsO: Option[List[H0]], la: H1 :: H2p, sh: Int :: Int :: SH2p) = {
-        println("RUNNING ifLAIsHList")
         val thisA: H1 = la.head
         val h1Nil = Nil: List[H1]
         val thisArrs: Option[List[H1]] = lsO flatMap { ls => createArrs[H1, T, H0](thisA, h1Nil, ls, sh.head) }
