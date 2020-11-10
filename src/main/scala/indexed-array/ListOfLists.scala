@@ -13,7 +13,7 @@ object ListOfListsObj {
     data: List[T],
   )
   implicit def list1dIsArray[T: IsElement] = IsArray[List1d, T, T](
-    fgetEmpty = self => List1d[T](List()),
+    fgetEmpty = List1d[T](List()),
     fgetAtN = (self, n) => self.data(n),
     flength = self => self.data.length,
     fcons = (self, elem) => List1d(elem :: self.data),
@@ -26,7 +26,7 @@ object ListOfListsObj {
     data: List[List[T]],
   )
   implicit def list2dIsArray[T: IsElement] = IsArray[List2d, T, List1d[T]] (
-    fgetEmpty = self => List2d[T](List(List())),
+    fgetEmpty = List2d[T](List(List())),
     fgetAtN = (self, n) => List1d(self.data(n)),
     flength = self => self.data.length,
     fcons = (self, elem) => List2d(elem.data :: self.data),
@@ -37,7 +37,7 @@ object ListOfListsObj {
     data: List[List[List[T]]],
   )
   implicit def list3dIsArray[T: IsElement] = IsArray[List3d, T, List2d[T]] (
-    fgetEmpty = self => List3d[T](List(List(List()))),
+    fgetEmpty = List3d[T](List(List(List()))),
     fgetAtN = (self, n) => List2d(self.data(n)),
     flength = self => self.data.length,
     fcons = (self, elem) => List3d(elem.data :: self.data),

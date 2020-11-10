@@ -54,48 +54,24 @@ object Dummy {
     import ArrayDefs._
     import ArrayDefs.IsArraySyntax._
     implicit def list1dIsArray[T: IsElement] = IsArray[List1d, T, T](
-      fgetEmpty = self => List1d[T](Nil: List[T]),
+      fgetEmpty = List1d[T](Nil: List[T]),
       fgetAtN = (self, n) => self.data(n),
       flength = self => self.data.length,
       fcons = (self, elem) => List1d(elem :: self.data),
     )
     implicit def list2dIsArray[T: IsElement] = IsArray[List2d, T, List1d[T]] (
-      fgetEmpty = self => List2d[T](Nil: List[List[T]]),
+      fgetEmpty = List2d[T](Nil: List[List[T]]),
       fgetAtN = (self, n) => List1d(self.data(n)),
       flength = self => self.data.length,
       fcons = (self, elem) => List2d(elem.data :: self.data),
     )
     implicit def list3dIsArray[T: IsElement] = IsArray[List3d, T, List2d[T]] (
-      fgetEmpty = self => List3d[T](Nil: List[List[List[T]]]),
+      fgetEmpty = List3d[T](Nil: List[List[List[T]]]),
       fgetAtN = (self, n) => List2d(self.data(n)),
       flength = self => self.data.length,
       fcons = (self, elem) => List3d(elem.data :: self.data),
     )
   }
-  object ReshapesImplicits {
-    import Types._
-    import Values._
-    import ArrayDefs._
-    import IsArrayImplicits._
-    implicit def list1dReshapes[T: IsElement]: Reshapes[List1d, T] { type S = T } = 
-      Reshapes[List1d, T, T]
-    implicit def list2dReshapes[T: IsElement]: Reshapes[List2d, T] { type S = List1d[T] } = 
-      Reshapes[List2d, T, List1d[T]]
-    implicit def list3dReshapes[T: IsElement]: Reshapes[List3d, T] { type S = List2d[T] } = 
-      Reshapes[List3d, T, List2d[T]]
-  }
-  //object IsUpdatableImplicits {
-    //import Types._
-    //import Values._
-    //import ArrayDefs._
-    //import IsArrayImplicits._
-    //implicit def list1dIsUpdatable[T: IsElement] = IsUpdatable.fromArr[List1d, T, T](
-    //)
-    //implicit def list2dIsUpdatable[T: IsElement] = IsUpdatable.fromArr[List2d, T, List1d[T]](
-    //)
-    //implicit def list3dIsUpdatable[T: IsElement] = IsUpdatable.fromArr[List3d, T, List2d[T]](
-    //)
-  //}
 }
   
 
@@ -106,7 +82,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("Arraylike objects should be able to implement IsArray") {
     case class A1[T](data: List[T])
     implicit def a1ev[T: IsElement] = IsArray[A1, T, T](
-      self => A1[T](Nil: List[T]),
+      A1[T](Nil: List[T]),
       (self, n) => self.data(n),
       self => self.data.length,
       (self, o) => A1[T](o :: self.data),
@@ -119,7 +95,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("A 2d 1dOf1d type that can implement IsArray, implements IsArray") {
       case class A1OfA1[T](data: List[A1[T]])
       implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1, T, A1[T]](
-        self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+        A1OfA1[T](List(A1[T](Nil: List[T]))),
         (self, n) => self.data(n),
         self => self.data.length,
         (self, o) => A1OfA1[T](o :: self.data),
@@ -128,21 +104,14 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
 
     scenario("A 2d list-of-list type that can implement IsArray, implements IsArray") {
-      Given("A 2d list-of-list type and an implicit conversion to IsArray")
       case class A2[T](data: List[List[T]])
       implicit def a2ev[T: IsElement] = IsArray[A2, T, A1[T]](
-        self => A2[T](List(List())),
+        A2[T](List(List())),
         (self, n) => A1[T](self.data(n)),
         self => self.data.length,
         (self, o) => A2[T](a1ev.toList(o) :: self.data),
       )
-      When("A valid IsElement is used")
-      Then("It should compile")
       "the[IsArray[A2, Double] {type S = A1[Double] }]" should compile
-     
-      //When("A bad IsElement is used")
-      //Then("It should not compile")
-      //"implicitly[IsArray[A2[BadElem]]]" shouldNot typeCheck
     }
   }
 
@@ -151,7 +120,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       Given("An arraylike value and an implicit conversion to IsArray")
       case class A1[T](data: List[T])
       implicit def a1ev[T: IsElement] = IsArray[A1, T, T](
-        self => A1[T](Nil: List[T]),
+        A1[T](Nil: List[T]),
         (self, n) => self.data(n),
         self => self.data.length,
         (self, o) => A1[T](o :: self.data),
@@ -171,7 +140,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       Given("An 2-d arraylike which returns a 1-d arraylike")
       case class A1[T](data: List[T])
       implicit def a1IsArray[T: IsElement] = IsArray[A1, T, T](
-        self => A1[T](Nil: List[T]),
+        A1[T](Nil: List[T]),
         (self, n) => self.data(n),
         self => self.data.length,
         (self, o) => A1[T](o :: self.data),
@@ -179,7 +148,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       //implicit def a1Is1d[T: Element] = Is1d[A1[T], T]
       case class A1OfA1[T](data: List[A1[T]])
       implicit def a1ofa1ev[T: IsElement] = IsArray[A1OfA1, T, A1[T]](
-        self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+        A1OfA1[T](List(A1[T](Nil: List[T]))),
         (self, n) => self.data(n),
         self => self.data.length,
         (self, o) => A1OfA1[T](o :: self.data),
@@ -199,14 +168,14 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy._
     case class A1[T](data: List[T])
     implicit def a1IsArray[T: IsElement] = IsArray[A1, T, T](
-      self => A1[T](Nil: List[T]),
+      A1[T](Nil: List[T]),
       (self, n) => self.data(n),
       self => self.data.length,
       (self, o) => A1[T](o :: self.data),
     )
     case class A1OfA1[T](data: List[A1[T]])
     implicit def a1ofa1IsArray[T: IsElement] = IsArray[A1OfA1, T, A1[T]](
-      self => A1OfA1[T](List(A1[T](Nil: List[T]))),
+      A1OfA1[T](List(A1[T](Nil: List[T]))),
       (self, n) => self.data(n),
       self => self.data.length,
       (self, o) => A1OfA1[T](o :: self.data),
@@ -280,7 +249,38 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("getILoc") {
+  feature(".fromList") {
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    object FromListTest extends Tag("FromListTest")
+    scenario("a List1d can be constructed from a list of Ts", FromListTest) {
+      val ts3: List[Double] = List(1.5, 2.5, 3.5)
+      assert(list1d.getEmpty.fromElems(ts3, 3 :: HNil) match {
+        case Some(l1) => l1.flatten.toList === ts3
+        case None => false
+      })
+    }
+    scenario("a List1d can be constructed from a 2d array and a list of Ts", FromListTest) {
+      val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
+      val l1O = list2d.getEmpty.fromElems(ts6, 6 :: HNil)
+      assert(l1O match {
+        case Some(l1) => l1.flatten.toList === ts6
+        case None => false
+      })
+    }
+    scenario("a List2d can be constructed from a 2d array and a list of Ts", FromListTest) {
+      val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
+      val l2O = list2d.getEmpty.fromElems(ts6, 3 :: 2 :: HNil)
+      assert(l2O match {
+        case Some(l2) => l2.flatten.toList === ts6
+        case None => false
+      })
+    }
+  }
+
+  feature("IsArray.getILoc") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
@@ -401,13 +401,28 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The Reshapes Typeclass") {
+  feature("IsArray.flatten") {
     import Dummy.Types._
     import Dummy.Values._
     import ArrayDefs.IsArraySyntax._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.ReshapesSyntax._
-    import Dummy.ReshapesImplicits._
+    object FlattenTest extends Tag("FlattenTest")
+    scenario("list1d.flatten returns the correct List[T]", FlattenTest) {
+      assert(list1d.flatten == list1d.data)
+    }
+    scenario("list2d.flatten returns the correct List[T]", FlattenTest) {
+      assert(list2d.flatten == list2d.data.flatten)
+    }
+    scenario("list3d.flatten returns the correct List[T]", FlattenTest) {
+      assert(list3d.flatten == list3d.data.flatten.flatten)
+    }
+  }
+
+  feature("IsArray.reshapes") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.IsArrayImplicits._
     object ReshapesTest extends Tag("ReshapesTest")
     
     trait ShapeList[A, D <: HList] {
@@ -443,20 +458,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     def shapeList[A, D <: HList](lst: List[A], dims: D)(implicit ev: ShapeList[A, D]): ev.Out = 
       ev.shapeList(Some(lst), dims)
 
-    scenario("An array can implement Reshapes", ReshapesTest) {
-      When("An implicit conversion to IsUpdatable is in scope")
-      Then("Implicit conversion should occur")
-      "implicitly[List1d[Double] => ReshapesOps[List1d, Double, Double]]" should compile
-    }
-    scenario("list1d.flatten returns the correct List[T]", ReshapesTest) {
-      assert(list1d.flatten == list1d.data)
-    }
-    scenario("list2d.flatten returns the correct List[T]", ReshapesTest) {
-      assert(list2d.flatten == list2d.data.flatten)
-    }
-    scenario("list3d.flatten returns the correct List[T]", ReshapesTest) {
-      assert(list3d.flatten == list3d.data.flatten.flatten)
-    }
     scenario("list1d.reshape(list1d.length) returns list1d", ReshapesTest) {
       assert(list1d.reshape(list1d.data.length :: HNil) == Some(list1d))
     }
