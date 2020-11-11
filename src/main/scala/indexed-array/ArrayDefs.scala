@@ -25,7 +25,7 @@ object ArrayDefs {
   }
 
   @implicitNotFound(f"Cannot find IsArray implicit")
-  abstract class IsArray[A[_], T] extends IsArrBase[A[T], T] {
+  abstract class IsArray[A[_], T] extends IsArrBase[A[T], T] { self =>
     type S
     //implicit val sIsBase: IsBase[S]
 
@@ -38,17 +38,17 @@ object ArrayDefs {
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
     // for ++, we do not want to specify the actual implementation of other; any IsArray with the
     // same shape should be fine.
-    def ++[B[_]](self: A[T], other: B[T])(implicit bIsArr: IsArray[B, T]): A[T] = ???
-    def getILoc[R](self: A[T], r: R)(implicit getILoc: GetILoc[A, T, R]): A[T] = getILoc.iloc(self, r)
-    def toList(self: A[T]): List[S] = (for(i <- 0 to length(self) - 1) yield (getAtN(self, i))).toList
+    def ++[B[_]](a: A[T], other: B[T])(implicit bIsArr: IsArray[B, T]): A[T] = ???
+    def getILoc[R](a: A[T], r: R)(implicit getILoc: GetILoc[A, T, R]): A[T] = getILoc.iloc(a, r)
+    def toList(a: A[T]): List[S] = (for(i <- 0 to length(a) - 1) yield (getAtN(a, i))).toList
     def fromList(a: A[T], listS: List[S]): A[T] = 
       listS.foldLeft(getEmpty[T])((e, s) => cons(e, s))
     def ndims[GSOut <: HList](a: A[T])(implicit 
       gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
       tl: ToList[GSOut, Int],
     ): Int = shape(a).toList[Int].length
-    def shape(self: A[T])(implicit gs: GetShape[A[T], T, HNil]): gs.Out = gs.getShape(self, HNil)
-    def getArrays(self: A[T])(implicit ga: GetArrs[A, T, HNil]): ga.Out = ga.getArrs(self, HNil)
+    def shape(a: A[T])(implicit gs: GetShape[A[T], T, HNil]): gs.Out = gs.getShape(a, HNil)
+    def getArrays(a: A[T])(implicit ga: GetArrs[A, T, HNil]): ga.Out = ga.getArrs(a, HNil)
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
     def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
       ga: GetArrs[A, T, HNil] { type Out = GAOut },

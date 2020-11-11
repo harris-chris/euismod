@@ -304,16 +304,24 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     object MapTest extends Tag("MapTest")
     scenario(".map on a 1d array returns a mapped 1d array", MapTest) {
-      assert(list1d.map(t => t.toInt).flatten === list1d.flatten.map(_.toInt))
+      val mapped = list1d.map(t => t.toInt)
+      assert(mapped.shape === list1d.shape)
+      assert(mapped.flatten === list1d.flatten.map(_.toInt))
     }
     scenario(".map on a 2d array returns a mapped 2d array", MapTest) {
-      assert(list2d.map(t => t.toInt).flatten === list2d.flatten.map(_.toInt))
+      val mapped = list2d.map(t => t.toInt)
+      assert(mapped.shape === list2d.shape)
+      assert(mapped.flatten === list2d.flatten.map(_.toInt))
     }
     scenario(".map on a 3d array returns a mapped 3d array", MapTest) {
-      assert(list3d.map(t => t.toInt).flatten === list3d.flatten.map(_.toInt))
+      val mapped = list3d.map(t => t.toInt)
+      assert(mapped.shape === list3d.shape)
+      assert(mapped.flatten === list3d.flatten.map(_.toInt))
     }
     scenario(".map double => char on a 3d array returns a mapped 3d array", MapTest) {
-      assert(list3d.map(t => 'c').flatten === list3d.flatten.map(_ => 'c'))
+      val mapped = list3d.map(t => 'c')
+      assert(mapped.shape === list3d.shape)
+      assert(mapped.flatten === list3d.flatten.map(_ => 'c'))
     }
   }
 
