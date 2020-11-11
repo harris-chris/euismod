@@ -292,14 +292,18 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     def checkGetILocWithInt[A[_], T, _S: IsBase](
       a: A[T], f:(A[T], Int) => A[T],
-    ) (implicit aIsArr: IsArray[A, T] { type S = _S },
+    ) ( implicit 
+      tIsEle: IsElement[T],
+      aIsArr: IsArray[A, T] { type S = _S },
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
       (0 to a.length - 1).forall(n => f(a, n) == a.getAtN(n) :: a.getEmpty)
     }
     def checkGetILocWithListInt[A[_], T, _S: IsBase](
       a: A[T], f:(A[T], List[Int]) => A[T],
-    ) (implicit aIsArr: IsArray[A, T] { type S = _S },
+    ) (implicit 
+      tIsEle: IsElement[T],
+      aIsArr: IsArray[A, T] { type S = _S },
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
       (0 to a.length - 2).forall(n => f(a, List(n, n + 1)) == { 

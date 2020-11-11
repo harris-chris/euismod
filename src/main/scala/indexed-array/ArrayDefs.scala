@@ -85,8 +85,10 @@ object ArrayDefs {
 
   object IsArraySyntax {
     implicit class IsArrayOps[A[_], T, _S](a: A[T])(implicit 
+      val tIsEle: IsElement[T],
       val tc: IsArray[A, T] { type S = _S },
     ) {
+      def getEmpty = tc.getEmpty[T]
       def getEmpty[_T](implicit _tIsEle: IsElement[_T]) = tc.getEmpty[_T]
       def getAtN(n: Int): _S = tc.getAtN(a, n)
       def getILoc[R](r: R)(implicit getILoc: GetILoc[A, T, R]) = tc.getILoc(a, r)
