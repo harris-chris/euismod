@@ -304,40 +304,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     object MapTest extends Tag("MapTest")
     scenario(".map on a 1d array returns a mapped 1d array", MapTest) {
-      val isArr = implicitly[IsArray[List1d, Double] { type S = Double }]
-      val fl = implicitly[Flatten[List1d, Double]]
-      val list_d: List[Double] = fl.flatten(list1d)
-      println("LIST D")
-      println(list_d)
-      val gs = implicitly[GetShape[List1d[Double], Double, HNil] { type Out = Int :: HNil }]
-      val shape: HList = gs.getShape(list1d, HNil)
-      println("SHAPE")
-      println(shape)
-      val emptyI: List1d[Int] = isArr.getEmpty[Int]
-      val aiIsArr = implicitly[IsArray[List1d, Int] { type S = Int }]
-      val t1: List1d[Int] = aiIsArr.cons(emptyI, 3: Int)
-      println("TEST INT ARR")
-      println(t1)
-      import GetArrs._
-      val gaf: GetArrs[List1d, Int, HNil] { type Out = List1d[Int] :: HNil } = 
-        getArrsIfSIsEle[List1d, Int, Int, HNil]
-      //val ga = implicitly[GetArrs[List1d, Int, HNil] { type Out = List1d[Int] :: HNil }]
-      val arrs: List1d[Int] :: HNil = gaf.getArrs(emptyI, HNil)
-      println("ARRAYS")
-      println(arrs)
-      import FromElemsRT._
-      val hIsArr = implicitly[IsArray[List1d, Int] { type S = Int }]
-      val hIsABs = implicitly[IsArrBase[List1d[Int], Int] { type S = Int }]
-      val ev: FromElemsRT[Int, List1d[Int] :: HNil, Int :: HNil] = 
-        ifSingleElemRemainingInShape[Int, Int, List1d[Int], HNil]
-      val fe = implicitly[FromElemsRT[Int, List1d[Int] :: HNil, Int :: HNil] { type Out = Option[List1d[Int]] }]
-      val fe1: FromElemsRT[Int, List1d[Int] :: HNil, Int :: HNil] { type Out = Option[List1d[Int]] } = 
-        implicitly[FromElemsRT[Int, gaf.Out, gs.Out]{ type Out = Option[List1d[Int]] }] 
-      //val lInt = isArr.map(list1d, t => t.toInt)
-      //val l1m = list1d.map(t => t.toInt: (Double) => Int)
-      //val l1m: List1d[Int] = list1d.map(_.toInt: Double => Int)
-      //assert(l1m === list1d.data.map(_.toInt))
-      list1d.map(t => t.toInt)
+      assert(list1d.map(t => t.toInt).flatten === list1d.flatten.map(_.toInt))
+    }
+    scenario(".map on a 2d array returns a mapped 2d array", MapTest) {
+      assert(list2d.map(t => t.toInt).flatten === list2d.flatten.map(_.toInt))
+    }
+    scenario(".map on a 3d array returns a mapped 3d array", MapTest) {
+      assert(list3d.map(t => t.toInt).flatten === list3d.flatten.map(_.toInt))
+    }
+    scenario(".map double => char on a 3d array returns a mapped 3d array", MapTest) {
+      assert(list3d.map(t => 'c').flatten === list3d.flatten.map(_ => 'c'))
     }
   }
 
