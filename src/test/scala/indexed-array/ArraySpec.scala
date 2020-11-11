@@ -230,6 +230,20 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(lst5 == List1d[Double](values1d))
     }
   }
+  
+  feature("IsArray.getEmpty[_T]") {
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    object GetEmptyTest extends Tag("GetEmptyTest")
+    scenario(".getEmpty[_T] is used on a 1d arraylike to create a new empty arraylike", GetEmptyTest) {
+      "val l1: List1d[Int] = list1d.getEmpty[Int]" should compile
+    }
+    scenario(".getEmpty[_T] is used  on a 2d arraylike to create a new empty arraylike", GetEmptyTest) {
+      "val l2: List2d[Int] = list2d.getEmpty[Int]" should compile
+    }
+  }
 
   feature("IsArray.getArrays") {
     import ArrayDefs.IsArraySyntax._
@@ -280,6 +294,50 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case Some(l2) => l2.flatten.toList === ts6
         case None => false
       })
+    }
+  }
+
+  feature("IsArray.map") {
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    object MapTest extends Tag("MapTest")
+    scenario(".map on a 1d array returns a mapped 1d array", MapTest) {
+      val isArr = implicitly[IsArray[List1d, Double] { type S = Double }]
+      val fl = implicitly[Flatten[List1d, Double]]
+      val list_d: List[Double] = fl.flatten(list1d)
+      println("LIST D")
+      println(list_d)
+      val gs = implicitly[GetShape[List1d[Double], Double, HNil] { type Out = Int :: HNil }]
+      val shape: HList = gs.getShape(list1d, HNil)
+      println("SHAPE")
+      println(shape)
+      val emptyI: List1d[Int] = isArr.getEmpty[Int]
+      val aiIsArr = implicitly[IsArray[List1d, Int] { type S = Int }]
+      val t1: List1d[Int] = aiIsArr.cons(emptyI, 3: Int)
+      println("TEST INT ARR")
+      println(t1)
+      import GetArrs._
+      val gaf: GetArrs[List1d, Int, HNil] { type Out = List1d[Int] :: HNil } = 
+        getArrsIfSIsEle[List1d, Int, Int, HNil]
+      //val ga = implicitly[GetArrs[List1d, Int, HNil] { type Out = List1d[Int] :: HNil }]
+      val arrs: List1d[Int] :: HNil = gaf.getArrs(emptyI, HNil)
+      println("ARRAYS")
+      println(arrs)
+      import FromElemsRT._
+      val hIsArr = implicitly[IsArray[List1d, Int] { type S = Int }]
+      val hIsABs = implicitly[IsArrBase[List1d[Int], Int] { type S = Int }]
+      val ev: FromElemsRT[Int, List1d[Int] :: HNil, Int :: HNil] = 
+        ifSingleElemRemainingInShape[Int, Int, List1d[Int], HNil]
+      val fe = implicitly[FromElemsRT[Int, List1d[Int] :: HNil, Int :: HNil] { type Out = Option[List1d[Int]] }]
+      val fe1: FromElemsRT[Int, List1d[Int] :: HNil, Int :: HNil] { type Out = Option[List1d[Int]] } = 
+        implicitly[FromElemsRT[Int, gaf.Out, gs.Out]{ type Out = Option[List1d[Int]] }] 
+      //val lInt = isArr.map(list1d, t => t.toInt)
+      //val l1m = list1d.map(t => t.toInt: (Double) => Int)
+      //val l1m: List1d[Int] = list1d.map(_.toInt: Double => Int)
+      //assert(l1m === list1d.data.map(_.toInt))
+      list1d.map(t => t.toInt)
     }
   }
 

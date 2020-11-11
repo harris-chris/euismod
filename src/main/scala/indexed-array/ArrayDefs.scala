@@ -65,16 +65,18 @@ object ArrayDefs {
     ): fr.Out = {
       fromElems(a, fl.flatten(a), shape)
     }
-    def map[_T, GAOut <: HList, GSOut <: HList, SH <: HList](a: A[T], f: T => _T)(implicit
+    def map[_T, GAOut <: HList, GSOut <: HList, SH <: HList](a: A[T], f: (T) => _T)(implicit
       fl: Flatten[A, T],
+      a_tIsArr: IsArray[A, _T],
       gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
       ga: GetArrs[A, _T, HNil] { type Out = GAOut },
-      fr: FromElemsRT[_T, GAOut, GSOut],
-    ): fr.Out = {
+      fr: FromElemsRT[_T, GAOut, GSOut] { type Out = Option[A[_T]] },
+    ): A[_T] = {
       val sh: GSOut = gs.getShape(a, HNil)
       val list_t: List[_T] = flatten(a).map(f)
-      val empty_t = getEmpty[_T]
-      fr.fromElems(Some(list_t.reverse), ga.getArrs(empty_t, HNil), sh) 
+      val empty_t: A[_T] = getEmpty[_T]
+      val arrs: GAOut = ga.getArrs(empty_t, HNil)
+      fr.fromElems(Some(list_t.reverse), arrs, sh).get 
     }
   }
   //object IsArray {
@@ -119,6 +121,13 @@ object ArrayDefs {
         ga: GetArrs[A, T, HNil] { type Out = GAOut },
         rs: FromElemsRT[T, GAOut, SH],
       ) = tc.reshape(a, shape)
+      def map[_T, GAOut <: HList, GSOut <: HList, SH <: HList](f: T => _T)(implicit
+        a_tIsArr: IsArray[A, _T],
+        fl: Flatten[A, T],
+        gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
+        ga: GetArrs[A, _T, HNil] { type Out = GAOut },
+        fr: FromElemsRT[_T, GAOut, GSOut] { type Out = Option[A[_T]] },
+      ): A[_T] = tc.map(a, f)
     }
   }
 
