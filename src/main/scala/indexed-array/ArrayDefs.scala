@@ -64,6 +64,18 @@ object ArrayDefs {
     ): fr.Out = {
       fromElems(a, fl.flatten(a), shape)
     }
+    def map[_T, GAOut <: HList, GSOut <: HList, SH <: HList](a: A[T], f: T => _T)(implicit
+      _tIsEle: IsElement[_T],
+      fl: Flatten[A, T],
+      gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
+      ga: GetArrs[A, _T, HNil] { type Out = GAOut },
+      fr: FromElemsRT[_T, GAOut, GSOut],
+    ): fr.Out = {
+      val sh: GSOut = gs.getShape(a, HNil)
+      val list_t: List[_T] = flatten(a).map(f)
+      val empty_t = getEmpty[_T]
+      fr.fromElems(Some(list_t.reverse), ga.getArrs(empty_t, HNil), sh) 
+    }
   }
   //object IsArray {
     //def apply[A[_], T, _S](
@@ -161,21 +173,6 @@ object ArrayDefs {
       )
     }
   }
-
-  //trait ArrMap[A, T, _T] {
-    //type Out
-    //def map(a: A, f: T => _T): Out
-  //}
-  //object ArrMap {
-    //implicit def ArrMapIfSIsT[A, T, _T](implicit 
-      //aIsABs: IsArrBase[A, T] { type S = T }
-    //): ArrMap[A, T, _T] { type Out = A[_T] { type S = _T } } = new ArrMap[A, T, _T] {
-      //type Out = A[_T] { type S = _T }
-      //def map(a: A, f: T => _T): Out = {
-        //val mappedTs: List[_T] = aIsABs.flatten.map(f)
-
-    //}
-
 
   trait FromElemsRT[_S, Arrs <: HList, SH <: HList] {
     type Out 
@@ -293,21 +290,26 @@ object ArrayDefs {
     //def map(a: A[T], f: T => _T): A[_T] 
   //}
   //object ArrMap {
-    //implicit def mapIfEIsBase[A, B, C](implicit 
-      //aIsUpd: IsUpdatable[A] { type E = B }, 
-      //cIsUpd: IsUpdatable[A] { type E = C },
-    //): ArrMap[A, B, C] = new ArrMap[A, B, C] {
-      //def map(self: A, f: B => C): A = aIsUpd.mapList[C](self, f)
+    //implicit def mapIfSIsT[A[_], T, _T](implicit 
+      //_tIsEle: IsElement[_T],
+      //aIsArr: IsArray[A, T] { type S = T }, 
+      //bIsArr: IsArray[A, T] { type S = _T },
+    //): ArrMap[A, T, _T] = new ArrMap[A, T, _T] {
+      //def map(a: A[T], f: T => _T): A[_T] = {
+        //val newEmpty = aIsArr.getEmpty[_T]
+        //val newList: List[_T] = aIsArr.toList(a).map(f)
+        //bIsArr.fromElems(newEmpty, newList)
+      //}
     //}
-    ////implicit def mapIfEIsArr[A, _E, B, C](implicit 
-      ////isArr: IsUpdatable[A] { type E = _E },
-      ////eIsArr: IsUpdatable[_E],
-      ////eArrMap: ArrMap[_E, B, C],
-    ////): ArrMap[A, B, C] = new ArrMap[A, B, C] {
-      ////def map(self: A, f: B => C): A = isArr.mapList(
-        ////self, e => eIsArr.map(e, f)
-      ////)
-    ////}
+    //implicit def mapIfEIsArr[A, _E, B, C](implicit 
+      //isArr: IsUpdatable[A] { type E = _E },
+      //eIsArr: IsUpdatable[_E],
+      //eArrMap: ArrMap[_E, B, C],
+    //): ArrMap[A, B, C] = new ArrMap[A, B, C] {
+      //def map(self: A, f: B => C): A = isArr.mapList(
+        //self, e => eIsArr.map(e, f)
+      //)
+    //}
   //}
 
   trait GetILoc[A[_], T, R] {
