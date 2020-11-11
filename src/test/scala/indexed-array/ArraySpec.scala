@@ -8,7 +8,7 @@ import com.github.nscala_time.time.Imports._
 import sportdate.SportDate
 import sportdate.{IsSportDateInstances, IsSportDateSyntax}
 
-import Skeleton.{IsBase, IsElement}
+import Skeleton.{IsBase}
 import IndicesObj._
 
 import shapeless._
@@ -18,13 +18,13 @@ import shapeless.ops.hlist._
 
 object Dummy {
   object Types {
-    case class List1d[T: IsElement] (
+    case class List1d[T] (
       data: List[T],
     )
-    case class List2d[T: IsElement] ( 
+    case class List2d[T] ( 
       data: List[List[T]],
     )
-    case class List3d[T: IsElement] ( 
+    case class List3d[T] ( 
       data: List[List[List[T]]],
     )
   }
@@ -53,23 +53,23 @@ object Dummy {
     import Values._
     import ArrayDefs._
     import ArrayDefs.IsArraySyntax._
-    implicit def list1dIsArray[T: IsElement] = new IsArray[List1d, T] {
+    implicit def list1dIsArray[T] = new IsArray[List1d, T] {
       type S = T
-      def getEmpty[_T: IsElement] = List1d[_T](Nil: List[_T])
+      def getEmpty[_T] = List1d[_T](Nil: List[_T])
       def getAtN(a: List1d[T], n: Int) = a.data(n)
       def length(a: List1d[T]) = a.data.length
       def cons(a: List1d[T], other: S) = List1d(other :: a.data)
     }
-    implicit def list2dIsArray[T: IsElement] = new IsArray[List2d, T] {
+    implicit def list2dIsArray[T] = new IsArray[List2d, T] {
       type S = List1d[T]
-      def getEmpty[_T: IsElement]: List2d[_T] = List2d[_T](Nil: List[List[_T]])
+      def getEmpty[_T]: List2d[_T] = List2d[_T](Nil: List[List[_T]])
       def getAtN(a: List2d[T], n: Int): S = List1d(a.data(n))
       def length(a: List2d[T]): Int = a.data.length
       def cons(a: List2d[T], sub: S): List2d[T] = List2d(sub.data :: a.data)
     }
-    implicit def list3dIsArray[T: IsElement] = new IsArray[List3d, T] {
+    implicit def list3dIsArray[T] = new IsArray[List3d, T] {
       type S = List2d[T]
-      def getEmpty[_T: IsElement] = List3d[_T](Nil: List[List[List[_T]]])
+      def getEmpty[_T] = List3d[_T](Nil: List[List[List[_T]]])
       def getAtN(a: List3d[T], n: Int) = List2d(a.data(n))
       def length(a: List3d[T]) = a.data.length
       def cons(a: List3d[T], sub: S): List3d[T] = List3d(sub.data :: a.data)
@@ -84,9 +84,9 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
 
   feature("Arraylike objects should be able to implement IsArray") {
     case class A1[T](data: List[T])
-    implicit def a1ev[T: IsElement] = new IsArray[A1, T] {
+    implicit def a1ev[T] = new IsArray[A1, T] {
       type S = T
-      def getEmpty[_T: IsElement] = A1[_T](Nil: List[_T])
+      def getEmpty[_T] = A1[_T](Nil: List[_T])
       def getAtN(a: A1[T], n: Int) = a.data(n)
       def length(a: A1[T]) = a.data.length
       def cons(a: A1[T], sub: S) = A1[T](sub :: a.data)
@@ -98,9 +98,9 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
 
     scenario("A 2d 1dOf1d type that can implement IsArray, implements IsArray") {
       case class A1OfA1[T](data: List[A1[T]])
-      implicit def a1ofa1ev[T: IsElement] = new IsArray[A1OfA1, T] {
+      implicit def a1ofa1ev[T] = new IsArray[A1OfA1, T] {
         type S = A1[T]
-        def getEmpty[_T: IsElement] = A1OfA1[_T](Nil: List[A1[_T]])
+        def getEmpty[_T] = A1OfA1[_T](Nil: List[A1[_T]])
         def getAtN(a: A1OfA1[T], n: Int) = a.data(n)
         def length(a: A1OfA1[T]) = a.data.length
         def cons(a: A1OfA1[T], sub: S) = A1OfA1[T](sub :: a.data)
@@ -110,9 +110,9 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
 
     scenario("A 2d list-of-list type that can implement IsArray, implements IsArray") {
       case class A2[T](data: List[List[T]])
-      implicit def a2ev[T: IsElement] = new IsArray[A2, T] {
+      implicit def a2ev[T] = new IsArray[A2, T] {
         type S = A1[T]
-        def getEmpty[_T: IsElement] = A2[_T](Nil: List[List[_T]])
+        def getEmpty[_T] = A2[_T](Nil: List[List[_T]])
         def getAtN(a: A2[T], n: Int) = A1[T](a.data(n))
         def length(a: A2[T]) = a.data.length
         def cons(a: A2[T], sub: S) = A2[T](a1ev.toList(sub) :: a.data)
@@ -123,9 +123,9 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
 
   feature("Implicit class conversions and typeclass syntax for IsArray implementations") {
     case class A1[T](data: List[T])
-    implicit def a1ev[T: IsElement] = new IsArray[A1, T] {
+    implicit def a1ev[T] = new IsArray[A1, T] {
       type S = T
-      def getEmpty[_T: IsElement] = A1[_T](Nil: List[_T])
+      def getEmpty[_T] = A1[_T](Nil: List[_T])
       def getAtN(a: A1[T], n: Int) = a.data(n)
       def length(a: A1[T]) = a.data.length
       def cons(a: A1[T], sub: S) = A1[T](sub :: a.data)
@@ -140,17 +140,17 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
 
   feature("IsXd typeclass") {
     case class A1[T](data: List[T])
-    implicit def a1ev[T: IsElement] = new IsArray[A1, T] {
+    implicit def a1ev[T] = new IsArray[A1, T] {
       type S = T
-      def getEmpty[_T: IsElement] = A1[_T](Nil: List[_T])
+      def getEmpty[_T] = A1[_T](Nil: List[_T])
       def getAtN(a: A1[T], n: Int) = a.data(n)
       def length(a: A1[T]) = a.data.length
       def cons(a: A1[T], sub: S) = A1[T](sub :: a.data)
     }
     case class A1OfA1[T](data: List[A1[T]])
-    implicit def a1ofa1ev[T: IsElement] = new IsArray[A1OfA1, T] {
+    implicit def a1ofa1ev[T] = new IsArray[A1OfA1, T] {
       type S = A1[T]
-      def getEmpty[_T: IsElement] = A1OfA1[_T](Nil: List[A1[_T]])
+      def getEmpty[_T] = A1OfA1[_T](Nil: List[A1[_T]])
       def getAtN(a: A1OfA1[T], n: Int) = a.data(n)
       def length(a: A1OfA1[T]) = a.data.length
       def cons(a: A1OfA1[T], sub: S) = A1OfA1[T](sub :: a.data)
@@ -159,35 +159,35 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       Given("An 2-d arraylike which returns a 1-d arraylike")
       When("Implementation of Is2d is attempted without Is1d implemented for the 1-d array")
       Then("It should fail to compile")
-      "implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1, T, A1[T]]" shouldNot typeCheck
+      "implicit def a1Of1Is2d[T] = Is2d[A1OfA1, T, A1[T]]" shouldNot typeCheck
       
       When("Implementation of Is2d is attempted with Is1d implemented for the 1-d array")
       Then("It should compile")
-      implicit def a1Is1d[T: IsElement] = Is1d[A1, T] 
-      "implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1, T, A1[T]]" should compile
+      implicit def a1Is1d[T] = Is1d[A1, T] 
+      "implicit def a1Of1Is2d[T] = Is2d[A1OfA1, T, A1[T]]" should compile
     }
   }
 
   feature("Multi-dimensional arrays") {
     import Dummy._
     case class A1[T](data: List[T])
-    implicit def a1ev[T: IsElement] = new IsArray[A1, T] {
+    implicit def a1ev[T] = new IsArray[A1, T] {
       type S = T
-      def getEmpty[_T: IsElement] = A1[_T](Nil: List[_T])
+      def getEmpty[_T] = A1[_T](Nil: List[_T])
       def getAtN(a: A1[T], n: Int) = a.data(n)
       def length(a: A1[T]) = a.data.length
       def cons(a: A1[T], sub: S) = A1[T](sub :: a.data)
     }
     case class A1OfA1[T](data: List[A1[T]])
-    implicit def a1ofa1ev[T: IsElement] = new IsArray[A1OfA1, T] {
+    implicit def a1ofa1ev[T] = new IsArray[A1OfA1, T] {
       type S = A1[T]
-      def getEmpty[_T: IsElement] = A1OfA1[_T](Nil: List[A1[_T]])
+      def getEmpty[_T] = A1OfA1[_T](Nil: List[A1[_T]])
       def getAtN(a: A1OfA1[T], n: Int) = a.data(n)
       def length(a: A1OfA1[T]) = a.data.length
       def cons(a: A1OfA1[T], sub: S) = A1OfA1[T](sub :: a.data)
     }
-    implicit def a1Is1d[T: IsElement] = Is1d[A1, T] 
-    implicit def a1Of1Is2d[T: IsElement] = Is2d[A1OfA1, T, A1[T]]
+    implicit def a1Is1d[T] = Is1d[A1, T] 
+    implicit def a1Of1Is2d[T] = Is2d[A1OfA1, T, A1[T]]
     scenario("A value is returned from a 2d-dimensional array using getAtN") {
       Given("A 1-dimensional arraylike, and a 2d list of 1d arraylike 2d array implementation")
       When("getAtN is called on a concrete instance of the 2d arraylike")
@@ -220,16 +220,13 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(values1d.zipWithIndex.forall({case(x, i) => x == list1d.getAtN(i)}))
     }
     scenario("IsArray objects are constructed from individual values using cons") {
-      Given("A list of values implementing IsElement")
       import ArrayDefs.IsArraySyntax._
       val lst0 = List1d[Double](Nil)
-      When("A 1d arraylike is constructed by cons-ing these values")
       val lst1 = values1d(4) :: lst0
       val lst2 = values1d(3) :: lst1
       val lst3 = values1d(2) :: lst2
       val lst4 = values1d(1) :: lst3
       val lst5 = values1d(0) :: lst4
-      Then("It should reconcile with the original values")
       assert(lst5 == List1d[Double](values1d))
     }
   }
@@ -263,14 +260,14 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     object FromListTest extends Tag("FromListTest")
     scenario("a List1d can be constructed from a list of Ts", FromListTest) {
       val ts3: List[Double] = List(1.5, 2.5, 3.5)
-      assert(list1d.getEmpty.fromElems(ts3, 3 :: HNil) match {
+      assert(list1d.empty.fromElems(ts3, 3 :: HNil) match {
         case Some(l1) => l1.flatten.toList === ts3
         case None => false
       })
     }
     scenario("a List1d can be constructed from a 2d array and a list of Ts", FromListTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
-      val l1O = list2d.getEmpty.fromElems(ts6, 6 :: HNil)
+      val l1O = list2d.empty.fromElems(ts6, 6 :: HNil)
       assert(l1O match {
         case Some(l1) => l1.flatten.toList === ts6
         case None => false
@@ -278,7 +275,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
     scenario("a List2d can be constructed from a 2d array and a list of Ts", FromListTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
-      val l2O = list2d.getEmpty.fromElems(ts6, 3 :: 2 :: HNil)
+      val l2O = list2d.empty.fromElems(ts6, 3 :: 2 :: HNil)
       assert(l2O match {
         case Some(l2) => l2.flatten.toList === ts6
         case None => false
@@ -290,24 +287,22 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    def checkGetILocWithInt[A[_], T, _S: IsBase](
+    def checkGetILocWithInt[A[_], T, _S](
       a: A[T], f:(A[T], Int) => A[T],
     ) ( implicit 
-      tIsEle: IsElement[T],
       aIsArr: IsArray[A, T] { type S = _S },
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
-      (0 to a.length - 1).forall(n => f(a, n) == a.getAtN(n) :: a.getEmpty)
+      (0 to a.length - 1).forall(n => f(a, n) == a.getAtN(n) :: a.empty)
     }
-    def checkGetILocWithListInt[A[_], T, _S: IsBase](
+    def checkGetILocWithListInt[A[_], T, _S](
       a: A[T], f:(A[T], List[Int]) => A[T],
     ) (implicit 
-      tIsEle: IsElement[T],
       aIsArr: IsArray[A, T] { type S = _S },
     ): Boolean = {
       import ArrayDefs.IsArraySyntax._
       (0 to a.length - 2).forall(n => f(a, List(n, n + 1)) == { 
-        a.getAtN(n) :: a.getAtN(n + 1) :: a.getEmpty
+        a.getAtN(n) :: a.getAtN(n + 1) :: a.empty
       })
     }
     scenario("getILoc is called with null to return the entire array") {

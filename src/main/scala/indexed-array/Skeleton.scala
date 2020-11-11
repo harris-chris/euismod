@@ -12,13 +12,6 @@ object Skeleton {
   abstract class IsBase[A]
 
   // Define your DataTypes here - these are the types of value used in the body of the array
-  abstract class IsElement[A] extends IsBase[A]
-  implicit val PositionsData = new IsElement[Double] {}
-  //implicit val WeightsData = new DataType[Int] {}
-  //abstract class PositionsData extends DataType { type Self = Double }
-  //abstract class WeightsData extends DataType { type Self = Double }
-  //abstract class ValuesData extends DataType { type Self = Double }
-  //abstract class PricesData extends DataType { type Self = Double }
 
   // IsIdxElem is a trait which defines whether a particular type can be used for an index
   trait IsIdxElem[A]

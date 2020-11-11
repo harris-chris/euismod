@@ -1,7 +1,7 @@
 package sportarray
 
 //import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
-import Skeleton.{IsBase, IsElement, PositionsData}
+import Skeleton.{IsBase}
 import IndicesObj.Index
 
 import scala.annotation.implicitNotFound
@@ -29,18 +29,19 @@ object ArrayDefs {
     type S
     //implicit val sIsBase: IsBase[S]
 
-    def getEmpty[_T: IsElement]: A[_T] 
+    def getEmpty[_T]: A[_T] 
     def getAtN(a: A[T], n: Int): S
     def length(a: A[T]): Int
     def cons(a: A[T], sub: S): A[T]
 
+    def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
     // for ++, we do not want to specify the actual implementation of other; any IsArray with the
     // same shape should be fine.
     def ++[B[_]](self: A[T], other: B[T])(implicit bIsArr: IsArray[B, T]): A[T] = ???
     def getILoc[R](self: A[T], r: R)(implicit getILoc: GetILoc[A, T, R]): A[T] = getILoc.iloc(self, r)
     def toList(self: A[T]): List[S] = (for(i <- 0 to length(self) - 1) yield (getAtN(self, i))).toList
-    def fromList(a: A[T], listS: List[S])(implicit tIsEle: IsElement[T]): A[T] = 
+    def fromList(a: A[T], listS: List[S]): A[T] = 
       listS.foldLeft(getEmpty[T])((e, s) => cons(e, s))
     def ndims[GSOut <: HList](a: A[T])(implicit 
       gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
@@ -65,7 +66,6 @@ object ArrayDefs {
       fromElems(a, fl.flatten(a), shape)
     }
     def map[_T, GAOut <: HList, GSOut <: HList, SH <: HList](a: A[T], f: T => _T)(implicit
-      _tIsEle: IsElement[_T],
       fl: Flatten[A, T],
       gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
       ga: GetArrs[A, _T, HNil] { type Out = GAOut },
@@ -97,17 +97,16 @@ object ArrayDefs {
 
   object IsArraySyntax {
     implicit class IsArrayOps[A[_], T, _S](a: A[T])(implicit 
-      val tIsEle: IsElement[T],
       val tc: IsArray[A, T] { type S = _S },
     ) {
-      def getEmpty = tc.getEmpty[T]
-      def getEmpty[_T](implicit _tIsEle: IsElement[_T]) = tc.getEmpty[_T]
+      def getEmpty[_T] = tc.getEmpty[_T]
+      def empty = tc.getEmpty[T]
       def getAtN(n: Int): _S = tc.getAtN(a, n)
       def getILoc[R](r: R)(implicit getILoc: GetILoc[A, T, R]) = tc.getILoc(a, r)
       def ::(other: _S) = tc.cons(a, other)
       def length: Int = tc.length(a)
       def toList: List[_S] = tc.toList(a)
-      def fromList(listS: List[_S])(implicit tIsEle: IsElement[T]): A[T] = tc.fromList(a, listS)
+      def fromList(listS: List[_S]): A[T] = tc.fromList(a, listS)
       def getArrays(implicit ga: GetArrs[A, T, HNil]): ga.Out = tc.getArrays(a)
       def shape(implicit gs: GetShape[A[T], T, HNil]): gs.Out = tc.shape(a)
       def flatten(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
@@ -129,15 +128,12 @@ object ArrayDefs {
   }
   object GetArrs {
     implicit def getArrsIfSIsEle[A[_], T, _S, L <: HList](implicit 
-      tIsEle: IsElement[T],
-      sIsEle: IsElement[_S],
-      aIsArr: IsArray[A, T] { type S = _S },
+      aIsArr: IsArray[A, T] { type S = T },
     ): GetArrs[A, T, L] { type Out = A[T] :: L } = new GetArrs[A, T, L] {
       type Out = A[T] :: L
       def getArrs(a: A[T], l: L): Out = aIsArr.getEmpty[T] :: l
     }
     implicit def getArrsIfSIsArr[A[_], T, _S[_], _S1, L <: HList](implicit 
-      tIsEle: IsElement[T],
       aIsABs: IsArray[A, T] { type S = _S[T] },
       sIsABs: IsArray[_S, T],
       gaForS: GetArrs[_S, T, A[T] :: L],
@@ -156,8 +152,7 @@ object ArrayDefs {
   }
   object GetShape {
     implicit def gsIfSIsEle[A, T, _S, L <: HList](implicit 
-      sIsEle: IsElement[_S],
-      aIsABs: IsArrBase[A, T] { type S = _S },
+      aIsABs: IsArrBase[A, T] { type S = T },
     ): GetShape[A, T, L] { type Out = Int :: L } = new GetShape[A, T, L] {
       type Out = Int :: L
       def getShape(a: A, l: L): Out = aIsABs.length(a) :: l
@@ -222,7 +217,7 @@ object ArrayDefs {
     def flatten(a: A[T]): List[T]
   }
   object Flatten {
-    implicit def flattenIfSIsT[A[_], T: IsElement](implicit 
+    implicit def flattenIfSIsT[A[_], T](implicit 
       aIsArr: IsArray[A, T] { type S = T },
     ): Flatten[A, T] = new Flatten[A, T] {
       def flatten(a: A[T]): List[T] = aIsArr.toList(a)
@@ -320,14 +315,12 @@ object ArrayDefs {
       def iloc(self: A[T], ref: R): A[T] = f(self, ref)
     }
     implicit def iLocInt[A[_], T](implicit 
-      tisEle: IsElement[T],
       isArr: IsArray[A, T],
     ): GetILoc[A, T, Int] = instance(
       (s, r) => isArr.cons(isArr.getEmpty[T], isArr.getAtN(s, r))
     )
     implicit def iLocListInt[A[_], T](implicit 
       isArr: IsArray[A, T],
-      tIsEle: IsElement[T],
     ): GetILoc[A, T, List[Int]] = instance(
       (s, r) => {
         val data: List[isArr.S] = r.map(isArr.getAtN(s, _)).toList.reverse
