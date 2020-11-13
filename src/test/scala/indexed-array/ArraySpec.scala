@@ -329,6 +329,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object GetILocTest extends Tag("GetILocTest")
     def checkGetILocWithInt[A[_], T, _S](
       a: A[T], f:(A[T], Int) => A[T],
     ) ( implicit 
@@ -347,66 +349,34 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         a.getAtN(n) :: a.getAtN(n + 1) :: a.empty
       })
     }
-    scenario("getILoc is called with null to return the entire array") {
-      Given("A 1-dimensional arraylike")
-      When("getILoc is called with a null argument")
-      import ArrayDefs.IsArraySyntax._
-      val t1 = list1d.getILoc(null)
-      Then("the entire array should be returned")
-      assert(t1 == list1d)
-      
-      Given("A 2-dimensional arraylike")
-      When("getILoc is called with a null argument")
-      import ArrayDefs.IsArraySyntax._
-      val t2 = list2d.getILoc(null)
-      Then("the entire array should be returned")
-      assert(t2 == list2d)
-    }
-    scenario("getILoc is called with an Int to return the appropriate element") {
-      import ArrayDefs.IsArraySyntax._
-      When("getILoc is called with an Int on a 1d arraylike")
-      Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
-      assert(checkGetILocWithInt[List1d, Double, Double](list1d, (l, i) => l.getILoc(i)))
-
-      When("getILoc is called with an Int on a 2d arraylike")
-      Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
-      assert(checkGetILocWithInt[List2d, Double, List1d[Double]](list2d, (l, i) => l.getILoc(i)))
-    }
-    scenario("getILoc is called with a List of Ints to return the appropriate elements") {
-      import ArrayDefs.IsArraySyntax._
-      When("getILoc is called with an List of Ints on a 1d arraylike")
-      Then("it returns a same-dimensional array with the top dimension reduced down to the references")
-      assert(checkGetILocWithListInt[List1d, Double, Double](list1d, (l, i) => l.getILoc(i)))
-
-      When("getILoc is called with an List of Ints on a 2d arraylike")
-      Then("it returns a same-dimensional array with the top dimension reduced down to the references")
-      assert(checkGetILocWithListInt[List2d, Double, List1d[Double]](list2d, (l, i) => l.getILoc(i)))
-    }
-    scenario("getILoc is called with an HList of Ints to return the appropriate elements") {
-      import ArrayDefs.IsArraySyntax._
-      When("getILoc is called with an HList of Ints on a 1d arraylike")
-      Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
-      assert(
-        checkGetILocWithInt[List1d, Double, Double](list1d, (l, i) => l.getILoc(i :: HNil))
+    val mini3 = List1d[Int](List(1, 2, 3))
+    val mini33 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9)))
+    val mini233 = List3d[Int](
+      List(
+        List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9)),
+        List(List(10, 11, 12), List(13, 14, 15), List(16, 17, 18))
       )
-      When("getILoc is called with an HList of Ints on a 2d arraylike")
-      Then("it returns a same-dimensional array with the top dimension reduced down to the reference")
-      assert(
-        checkGetILocWithInt[List2d, Double, List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
-      )
+    )
+    scenario("a List[Int] is used to return the listed elements from a 1d array", GetILocTest) {
+      assert(mini3(List(1, 2)) === List1d[Int](List(2, 3))) 
     }
-    scenario("getILoc is called with an HList of List[Int] to return the appropriate elements") {
-      import ArrayDefs.IsArraySyntax._
-      When("getILoc is called with an HList of List[Int] on a 1d arraylike")
-      Then("it returns a same-dimensional array with the top dimension reduced down to the references")
-      assert(
-        checkGetILocWithListInt[List1d, Double, Double](list1d, (l, i) => l.getILoc(i :: HNil))
-      )
-      When("getILoc is called with an HList of List[Int] on a 2d arraylike")
-      Then("it returns a same-dimensional array with the top dimension reduced down to the references")
-      assert(
-        checkGetILocWithListInt[List2d, Double, List1d[Double]](list2d, (l, i) => l.getILoc(i :: HNil))
-      )
+    scenario("a List[Int] :: HNil is used to return the listed elements from a 1d array", GetILocTest) {
+      assert(mini3(List(1, 2) :: HNil) === List1d[Int](List(2, 3))) 
+    }
+    scenario("a Int is used to return the listed elements from a 3d array", GetILocTest) {
+      assert(mini233(1) === mini233.getAtN(1)) 
+    }
+    scenario("a Int :: HNil is used to return T from a 1d array", GetILocTest) {
+      assert(mini3(1 :: HNil) === mini3.getAtN(1)) 
+    }
+    scenario("an HList of List[Int] is used to return the correct elements from a 3d array", GetILocTest) {
+      //assert(
+        //mini233(List(1) :: List(1, 2) :: List(0, 1) :: HNil) ===
+        //List3d[Int](List(List(List(13, 14), List(16, 17))))
+      //)
+    }
+    scenario("apply with an HList of different dimensions to an array will not compile", GetILocTest) {
+      "mini233.apply(1 :: 1 :: HNil)" shouldNot compile
     }
   }
 
