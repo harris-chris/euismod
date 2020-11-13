@@ -326,10 +326,10 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("IsArray.getILoc") {
+    import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
     object GetILocTest extends Tag("GetILocTest")
     def checkGetILocWithInt[A[_], T, _S](
       a: A[T], f:(A[T], Int) => A[T],
@@ -370,10 +370,10 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(mini3(1 :: HNil) === mini3.getAtN(1)) 
     }
     scenario("an HList of List[Int] is used to return the correct elements from a 3d array", GetILocTest) {
-      //assert(
-        //mini233(List(1) :: List(1, 2) :: List(0, 1) :: HNil) ===
-        //List3d[Int](List(List(List(13, 14), List(16, 17))))
-      //)
+      assert(
+        mini233(List(1) :: List(1, 2) :: List(0, 1) :: HNil) ===
+        List3d[Int](List(List(List(13, 14), List(16, 17))))
+      )
     }
     scenario("apply with an HList of different dimensions to an array will not compile", GetILocTest) {
       "mini233.apply(1 :: 1 :: HNil)" shouldNot compile
