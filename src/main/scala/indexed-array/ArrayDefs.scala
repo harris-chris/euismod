@@ -34,30 +34,30 @@ object ArrayDefs {
     def length(a: A[T]): Int
     def cons(a: A[T], sub: S): A[T]
 
-    def apply[R](a: A[T], r: R)(implicit getILoc: GetILoc[A, T, R]) = getILoc.iloc(a, r)
+    def apply[R](a: A[T], r: R)(implicit getILoc: GetILoc[A[T], R]) = getILoc.get(a, r)
     def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
     // for ++, we do not want to specify the actual implementation of other; any IsArray with the
     // same shape should be fine.
     def ++[B[_]](a: A[T], other: B[T])(implicit bIsArr: IsArray[B, T]): A[T] = ???
     def toList(a: A[T]): List[S] = (for(i <- 0 to length(a) - 1) yield (getAtN(a, i))).toList
-    def fromList(a: A[T], listS: List[S]): A[T] = 
+    def fromList(listS: List[S]): A[T] = 
       listS.reverse.foldLeft(getEmpty[T])((e, s) => cons(e, s))
     def ndims[GSOut <: HList](a: A[T])(implicit 
       gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
       tl: ToList[GSOut, Int],
     ): Int = shape(a).toList[Int].length
     def shape(a: A[T])(implicit gs: GetShape[A[T], T, HNil]): gs.Out = gs.getShape(a, HNil)
-    def getArrays(a: A[T])(implicit ga: GetArrs[A, T, HNil]): ga.Out = ga.getArrs(a, HNil)
+    def getArrays(a: A[T])(implicit ga: GetArrs[A, T, HNil]): ga.Out = ga.getArrs(HNil)
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
     def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
       ga: GetArrs[A, T, HNil] { type Out = GAOut },
       fr: FromElemsRT[T, GAOut, SH], 
-    ): fr.Out = fr.fromElems(Some(listT.reverse), ga.getArrs(a, HNil), shape)
+    ): fr.Out = fr.fromElems(Some(listT.reverse), ga.getArrs(HNil), shape)
     def fromElems[GAOut <: HList](a: A[T], listT: List[T])(implicit 
       ga: GetArrs[A, T, HNil] { type Out = GAOut },
       fr: FromElemsRT[T, GAOut, Int :: HNil], 
-    ): fr.Out = fr.fromElems(Some(listT.reverse), ga.getArrs(a, HNil), listT.length :: HNil)
+    ): fr.Out = fr.fromElems(Some(listT.reverse), ga.getArrs(HNil), listT.length :: HNil)
     def reshape[GAOut <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
       ga: GetArrs[A, T, HNil] { type Out = GAOut },
@@ -75,9 +75,13 @@ object ArrayDefs {
       val sh: GSOut = gs.getShape(a, HNil)
       val list_t: List[_T] = flatten(a).map(f)
       val empty_t: A[_T] = getEmpty[_T]
-      val arrs: GAOut = ga.getArrs(empty_t, HNil)
+      val arrs: GAOut = ga.getArrs(HNil)
       fr.fromElems(Some(list_t.reverse), arrs, sh).get 
     }
+    //private def getReducedArraysForApply[I <: HList](a: A[T], applyInput: I)(implicit 
+      //gr: GetReduceArrs[A, T, HNil],
+    //): gr.Out = gr.getReducedArrs(a, applyInput, HNil)
+    
   }
 
   object IsArraySyntax {
@@ -87,11 +91,11 @@ object ArrayDefs {
       def getEmpty[_T] = tc.getEmpty[_T]
       def empty = tc.getEmpty[T]
       def getAtN(n: Int): _S = tc.getAtN(a, n)
-      def apply[R](r: R)(implicit getILoc: GetILoc[A, T, R]) = tc.apply(a, r)
+      def apply[R](r: R)(implicit getILoc: GetILoc[A[T], R]) = tc.apply(a, r)
       def ::(other: _S) = tc.cons(a, other)
       def length: Int = tc.length(a)
       def toList: List[_S] = tc.toList(a)
-      def fromList(listS: List[_S]): A[T] = tc.fromList(a, listS)
+      def fromList(listS: List[_S]): A[T] = tc.fromList(listS)
       def getArrays(implicit ga: GetArrs[A, T, HNil]): ga.Out = tc.getArrays(a)
       def shape(implicit gs: GetShape[A[T], T, HNil]): gs.Out = tc.shape(a)
       def flatten(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
@@ -116,27 +120,52 @@ object ArrayDefs {
 
   sealed trait GetArrs[A[_], T, L <: HList] {self =>
     type Out <: HList
-    def getArrs(a: A[T], l: L): Out
+    def getArrs(l: L): Out
   }
   object GetArrs {
+    type Aux[A[_], T, L <: HList, O <: HList] = GetArrs[A, T, L] { type Out = O }
+    def instance[A[_], T, L <: HList, O <: HList](f: L => O): Aux[A, T, L, O] = new GetArrs[A, T, L] { 
+      type Out = O
+      def getArrs(l: L): Out = f(l)
+    }
     implicit def getArrsIfSIsEle[A[_], T, _S, L <: HList](implicit 
       aIsArr: IsArray[A, T] { type S = T },
-    ): GetArrs[A, T, L] { type Out = A[T] :: L } = new GetArrs[A, T, L] {
-      type Out = A[T] :: L
-      def getArrs(a: A[T], l: L): Out = aIsArr.getEmpty[T] :: l
-    }
+    ): Aux[A, T, L, A[T] :: L] = instance(l => aIsArr.getEmpty[T] :: l)
     implicit def getArrsIfSIsArr[A[_], T, _S[_], _S1, L <: HList](implicit 
       aIsABs: IsArray[A, T] { type S = _S[T] },
       sIsABs: IsArray[_S, T],
       gaForS: GetArrs[_S, T, A[T] :: L],
-    ): GetArrs[A, T, L] { type Out = gaForS.Out } = new GetArrs[A, T, L] {
-      type Out = gaForS.Out
-      def getArrs(a: A[T], l: L): gaForS.Out = gaForS.getArrs(
-        sIsABs.getEmpty[T], 
+    ): Aux[A, T, L, gaForS.Out] = instance( l => 
+      gaForS.getArrs(
         aIsABs.getEmpty[T] :: l
       )
-    }
+    )
   }
+
+  //sealed trait GetReducedArrs[A[_], T, I <: HList, L <: HList] {self =>
+    //type Out <: HList
+    //def getReducedArrs(a: A[T], i: I, l: L): Out
+  //}
+  //object GetReducedArrs {
+    //type Aux[A[_], T, I <: HList, L <: HList, O <: HList] = GetReducedArrs[A, T, I, L] { type Out = O }
+    //implicit def ifIIsInt[A[_], T, _S, I1p <: HList, L <: HList](implicit 
+      //aIsArr: IsArray[A, T] { type S = T },
+    //): Aux[A, T, Int :: I1p, L, L] = new GetReducedArrs[A, T, Int :: I1p, L] {
+      //type Out = L
+      //def (a: A[T], l: L): Out = l
+    //}
+    //implicit def getArrsIfSIsArr[A[_], T, _S[_], _S1, L <: HList](implicit 
+      //aIsABs: IsArray[A, T] { type S = _S[T] },
+      //sIsABs: IsArray[_S, T],
+      //gaForS: GetArrs[_S, T, A[T] :: L],
+    //): GetArrs[A, T, L] { type Out = gaForS.Out } = new GetArrs[A, T, L] {
+      //type Out = gaForS.Out
+      //def getArrs(a: A[T], l: L): gaForS.Out = gaForS.getArrs(
+        //sIsABs.getEmpty[T], 
+        //aIsABs.getEmpty[T] :: l
+      //)
+    //}
+  //}
 
   sealed trait GetShape[A, T, L <: HList] {self =>
     type Out <: HList
@@ -255,48 +284,45 @@ object ArrayDefs {
     }
   }
 
-  trait GetILoc[A[_], T, R] {
+  trait GetILoc[A, R] {
     type Out
-    def iloc(a: A[T], ref: R): Out
+    def get(a: A, ref: R): Out
   }
   object GetILoc {
-    type Aux[A[_], T, R, O] = GetILoc[A, T, R] { type Out = O }
-    implicit def ifInt[A[_], T, _S](implicit 
-      isArr: IsArray[A, T] { type S = _S },
-    ): Aux[A, T, Int, _S] = new GetILoc[A, T, Int] {
-      type Out = _S
-      def iloc(a: A[T], ref: Int): Out = isArr.getAtN(a, ref) 
+    type Aux[A, R, O] = GetILoc[A, R] { type Out = O }
+    def instance[A, R, O](f: (A, R) => O): Aux[A, R, O] = new GetILoc[A, R] { 
+      type Out = O
+      def get(a: A, ref: R): Out = f(a, ref)
     }
-    implicit def ifListInt[A[_], T, _S](implicit
+
+    implicit def ifRefIsInt[A[_], T, _S](implicit
+      aIsArr: IsArray[A, T] { type S = _S }
+    ): Aux[A[T], Int, _S] = instance((a, r) => aIsArr.getAtN(a, r))
+
+    implicit def ifRefIsListInt[A[_], T](implicit
+      aIsArr: IsArray[A, T],
+    ): Aux[A[T], List[Int], A[T]] = instance((a, rs) => aIsArr.fromList(
+      rs.map(aIsArr.getAtN(a, _)))
+    )
+
+    implicit def ifRefIsHNil[A]: Aux[A, HNil, A] = instance((a, r) => a)
+
+    implicit def ifRefIsHListWithInt[A[_], T, _S, R1p <: HList, O](implicit
       aIsArr: IsArray[A, T] { type S = _S },
-    ): Aux[A, T, List[Int], A[T]] { type Out = A[T] } = new GetILoc[A, T, List[Int]] {
-      type Out = A[T]
-      def iloc(a: A[T], ref: List[Int]): Out = {
-        val data: List[_S] = ref.map(aIsArr.getAtN(a, _)).toList
-        println(s"DATA ${data}")
-        aIsArr.fromList(a, data) 
-      }
-    }
-    implicit def ifHListAndSIsEle[A[_], T, H0](implicit 
-      isArr: IsArray[A, T] { type S = T },
-      iLoc: GetILoc[A, T, H0],
-    ): Aux[A, T, H0 :: HNil, iLoc.Out] = new GetILoc[A, T, H0 :: HNil] {
-      type Out = iLoc.Out
-      def iloc(a: A[T], ref: H0 :: HNil): Out = iLoc.iloc(a, ref.head)
-    }
-    implicit def ifHListAndSIsArr[A[_], T, _S[_], H0, H1, H2p <: HList, AO[_], AOS[_]](implicit 
-      aIsArr: IsArray[A, T] { type S = _S[T] },
-      iLocForA: GetILoc[A, T, H0] { type Out = AO[T] },
-      iLocedAIsArr: IsArray[AO, T] { type S = AOS[T] },
-      iLocForSOfILocedA: GetILoc[AOS, T, H1 :: H2p] { type Out = AOS[T] },
-    ): Aux[A, T, H0 :: H1 :: H2p, iLocForA.Out] { type Out = iLocForA.Out } = new GetILoc[A, T, H0 :: H1 :: H2p] {
-      type Out = iLocForA.Out
-      def iloc(a: A[T], ref: H0 :: H1 :: H2p): Out = {
-        val aLoced: AO[T] = iLocForA.iloc(a, ref.head)
-        val sLoced: List[AOS[T]] = iLocedAIsArr.toList(aLoced).map(aos => iLocForSOfILocedA.iloc(aos, ref.tail))
-        iLocedAIsArr.fromList(aLoced, sLoced)
-      }
-    }
+      iLocS: GetILoc[_S, R1p] { type Out = O }, 
+    ): Aux[A[T], Int :: R1p, O] = instance((a, r) => 
+      iLocS.get(aIsArr.getAtN(a, r.head), r.tail)
+    )
+
+    implicit def ifRefIsHListWithListInt[A[_], T, _S, R1p <: HList, SO](implicit
+      aIsArr: IsArray[A, T] { type S = _S },
+      iLocS: GetILoc[_S, R1p] { type Out = SO }, 
+      outIsArr: IsArray[A, T] { type S = SO }
+    ): Aux[A[T], List[Int] :: R1p, A[T]] = instance((a, r) => {
+      val origS: List[_S] = r.head.map(aIsArr.getAtN(a, _))
+      val locedS: List[SO] = origS.map(iLocS.get(_, r.tail))
+      outIsArr.fromList(locedS)
+    })
   }
 
   abstract class GetLoc[A[_], T, R] {

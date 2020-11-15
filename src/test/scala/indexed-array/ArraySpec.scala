@@ -361,7 +361,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(mini3(List(1, 2)) === List1d[Int](List(2, 3))) 
     }
     scenario("a List[Int] :: HNil is used to return the listed elements from a 1d array", GetILocTest) {
-      assert(mini3(List(1, 2) :: HNil) === List1d[Int](List(2, 3))) 
+      assert(mini33(List(1, 2) :: HNil) === List2d[Int](List(List(4, 5, 6), List(7, 8, 9)))) 
     }
     scenario("a Int is used to return the listed elements from a 3d array", GetILocTest) {
       assert(mini233(1) === mini233.getAtN(1)) 
@@ -369,14 +369,39 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("a Int :: HNil is used to return T from a 1d array", GetILocTest) {
       assert(mini3(1 :: HNil) === mini3.getAtN(1)) 
     }
+    scenario("a Int :: HNil is used to return a 2d from a 3d array", GetILocTest) {
+      val l2: List2d[Int] = mini233(1 :: HNil)
+      assert(l2 === mini233.getAtN(1)) 
+    }
+    scenario("a Int :: List[Int] :: HNil is used to return a 2d from a 3d array", GetILocTest) {
+      val l2: List2d[Int] = mini233(1 :: List(0, 1) :: HNil)
+      assert(l2 === mini233.getAtN(1)(List(0, 1))) 
+    }
+    scenario("a List[Int] :: Int :: HNil is used to return a 2d from a 3d array", GetILocTest) {
+      //import ArrayDefs.GetILoc._
+      //val aIsArr = implicitly[IsArray[List3d, Int] { type S = List2d[Int] }]
+      //val iLocS = implicitly[GetILoc[List2d[Int], Int :: HNil] { type Out = List1d[Int] } ]
+      //val e: GetILoc[List2d[Int], Int :: HNil] = ifRefIsHListWithInt[List2d, Int, List1d[Int], HNil, List1d[Int]]
+      ////val outIsArr = implicitly[IsArray[List3d, Int] { type S = List1d[I }]
+      //val tc = ifRefIsHListWithListInt[List3d, Int, List2d[Int], Int :: HNil, List1d[Int]]
+      //val scheck: List2d[Int] = mini233(1 :: HNil)
+      //val l2: List2d[Int] = mini233(List(0) :: 1 :: HNil)
+      //assert(l2 === mini233.getAtN(0)(1)) 
+    }
     scenario("an HList of List[Int] is used to return the correct elements from a 3d array", GetILocTest) {
       assert(
         mini233(List(1) :: List(1, 2) :: List(0, 1) :: HNil) ===
         List3d[Int](List(List(List(13, 14), List(16, 17))))
       )
     }
-    scenario("apply with an HList of different dimensions to an array will not compile", GetILocTest) {
-      "mini233.apply(1 :: 1 :: HNil)" shouldNot compile
+    //scenario("an HList of List[Int] :: Int is used to return the correct elements from a 3d array", GetILocTest) {
+      //assert(
+        //mini233(List(1) :: 2 :: HNil) ===
+        //List3d[Int](List(List(List(13, 14), List(16, 17))))
+      //)
+    //}
+    scenario("apply with an HList of more elements than array dimensions will not compile", GetILocTest) {
+      "mini233.apply(1 :: 1 :: 1 :: 1 :: HNil)" shouldNot compile
     }
   }
 
