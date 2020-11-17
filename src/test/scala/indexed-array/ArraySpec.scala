@@ -253,49 +253,55 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario(".getArrays is called") {
       When(".getArrays is called on a 1d array")
       Then("It should return an empty version of itself")
-      val l1Arrs: List1d[Double] :: HNil = list1d.getArrays
-      assert(l1Arrs == list1d.getEmpty :: HNil)
+      val l1Arrs0: List1d[Double] :: HNil = list1d.getArraysAsc
+      val l1Arrs1: List1d[Double] :: HNil = list1d.getArraysDesc
+      assert(l1Arrs0 == list1d.getEmpty :: HNil)
       When(".getArrays is called on a 2d array")
       Then("It should return an empty 1d and 2d array")
-      val l2Arrs: List1d[Double] :: List2d[Double] :: HNil = list2d.getArrays
-      assert(l2Arrs == list1d.getEmpty :: list2d.getEmpty :: HNil)
+      val l2Arrs: List2d[Double] :: List1d[Double] :: HNil = list2d.getArraysDesc
+      assert(l2Arrs == list2d.getEmpty :: list1d.getEmpty :: HNil)
       When(".getArrays is called on a 3d array")
       Then("It should return an empty 1d, 2d and 3d array")
-      val l3Arrs: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = list3d.getArrays
+      val l3Arrs: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = list3d.getArraysAsc
       assert(l3Arrs == list1d.getEmpty :: list2d.getEmpty :: list3d.getEmpty :: HNil)
     }
   }
 
-  feature("IsArray.getReducedArraysForApply") {
-    import ArrayDefs.IsArraySyntax._
-    import Dummy.Types._
-    import Dummy.Values._
-    import Dummy.IsArrayImplicits._
-    scenario(".getArrays is called") {
-      val l3Arrs: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = list3d.getArrays
-      val l3r: List1d[Double] :: List2d[Double] :: HNil = 
-        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
-          list3d, List(0) :: 1 :: List(0) :: HNil
-        )
-      val l3r1: List1d[Double] :: HNil = 
-        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
-          list3d, 0 :: 1 :: List(0) :: HNil
-        )
-      val l3r2: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = 
-        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
-          list3d, List(0) :: List(0) :: List(0) :: HNil
-        )
-      val l3r3: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = 
-        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
-          list3d, List(0) :: List(0) :: HNil
-        )
-      val l3r4: List1d[Double] :: List2d[Double] :: HNil = 
-        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
-          list3d, 0 :: List(0) :: HNil
-        )
-      assert(l3Arrs == list1d.getEmpty :: list2d.getEmpty :: list3d.getEmpty :: HNil)
-    }
-  }
+  //feature("IsArray.getReducedArraysForApply") {
+    //import ArrayDefs.IsArraySyntax._
+    //import Dummy.Types._
+    //import Dummy.Values._
+    //import Dummy.IsArrayImplicits._
+    //scenario(".getArrays is called") {
+      //val l3Arrs: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = list3d.getArrays
+      //val l3r: List1d[Double] :: List2d[Double] :: HNil = 
+        //implicitly[GetRdcArrs[List3d, Double, List[Int] :: Int :: List[Int] :: HNil] {
+          //type Out = List1d[Double] :: List2d[Double] :: HNil }].apply(
+          //list3d, List(0) :: 1 :: List(0) :: HNil
+        //)
+      //val l3r1: List1d[Double] :: HNil = 
+        //implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
+          //list3d, 0 :: 1 :: List(0) :: HNil
+        //)
+      //val l3r2: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = 
+        //implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
+          //list3d, List(0) :: List(0) :: List(0) :: HNil
+        //)
+      //val l3r3: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = 
+        //implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
+          //list3d, List(0) :: List(0) :: HNil
+        //)
+      //val l3r4: List1d[Double] :: List2d[Double] :: HNil = 
+        //implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
+          //list3d, 0 :: List(0) :: HNil
+        //)
+      //val l3r5: List1d[Double] :: List2d[Double] :: HNil = 
+        //implicitly[IsArray[List2d, Double]].getReducedArraysForApply(
+          //list2d, List(0) :: HNil
+        //)
+      //assert(l3Arrs == list1d.getEmpty :: list2d.getEmpty :: list3d.getEmpty :: HNil)
+    //}
+  //}
 
   feature(".fromList") {
     import ArrayDefs.IsArraySyntax._
@@ -356,85 +362,88 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("IsArray.getILoc") {
-    import ArrayDefs.IsArraySyntax._
-    import Dummy.Types._
-    import Dummy.Values._
-    import Dummy.IsArrayImplicits._
-    object GetILocTest extends Tag("GetILocTest")
-    def checkGetILocWithInt[A[_], T, _S](
-      a: A[T], f:(A[T], Int) => A[T],
-    ) ( implicit 
-      aIsArr: IsArray[A, T] { type S = _S },
-    ): Boolean = {
-      import ArrayDefs.IsArraySyntax._
-      (0 to a.length - 1).forall(n => f(a, n) == a.getAtN(n) :: a.empty)
-    }
-    def checkGetILocWithListInt[A[_], T, _S](
-      a: A[T], f:(A[T], List[Int]) => A[T],
-    ) (implicit 
-      aIsArr: IsArray[A, T] { type S = _S },
-    ): Boolean = {
-      import ArrayDefs.IsArraySyntax._
-      (0 to a.length - 2).forall(n => f(a, List(n, n + 1)) == { 
-        a.getAtN(n) :: a.getAtN(n + 1) :: a.empty
-      })
-    }
-    val mini3 = List1d[Int](List(1, 2, 3))
-    val mini33 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9)))
-    val mini233 = List3d[Int](
-      List(
-        List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9)),
-        List(List(10, 11, 12), List(13, 14, 15), List(16, 17, 18))
-      )
-    )
-    scenario("a List[Int] is used to return the listed elements from a 1d array", GetILocTest) {
-      assert(mini3(List(1, 2)) === List1d[Int](List(2, 3))) 
-    }
-    scenario("a List[Int] :: HNil is used to return the listed elements from a 1d array", GetILocTest) {
-      assert(mini33(List(1, 2) :: HNil) === List2d[Int](List(List(4, 5, 6), List(7, 8, 9)))) 
-    }
-    scenario("a Int is used to return the listed elements from a 3d array", GetILocTest) {
-      assert(mini233(1) === mini233.getAtN(1)) 
-    }
-    scenario("a Int :: HNil is used to return T from a 1d array", GetILocTest) {
-      assert(mini3(1 :: HNil) === mini3.getAtN(1)) 
-    }
-    scenario("a Int :: HNil is used to return a 2d from a 3d array", GetILocTest) {
-      val l2: List2d[Int] = mini233(1 :: HNil)
-      assert(l2 === mini233.getAtN(1)) 
-    }
-    scenario("a Int :: List[Int] :: HNil is used to return a 2d from a 3d array", GetILocTest) {
-      val l2: List2d[Int] = mini233(1 :: List(0, 1) :: HNil)
-      assert(l2 === mini233.getAtN(1)(List(0, 1))) 
-    }
-    scenario("a List[Int] :: Int :: HNil is used to return a 2d from a 3d array", GetILocTest) {
-      //import ArrayDefs.GetILoc._
-      //val aIsArr = implicitly[IsArray[List3d, Int] { type S = List2d[Int] }]
-      //val iLocS = implicitly[GetILoc[List2d[Int], Int :: HNil] { type Out = List1d[Int] } ]
-      //val e: GetILoc[List2d[Int], Int :: HNil] = ifRefIsHListWithInt[List2d, Int, List1d[Int], HNil, List1d[Int]]
-      ////val outIsArr = implicitly[IsArray[List3d, Int] { type S = List1d[I }]
-      //val tc = ifRefIsHListWithListInt[List3d, Int, List2d[Int], Int :: HNil, List1d[Int]]
-      //val scheck: List2d[Int] = mini233(1 :: HNil)
-      //val l2: List2d[Int] = mini233(List(0) :: 1 :: HNil)
-      //assert(l2 === mini233.getAtN(0)(1)) 
-    }
-    scenario("an HList of List[Int] is used to return the correct elements from a 3d array", GetILocTest) {
-      assert(
-        mini233(List(1) :: List(1, 2) :: List(0, 1) :: HNil) ===
-        List3d[Int](List(List(List(13, 14), List(16, 17))))
-      )
-    }
-    //scenario("an HList of List[Int] :: Int is used to return the correct elements from a 3d array", GetILocTest) {
+  //feature("IsArray.getILoc") {
+    //import ArrayDefs.IsArraySyntax._
+    //import Dummy.Types._
+    //import Dummy.Values._
+    //import Dummy.IsArrayImplicits._
+    //object GetILocTest extends Tag("GetILocTest")
+    //def checkGetILocWithInt[A[_], T, _S](
+      //a: A[T], f:(A[T], Int) => A[T],
+    //) ( implicit 
+      //aIsArr: IsArray[A, T] { type S = _S },
+    //): Boolean = {
+      //import ArrayDefs.IsArraySyntax._
+      //(0 to a.length - 1).forall(n => f(a, n) == a.getAtN(n) :: a.empty)
+    //}
+    //def checkGetILocWithListInt[A[_], T, _S](
+      //a: A[T], f:(A[T], List[Int]) => A[T],
+    //) (implicit 
+      //aIsArr: IsArray[A, T] { type S = _S },
+    //): Boolean = {
+      //import ArrayDefs.IsArraySyntax._
+      //(0 to a.length - 2).forall(n => f(a, List(n, n + 1)) == { 
+        //a.getAtN(n) :: a.getAtN(n + 1) :: a.empty
+      //})
+    //}
+    //val mini3 = List1d[Int](List(1, 2, 3))
+    //val mini33 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9)))
+    //val mini233 = List3d[Int](
+      //List(
+        //List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9)),
+        //List(List(10, 11, 12), List(13, 14, 15), List(16, 17, 18))
+      //)
+    //)
+    //scenario("a List[Int] is used to return the listed elements from a 1d array", GetILocTest) {
+      //assert(mini3(List(1, 2)) === List1d[Int](List(2, 3))) 
+    //}
+    //scenario("a List[Int] :: HNil is used to return the listed elements from a 1d array", GetILocTest, Current) {
+      //implicitly[GetILocHList[List2d[Int], List[Int] :: HNil, List2d[Int] :: List1d[Int] :: HNil]]
+      //implicitly[GetRdcArrs[List2d, Int, List[Int] :: HNil] { type Out = List2d[Int] :: List1d[Int] :: HNil}]
+      //implicitly[GetILocHList[List2d[Int], List[Int] :: HNil, List2d[Int] :: List1d[Int] :: HNil]]
+      //assert(mini33(List(1, 2) :: HNil) === List2d[Int](List(List(4, 5, 6), List(7, 8, 9)))) 
+    //}
+    //scenario("a Int is used to return the listed elements from a 3d array", GetILocTest) {
+      //assert(mini233(1) === mini233.getAtN(1)) 
+    //}
+    //scenario("a Int :: HNil is used to return T from a 1d array", GetILocTest) {
+      //assert(mini3(1 :: HNil) === mini3.getAtN(1)) 
+    //}
+    //scenario("a Int :: HNil is used to return a 2d from a 3d array", GetILocTest) {
+      //val l2: List2d[Int] = mini233(1 :: HNil)
+      //assert(l2 === mini233.getAtN(1)) 
+    //}
+    //scenario("a Int :: List[Int] :: HNil is used to return a 2d from a 3d array", GetILocTest) {
+      //val l2: List2d[Int] = mini233(1 :: List(0, 1) :: HNil)
+      //assert(l2 === mini233.getAtN(1)(List(0, 1))) 
+    //}
+    //scenario("a List[Int] :: Int :: HNil is used to return a 2d from a 3d array", GetILocTest) {
+      ////import ArrayDefs.GetILoc._
+      ////val aIsArr = implicitly[IsArray[List3d, Int] { type S = List2d[Int] }]
+      ////val iLocS = implicitly[GetILoc[List2d[Int], Int :: HNil] { type Out = List1d[Int] } ]
+      ////val e: GetILoc[List2d[Int], Int :: HNil] = ifRefIsHListWithInt[List2d, Int, List1d[Int], HNil, List1d[Int]]
+      //////val outIsArr = implicitly[IsArray[List3d, Int] { type S = List1d[I }]
+      ////val tc = ifRefIsHListWithListInt[List3d, Int, List2d[Int], Int :: HNil, List1d[Int]]
+      ////val scheck: List2d[Int] = mini233(1 :: HNil)
+      ////val l2: List2d[Int] = mini233(List(0) :: 1 :: HNil)
+      ////assert(l2 === mini233.getAtN(0)(1)) 
+    //}
+    //scenario("an HList of List[Int] is used to return the correct elements from a 3d array", GetILocTest) {
       //assert(
-        //mini233(List(1) :: 2 :: HNil) ===
+        //mini233(List(1) :: List(1, 2) :: List(0, 1) :: HNil) ===
         //List3d[Int](List(List(List(13, 14), List(16, 17))))
       //)
     //}
-    scenario("apply with an HList of more elements than array dimensions will not compile", GetILocTest) {
-      "mini233.apply(1 :: 1 :: 1 :: 1 :: HNil)" shouldNot compile
-    }
-  }
+    ////scenario("an HList of List[Int] :: Int is used to return the correct elements from a 3d array", GetILocTest) {
+      ////assert(
+        ////mini233(List(1) :: 2 :: HNil) ===
+        ////List3d[Int](List(List(List(13, 14), List(16, 17))))
+      ////)
+    ////}
+    //scenario("apply with an HList of more elements than array dimensions will not compile", GetILocTest) {
+      //"mini233.apply(1 :: 1 :: 1 :: 1 :: HNil)" shouldNot compile
+    //}
+  //}
 
   feature("The IsArray.length method returns the length of the top dimension") {
     import Dummy.Types._
@@ -542,7 +551,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val list3dFlat = list3d.data.flatten.flatten
       assert(list3d.reshape(list3dFlat.length :: HNil) == Some(List1d[Double](list3dFlat)))
     }
-    scenario("list2d.reshape(2, 8) returns None, because list2d has 15 elements", ReshapesTest, Current) {
+    scenario("list2d.reshape(2, 8) returns None, because list2d has 15 elements", ReshapesTest) {
       assert(list2d.reshape(2 :: 8 :: HNil) === None)
     }
     scenario("list2d.reshape(5, 3) returns a 5, 3 shaped List2d", ReshapesTest) {
