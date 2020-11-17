@@ -151,6 +151,12 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val t: List[Int] = l1.flatten
       assert(l1 ++ l2 === Some(exp))
     }
+    scenario("adding a List2d to a List2d produces a combined array", AddTest) {
+      val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
+      val l2 = List2d[Int](List(List(7, 8, 9), List(10, 11, 12)))
+      val exp = List2d[Int](List(List(1, 2, 3, 4, 5, 6), List(7, 8, 9, 10, 11, 12)))
+      assert(l1 ++ l2 === Some(exp))
+    }
   }
 
   feature("IsXd typeclass") {
