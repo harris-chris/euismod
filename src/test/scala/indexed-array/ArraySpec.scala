@@ -138,6 +138,20 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("IsArray.++") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    scenario("adding a List1d to a List1d produces a combined array") {
+      val l1 = List1d[Int](List(1, 2, 3))
+      val l2 = List1d[Int](List(4, 5, 6))
+      val exp = List1d[Int](List(1, 2, 3, 4, 5, 6))
+      assert(Combine[List1d, List1d, Int].apply(l1, l2) === Some(exp)) 
+      assert(l1 ++ l2 === Some(exp))
+    }
+  }
+
   feature("IsXd typeclass") {
     case class A1[T](data: List[T])
     implicit def a1ev[T] = new IsArray[A1, T] {
@@ -207,18 +221,21 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("IsArray methods") {
+  feature("IsArray.getAtN") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     scenario("getAtN is called on a 1d Array to recover its original elements") {
-      Given("A 1d arraylike")
       import ArrayDefs.IsArraySyntax._
       val list1d = List1d[Double](values1d)
-      When("getAtN is called for its elements")
-      Then("It should return the originally input values")
       assert(values1d.zipWithIndex.forall({case(x, i) => x == list1d.getAtN(i)}))
     }
+  }
+
+  feature("IsArray.cons") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
     scenario("IsArray objects are constructed from individual values using cons") {
       import ArrayDefs.IsArraySyntax._
       val lst0 = List1d[Double](Nil)
