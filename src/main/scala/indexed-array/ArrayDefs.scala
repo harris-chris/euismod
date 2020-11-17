@@ -10,7 +10,7 @@ import shapeless.{HList, HNil, Lazy, :: => #:}
 import shapeless.ops.hlist._
 import shapeless._
 import nat._
-import shapeless.ops.nat._
+import shapeless.ops.nat.{Diff => NatDiff}
 
 object ArrayDefs {
 
@@ -85,6 +85,12 @@ object ArrayDefs {
     ): O = gr(a, r)
   }
 
+  object IsArray {
+    def apply[A[_], T, _S](
+      implicit isArr: IsArray[A, T] { type S = _S },
+    ): IsArray[A, T] { type S = _S } = isArr
+  }
+
   object IsArraySyntax {
     implicit class IsArrayOps[A[_], T, _S](a: A[T])(implicit 
       val tc: IsArray[A, T] { type S = _S },
@@ -131,15 +137,16 @@ object ArrayDefs {
       def apply(a: A[T], i: I): Out = f(a, i)
     }
     implicit def ifIIsHList[
-      A[_], T, Inp <: HList, Arrs <: HList, Filt <: HList, NumInts <: Nat, ArrsR <: HList, RdArrs <: HList,
+      A[_], T, Inp <: HList, Arrs <: HList, Filt <: HList, IntsN <: Nat, ArrsN <: Nat, TakeN <: Nat, RdArrs <: HList,
     ] (implicit 
-      ga: GetArrsDesc[A, T, HNil] { type Out = Arrs },
+      ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
       fl: Filter[Inp, Int] { type Out = Filt },
-      lf: Length[Filt] { type Out = NumInts },
-      r1: Reverse[Arrs] { type Out = ArrsR },
-      dr: Drop[ArrsR, NumInts] { type Out = RdArrs },
-      r2: Reverse[RdArrs],
-    ): Aux[A, T, Inp, r2.Out] = instance((a: A[T], inp: Inp) => r2(dr(r1(ga(HNil)))))
+      lf: Length[Filt] { type Out = IntsN },
+      la: Length[Arrs] { type Out = ArrsN },
+      di: NatDiff[ArrsN, IntsN] { type Out = TakeN },
+      dr: Take[Arrs, TakeN] { type Out = RdArrs },
+      re: Reverse[RdArrs],
+    ): Aux[A, T, Inp, re.Out] = instance((a: A[T], inp: Inp) => re(dr(ga(HNil))))
   }
 
   sealed trait GetArrsDesc[A[_], T, L <: HList] {self =>
