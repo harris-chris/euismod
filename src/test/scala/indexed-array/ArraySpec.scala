@@ -267,47 +267,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("GetRdcArrs") {
-    import ArrayDefs.IsArraySyntax._
-    import Dummy.Types._
-    import Dummy.Values._
-    import Dummy.IsArrayImplicits._
-    scenario("For 3d array with List :: List :: Int") {
-      implicitly[GetArrsAsc[List3d, Double, HNil] { type Out = List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil }]
-      implicitly[shapeless.ops.hlist.Filter[List[Int] :: Int :: List[Int] :: HNil, Int] { type Out = Int :: HNil }]
-      implicitly[Length[Int :: HNil] { type Out = Nat._1 }]
-
-      //implicitly[GetRdcArrs[List3d, Double, List[Int] :: Int :: List[Int] :: HNil]
-        //{ type Out = List1d[Int] :: List2d[Int] :: HNil }]
-      //val l3r: List2d[Double] :: List1d[Double] :: HNil = 
-        //implicitly[GetRdcArrs[List3d, Double, List[Int] :: Int :: List[Int] :: HNil] {
-          //type Out = List2d[Double] :: List1d[Double] :: HNil }].apply(
-          //list3d, List(0) :: 1 :: List(0) :: HNil
-        //)
-      //val l3r1: List1d[Double] :: HNil = 
-        //implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
-          //list3d, 0 :: 1 :: List(0) :: HNil
-        //)
-      //val l3r2: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = 
-        //implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
-          //list3d, List(0) :: List(0) :: List(0) :: HNil
-        //)
-      //val l3r3: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = 
-        //implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
-          //list3d, List(0) :: List(0) :: HNil
-        //)
-      //val l3r4: List1d[Double] :: List2d[Double] :: HNil = 
-        //implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
-          //list3d, 0 :: List(0) :: HNil
-        //)
-      //val l3r5: List1d[Double] :: List2d[Double] :: HNil = 
-        //implicitly[IsArray[List2d, Double]].getReducedArraysForApply(
-          //list2d, List(0) :: HNil
-        //)
-      //assert(l3Arrs == list1d.getEmpty :: list2d.getEmpty :: list3d.getEmpty :: HNil)
-    }
-  }
-
   feature(".fromList") {
     import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
@@ -447,16 +406,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    scenario("An xd array of y elements should return .length of y")
+    scenario("An 1d array of y elements should return .length of y")
     {
-      When(".length is run on list1d")
-      Then("It should return the correct length")
       assert(list1d.length == list1d.data.length)
-      When(".length is run on list2d")
-      Then("It should return the correct length")
+    }
+    scenario("A 2d array of y elements should return .length of y")
+    {
       assert(list2d.length == list2d.data.length)
-      When(".length is run on list3d")
-      Then("It should return the correct length")
+    }
+    scenario("A 3d array of y elements should return .length of y")
+    {
       assert(list3d.length == list3d.data.length)
     }
   }

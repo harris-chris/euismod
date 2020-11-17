@@ -40,7 +40,9 @@ object ArrayDefs {
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
     // for ++, we do not want to specify the actual implementation of other; any IsArray with the
     // same shape should be fine.
-    def ++[B[_]](a: A[T], other: B[T])(implicit bIsArr: IsArray[B, T]): A[T] = ???
+    def ++[B[_], DA <: Nat, DB <: Nat](a: A[T], b: B[T])(implicit 
+      cb: Combine[A, B, T],
+    ): A[T] = cb(a, b)
     def toList(a: A[T]): List[S] = (for(i <- 0 to length(a) - 1) yield (getAtN(a, i))).toList
     def fromList(listS: List[S]): A[T] = 
       listS.reverse.foldLeft(getEmpty[T])((e, s) => cons(e, s))
@@ -48,7 +50,7 @@ object ArrayDefs {
       gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
       tl: ToList[GSOut, Int],
     ): Int = shape(a).toList[Int].length
-    def shape(a: A[T])(implicit gs: GetShape[A[T], T, HNil]): gs.Out = gs.getShape(a, HNil)
+    def shape(a: A[T])(implicit gs: GetShape[A[T], T, HNil]): gs.Out = gs(a, HNil)
     def getArraysAsc(a: A[T])(implicit ga: GetArrsAsc[A, T, HNil]): ga.Out = ga(HNil)
     def getArraysDesc(a: A[T])(implicit ga: GetArrsDesc[A, T, HNil]): ga.Out = ga(HNil)
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl.flatten(a)
@@ -74,7 +76,7 @@ object ArrayDefs {
       ga: GetArrsAsc[A, _T, HNil] { type Out = GAOut },
       fr: FromElemsRT[_T, GAOut, GSOut] { type Out = Option[A[_T]] },
     ): A[_T] = {
-      val sh: GSOut = gs.getShape(a, HNil)
+      val sh: GSOut = gs(a, HNil)
       val list_t: List[_T] = flatten(a).map(f)
       val empty_t: A[_T] = getEmpty[_T]
       val arrs: GAOut = ga(HNil)
@@ -124,6 +126,41 @@ object ArrayDefs {
         fr: FromElemsRT[_T, GAOut, GSOut] { type Out = Option[A[_T]] },
       ): A[_T] = tc.map(a, f)
     }
+  }
+
+  sealed trait Combine[A[_], B[_], T] {self =>
+    def apply(a: A[T], b: B[T]): A[T]
+  }
+  object Combine {
+    def instance[A[_], B[_], T](f: (A[T], B[T]) => A[T]): Combine[A, B, T] = new Combine[A, B, T] {
+      def apply(a: A[T], b: B[T]): A[T] = f(a, b)
+    }
+    implicit def ifArrays[A[_], B[_], T, Arrs <: HList, SH <: HList]( implicit 
+      ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
+      aFl: Flatten[A, T],
+      bFl: Flatten[B, T],
+      aSh: GetShape[A[T], T, HNil] { type Out = SH },
+      bSh: GetShape[B[T], T, HNil] { type Out = SH },
+      cb: CombineShapes[SH] { type Out = SH },
+      fr: FromElemsRT[T, Arrs, SH] { type Out = A[T] },
+    ): Combine[A, B, T] = instance((a, b) => {
+      val elems: List[T] = aFl.flatten(a) ++ bFl.flatten(b)
+      fr.fromElems(Some(elems), ga(HNil), cb(aSh(a, HNil), bSh(b, HNil)))
+    })
+  }
+  
+  sealed trait CombineShapes[SH <: HList] {
+    def apply(a: SH, b: SH): SH
+  }
+  object CombineShapes {
+    def instance[SH <: HList](f: (SH, SH) => SH): CombineShapes[SH] = 
+    new CombineShapes[SH] {
+      def apply(a: SH, b: SH): SH = f(a, b)
+    }
+    implicit def ifHeadIsInt[T <: HList](implicit 
+      cb: CombineShapes[T],
+    ): CombineShapes[Int :: T] = instance((a, b) => (a.head + b.head) :: cb(a.tail, b.tail))
+    implicit val ifHNil: CombineShapes[HNil] = instance((a, b) => HNil)
   }
 
   sealed trait GetRdcArrs[A[_], T, I] {self =>
@@ -190,25 +227,24 @@ object ArrayDefs {
 
   sealed trait GetShape[A, T, L <: HList] {self =>
     type Out <: HList
-    def getShape(a: A, l: L): Out
+    def apply(a: A, l: L): Out
   }
   object GetShape {
+    type Aux[A, T, L <: HList, O <: HList] = GetShape[A, T, L] { type Out = O }
+    def instance[A, T, L <: HList, O <: HList](f: (A, L) => O): Aux[A, T, L, O] = 
+    new GetShape[A, T, L] { 
+      type Out = O 
+      def apply(a: A, l: L): Out = f(a, l)
+    }
     implicit def gsIfSIsEle[A, T, _S, L <: HList](implicit 
       aIsABs: IsArrBase[A, T] { type S = T },
-    ): GetShape[A, T, L] { type Out = Int :: L } = new GetShape[A, T, L] {
-      type Out = Int :: L
-      def getShape(a: A, l: L): Out = aIsABs.length(a) :: l
-    }
+    ): Aux[A, T, L, Int :: L] = instance((a, l) => aIsABs.length(a) :: l)
     implicit def gsIfSIsArr[A, T, _S, L <: HList](implicit 
       aIsABs: IsArrBase[A, T] { type S = _S },
       gsForS: GetShape[_S, T, Int :: L],
-    ): GetShape[A, T, L] { type Out = gsForS.Out } = new GetShape[A, T, L] {
-      type Out = gsForS.Out
-      def getShape(a: A, l: L): gsForS.Out = gsForS.getShape(
-        aIsABs.getAtN(a, 0), 
-        aIsABs.length(a) :: l
+      ): Aux[A, T, L, gsForS.Out] = instance((a, l) => 
+        gsForS(aIsABs.getAtN(a, 0), aIsABs.length(a) :: l)
       )
-    }
   }
 
   trait FromElemsRT[_S, Arrs <: HList, SH <: HList] {
