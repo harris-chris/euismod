@@ -56,10 +56,11 @@ object ArrayDefs {
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
       fr: FromElemsRT[T, GAOut, SH], 
     ): fr.Out = fr.fromElems(Some(listT.reverse), ga(HNil), shape)
-    def fromElems[GAOut <: HList](a: A[T], listT: List[T])(implicit 
+    def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T])(implicit 
+      gs: GetShape[A[T], T, HNil] { type Out = SH },
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
-      fr: FromElemsRT[T, GAOut, Int :: HNil], 
-    ): fr.Out = fr.fromElems(Some(listT.reverse), ga(HNil), listT.length :: HNil)
+      fr: FromElemsRT[T, GAOut, SH], 
+    ): fr.Out = fr.fromElems(Some(listT.reverse), ga(HNil), gs(a, HNil))
     def reshape[GAOut <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
@@ -112,6 +113,11 @@ object ArrayDefs {
         ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
         fr: FromElemsRT[T, Arrs, SH],
       ): fr.Out = tc.fromElems(a, listT, shape)
+      def fromElems[Arrs <: HList, SH <: HList](listT: List[T])(implicit 
+        gs: GetShape[A[T], T, HNil] { type Out = SH },
+        ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
+        fr: FromElemsRT[T, Arrs, SH], 
+      ): fr.Out = tc.fromElems(a, listT)
       def reshape[GAOut <: HList, SH <: HList](shape: SH)(implicit 
         fl: Flatten[A, T],
         ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
@@ -141,11 +147,16 @@ object ArrayDefs {
       bFl: Flatten[B, T],
       aSh: GetShape[A[T], T, HNil] { type Out = SH },
       bSh: GetShape[B[T], T, HNil] { type Out = SH },
-      cb: CombineShapes[SH] { type Out = SH },
+      cs: CombineShapes[SH] { type Out = SH },
       fr: FromElemsRT[T, Arrs, SH] { type Out = Option[A[T]] },
     ): Combine[A, B, T] = instance((a, b) => {
       val elems: List[T] = aFl(a) ++ bFl(b)
-      fr.fromElems(Some(elems), ga(HNil), cb(aSh(a, HNil), bSh(b, HNil)))
+      println(s"ELEMS ${elems}")
+      val newShape = cs(aSh(a, HNil), bSh(b, HNil))
+      println(s"SHAPE ${newShape}")
+      val out = fr.fromElems(Some(elems), ga(HNil), newShape)
+      println(s"OUT ${out}")
+      out
     })
   }
   

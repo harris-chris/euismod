@@ -143,11 +143,12 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    scenario("adding a List1d to a List1d produces a combined array") {
+    object AddTest extends Tag("AddTest")
+    scenario("adding a List1d to a List1d produces a combined array", AddTest) {
       val l1 = List1d[Int](List(1, 2, 3))
       val l2 = List1d[Int](List(4, 5, 6))
       val exp = List1d[Int](List(1, 2, 3, 4, 5, 6))
-      assert(Combine[List1d, List1d, Int].apply(l1, l2) === Some(exp)) 
+      val t: List[Int] = l1.flatten
       assert(l1 ++ l2 === Some(exp))
     }
   }
