@@ -266,6 +266,37 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("IsArray.getReducedArraysForApply") {
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    scenario(".getArrays is called") {
+      val l3Arrs: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = list3d.getArrays
+      val l3r: List1d[Double] :: List2d[Double] :: HNil = 
+        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
+          list3d, List(0) :: 1 :: List(0) :: HNil
+        )
+      val l3r1: List1d[Double] :: HNil = 
+        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
+          list3d, 0 :: 1 :: List(0) :: HNil
+        )
+      val l3r2: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = 
+        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
+          list3d, List(0) :: List(0) :: List(0) :: HNil
+        )
+      val l3r3: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = 
+        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
+          list3d, List(0) :: List(0) :: HNil
+        )
+      val l3r4: List1d[Double] :: List2d[Double] :: HNil = 
+        implicitly[IsArray[List3d, Double]].getReducedArraysForApply(
+          list3d, 0 :: List(0) :: HNil
+        )
+      assert(l3Arrs == list1d.getEmpty :: list2d.getEmpty :: list3d.getEmpty :: HNil)
+    }
+  }
+
   feature(".fromList") {
     import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
