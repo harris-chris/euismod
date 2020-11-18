@@ -2,7 +2,7 @@ import numpy as np
 
 dbl1d = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
 
-dbl2d = np.stack([dbl1d, dbl1d + 1, dbl1d + 2], axis = 1)
+dbl2d = np.stack([dbl1d, dbl1d + 1, dbl1d + 2], axis = 0)
 
 dbl3d = np.array(
     [[[0.1, 0.2, 0.3, 0.4, 0.5],

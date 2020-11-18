@@ -574,9 +574,9 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("dbl2d.flatten returns the correct List[T]", FlattenTest) {
       // check taken from flatten_test.ipynb
       assert(Flatten[Dbl2d, Double].apply(dbl2d) === List(
-        0.1, 1.1, 2.1, 0.2, 1.2, 2.2, 0.3, 1.3, 2.3, 0.4, 1.4, 2.4, 0.5,
-        1.5, 2.5
-      ))
+        0.1, 0.2, 0.3, 0.4, 0.5, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3,
+        2.4, 2.5)
+      )
     }
     scenario("dbl3d.flatten returns the correct List[T]", FlattenTest) {
       // check taken from flatten_test.ipynb
