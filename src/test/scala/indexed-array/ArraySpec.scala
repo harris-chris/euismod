@@ -470,17 +470,18 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    scenario("An 1d array of _ elements should return the correct shape") {
+    object ShapeTest extends Tag("ShapeTest")
+    scenario("An 1d array of _ elements should return the correct shape", ShapeTest) {
       assert(list1d.shape === list1d.length :: HNil)
     }
-    scenario("An 2d array of _ elements should return the correct shape") {
-      assert(list2d.shape === list2d.getAtN(0).length :: list2d.length :: HNil)
+    scenario("An 2d array of _ elements should return the correct shape", ShapeTest) {
+      assert(list2d.shape === list2d.length :: list2d.getAtN(0).length :: HNil)
     }
-    scenario("An 3d array of _ elements should return the correct shape") {
+    scenario("An 3d array of _ elements should return the correct shape", ShapeTest) {
       val l2d = list3d.getAtN(0).getAtN(0).length
       val l1d = list3d.getAtN(0).length
       val l0d = list3d.length
-      assert(list3d.shape === l2d :: l1d :: l0d :: HNil)
+      assert(list3d.shape === l0d :: l1d :: l2d :: HNil)
     }
   }
 

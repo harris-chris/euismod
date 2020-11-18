@@ -39,16 +39,16 @@ object ArrayDefs {
     def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
     def ++[B[_], DA <: Nat, DB <: Nat](a: A[T], b: B[T])(implicit 
-      cb: Combine[A, B, T],
-    ): Option[A[T]] = cb(a, b)
+      st: Stack.Aux[A, B, T, Option[A[T]]],
+    ): Option[A[T]] = st(a, b, 0)
     def toList(a: A[T]): List[S] = (for(i <- 0 to length(a) - 1) yield (getAtN(a, i))).toList
     def fromList(listS: List[S]): A[T] = 
       listS.reverse.foldLeft(getEmpty[T])((e, s) => cons(e, s))
-    def ndims[GSOut <: HList](a: A[T])(implicit 
-      gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
-      tl: ToList[GSOut, Int],
+    def ndims[SH <: HList](a: A[T])(implicit 
+      sh: Shape[A, T] { type Out = SH }, 
+      tl: ToList[SH, Int],
     ): Int = shape(a).toList[Int].length
-    def shape(a: A[T])(implicit gs: GetShape[A[T], T, HNil]): gs.Out = gs(a, HNil)
+    def shape(a: A[T])(implicit sh: Shape[A, T]): sh.Out = sh(a)
     def getArraysAsc(a: A[T])(implicit ga: GetArrsAsc[A, T, HNil]): ga.Out = ga(HNil)
     def getArraysDesc(a: A[T])(implicit ga: GetArrsDesc[A, T, HNil]): ga.Out = ga(HNil)
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl(a)
@@ -57,10 +57,10 @@ object ArrayDefs {
       fr: FromElems[T, GAOut, SH], 
     ): fr.Out = fr(listT, ga(HNil), shape)
     def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T])(implicit 
-      gs: GetShape[A[T], T, HNil] { type Out = SH },
+      sh: Shape[A, T] { type Out = SH },
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
       fr: FromElems[T, GAOut, SH], 
-    ): fr.Out = fr(listT, ga(HNil), gs(a, HNil))
+    ): fr.Out = fr(listT, ga(HNil), sh(a))
     def reshape[GAOut <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
@@ -68,18 +68,18 @@ object ArrayDefs {
     ): fr.Out = {
       fromElems(a, fl(a), shape)
     }
-    def map[_T, GAOut <: HList, GSOut <: HList, SH <: HList](a: A[T], f: (T) => _T)(implicit
+    def map[_T, GAOut <: HList, SH <: HList](a: A[T], f: (T) => _T)(implicit
       fl: Flatten[A, T],
       a_tIsArr: IsArray[A, _T],
-      gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
+      sh: Shape[A, T] { type Out = SH }, 
       ga: GetArrsAsc[A, _T, HNil] { type Out = GAOut },
-      fr: FromElems[_T, GAOut, GSOut] { type Out = Option[A[_T]] },
+      fr: FromElems[_T, GAOut, SH] { type Out = Option[A[_T]] },
     ): A[_T] = {
-      val sh: GSOut = gs(a, HNil)
+      val shape: SH = sh(a)
       val list_t: List[_T] = flatten(a).map(f)
       val empty_t: A[_T] = getEmpty[_T]
       val arrs: GAOut = ga(HNil)
-      fr(list_t, arrs, sh).get 
+      fr(list_t, arrs, shape).get 
     }
     def getReducedArraysForApply[R, O](a: A[T], r: R)(implicit
       gr: GetRdcArrs[A, T, R] { type Out = O }
@@ -101,20 +101,20 @@ object ArrayDefs {
       def getAtN(n: Int): _S = tc.getAtN(a, n)
       def apply[R](r: R)(implicit getILoc: GetILoc[A[T], R]) = tc.apply(a, r)
       def ::(other: _S) = tc.cons(a, other)
-      def ++[B[_]](b: B[T])(implicit cb: Combine[A, B, T]) = tc.++(a, b)
+      def ++[B[_]](b: B[T])(implicit cb: Stack.Aux[A, B, T, Option[A[T]]]) = tc.++(a, b)
       def length: Int = tc.length(a)
       def toList: List[_S] = tc.toList(a)
       def fromList(listS: List[_S]): A[T] = tc.fromList(listS)
       def getArraysAsc(implicit ga: GetArrsAsc[A, T, HNil]): ga.Out = tc.getArraysAsc(a)
       def getArraysDesc(implicit ga: GetArrsDesc[A, T, HNil]): ga.Out = tc.getArraysDesc(a)
-      def shape(implicit gs: GetShape[A[T], T, HNil]): gs.Out = tc.shape(a)
+      def shape(implicit sh: Shape[A, T]): sh.Out = tc.shape(a)
       def flatten(implicit fl: Flatten[A, T]): List[T] = fl(a)
       def fromElems[Arrs <: HList, SH <: HList](listT: List[T], shape: SH)(implicit 
         ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
         fr: FromElems[T, Arrs, SH],
       ): fr.Out = tc.fromElems(a, listT, shape)
       def fromElems[Arrs <: HList, SH <: HList](listT: List[T])(implicit 
-        gs: GetShape[A[T], T, HNil] { type Out = SH },
+        sh: Shape[A, T] { type Out = SH },
         ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
         fr: FromElems[T, Arrs, SH], 
       ): fr.Out = tc.fromElems(a, listT)
@@ -123,36 +123,41 @@ object ArrayDefs {
         ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
         rs: FromElems[T, GAOut, SH],
       ) = tc.reshape(a, shape)
-      def map[_T, GAOut <: HList, GSOut <: HList, SH <: HList](f: T => _T)(implicit
+      def map[_T, GAOut <: HList, SH <: HList](f: T => _T)(implicit
         a_tIsArr: IsArray[A, _T],
         fl: Flatten[A, T],
-        gs: GetShape[A[T], T, HNil] { type Out = GSOut }, 
+        sh: Shape[A, T] { type Out = SH }, 
         ga: GetArrsAsc[A, _T, HNil] { type Out = GAOut },
-        fr: FromElemsRT[_T, GAOut, GSOut] { type Out = Option[A[_T]] },
+        fr: FromElems[_T, GAOut, SH] { type Out = Option[A[_T]] },
       ): A[_T] = tc.map(a, f)
     }
   }
 
-  sealed trait Combine[A[_], B[_], T] {self =>
-    def apply(a: A[T], b: B[T]): Option[A[T]]
+  sealed trait Stack[A[_], B[_], T] {self =>
+    type Out
+    def apply(a: A[T], b: B[T], dim: Int): Out
   }
-  object Combine {
-    def apply[A[_], B[_], T](implicit cb: Combine[A, B, T]): Combine[A, B, T] = cb
-    def instance[A[_], B[_], T](f: (A[T], B[T]) => Option[A[T]]): Combine[A, B, T] = new Combine[A, B, T] {
-      def apply(a: A[T], b: B[T]): Option[A[T]] = f(a, b)
+  object Stack {
+    type Aux[A[_], B[_], T, O] = Stack[A, B, T] { type Out = O }
+    def apply[A[_], B[_], T](implicit st: Stack[A, B, T]): Stack[A, B, T] = st
+    def instance[A[_], B[_], T, O](f: (A[T], B[T], Int) => O): Aux[A, B, T, O] = new Stack[A, B, T] {
+      type Out = O
+      def apply(a: A[T], b: B[T], dim: Int): Out = f(a, b, dim)
     }
-    implicit def ifArrays[A[_], B[_], T, Arrs <: HList, SH <: HList]( implicit 
+    implicit def ifArraysUnsizedDim1p[A[_], B[_], T, Arrs <: HList, SH <: HList]( implicit 
       ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
       aFl: Flatten[A, T],
       bFl: Flatten[B, T],
-      aSh: GetShape[A[T], T, HNil] { type Out = SH },
-      bSh: GetShape[B[T], T, HNil] { type Out = SH },
+      aSh: Shape[A, T] { type Out = SH },
+      bSh: Shape[B, T] { type Out = SH },
       cs: CombineShapes[SH, SH] { type Out = Option[SH] },
       fr: FromElems[T, Arrs, SH] { type Out = Option[A[T]] },
-    ): Combine[A, B, T] = instance((a, b) => {
+    ): Aux[A, B, T, Option[A[T]]] = instance((a, b, dim) => {
+      println(s"A SHAPE ${aSh(a)}")
+      println(s"B SHAPE ${bSh(b)}")
       val elems: List[T] = aFl(a) ++ bFl(b)
       println(s"ELEMS ${elems}")
-      val newShape = cs(aSh(a, HNil), bSh(b, HNil))
+      val newShape = cs(aSh(a), bSh(b), dim)
       println(s"SHAPE ${newShape}")
       newShape.flatMap(ns => {
         val out = fr(elems, ga(HNil), ns)
@@ -265,23 +270,40 @@ object ArrayDefs {
     ): Aux[A, T, L, rv.Out] = instance(l => rv(ga(l)))
   }
 
-  sealed trait GetShape[A, T, L <: HList] {self =>
-    type Out <: HList
-    def apply(a: A, l: L): Out
+  sealed trait Shape[A[_], T] { self =>
+    type Out
+    def apply(a: A[T]): Out
   }
-  object GetShape {
-    type Aux[A, T, L <: HList, O <: HList] = GetShape[A, T, L] { type Out = O }
-    def instance[A, T, L <: HList, O <: HList](f: (A, L) => O): Aux[A, T, L, O] = 
-    new GetShape[A, T, L] { 
-      type Out = O 
-      def apply(a: A, l: L): Out = f(a, l)
+  object Shape {
+    type Aux[A[_], T, O] = Shape[A, T] { type Out = O }
+    def instance[A[_], T, O](f: A[T] => O): Aux[A, T, O] = new Shape[A, T] {
+      type Out = O
+      def apply(a: A[T]): Out = f(a)
     }
-    implicit def gsIfSIsEle[A, T, _S, L <: HList](implicit 
-      aIsABs: IsArrBase[A, T] { type S = T },
-    ): Aux[A, T, L, Int :: L] = instance((a, l) => aIsABs.length(a) :: l)
-    implicit def gsIfSIsArr[A, T, _S, L <: HList](implicit 
-      aIsABs: IsArrBase[A, T] { type S = _S },
-      gsForS: GetShape[_S, T, Int :: L],
+    def apply[A[_], T](implicit sh: Shape[A, T]): Shape[A, T] = sh
+    implicit def ifFullyTyped[A[_], T](implicit ft: FullyTyped[A[T]]) = ???
+    implicit def ifShapeRT[A[_], T](implicit sh: ShapeRT[A, T, HNil]): Aux[A, T, sh.Out] = 
+      instance(a => sh(a, HNil))
+  }
+
+  sealed trait ShapeRT[A[_], T, L <: HList] {self =>
+    type Out <: HList
+    def apply(a: A[T], l: L): Out
+  }
+  object ShapeRT {
+    type Aux[A[_], T, L <: HList, O <: HList] = ShapeRT[A, T, L] { type Out = O }
+    def instance[A[_], T, L <: HList, O <: HList](f: (A[T], L) => O): Aux[A, T, L, O] = 
+    new ShapeRT[A, T, L] { 
+      type Out = O 
+      def apply(a: A[T], l: L): Out = f(a, l)
+    }
+    implicit def gsIfSIsEle[A[_], T, _S, L <: HList, O <: HList](implicit 
+      aIsABs: IsArrBase[A[T], T] { type S = T },
+      rv: Reverse[Int :: L] { type Out = O },
+    ): Aux[A, T, L, O] = instance((a, l) => rv(aIsABs.length(a) :: l))
+    implicit def gsIfSIsArr[A[_], T, S0[_], L <: HList](implicit 
+      aIsABs: IsArrBase[A[T], T] { type S = S0[T] },
+      gsForS: ShapeRT[S0, T, Int :: L],
       ): Aux[A, T, L, gsForS.Out] = instance((a, l) => 
         gsForS(aIsABs.getAtN(a, 0), aIsABs.length(a) :: l)
       )
@@ -298,9 +320,10 @@ object ArrayDefs {
       type Out = O
       def apply(l: List[T], arrs: Arrs, sh: SH): Out = f(l, arrs, sh)
     }
-    implicit def ifListT[T, Arrs <: HList, SH <: HList, O]( implicit 
-      fr: FromElemsRT[T, Arrs, SH]
-    ): Aux[T, Arrs, SH, fr.Out] = instance((l, arrs, sh) => fr(Some(l.reverse), arrs, sh))
+    implicit def ifListT[T, Arrs <: HList, SH <: HList, RSH <: HList, O]( implicit 
+      rv: Reverse[SH] { type Out = RSH },
+      fr: FromElemsRT[T, Arrs, RSH],
+    ): Aux[T, Arrs, SH, fr.Out] = instance((l, arrs, sh) => fr(Some(l.reverse), arrs, rv(sh)))
   }
 
   trait FromElemsRT[T, Arrs <: HList, SH <: HList] {
@@ -363,6 +386,8 @@ object ArrayDefs {
       sFl: Flatten[_S, T],
     ): Flatten[A, T] = instance(a => aIsArr.toList(a).map(sIsArr.flatten(_)).flatten) 
   }
+
+  abstract class FullyTyped[A] {}
 
   abstract class Is1d[A] private {}
   object Is1d {
