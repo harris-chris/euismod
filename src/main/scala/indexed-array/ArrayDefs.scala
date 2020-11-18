@@ -38,9 +38,12 @@ object ArrayDefs {
     def apply[R](a: A[T], r: R)(implicit gi: GetILoc[A[T], R]): gi.Out = gi(a, r)
     def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
-    def ++[B[_], DA <: Nat, DB <: Nat](a: A[T], b: B[T])(implicit 
-      st: Stack.Aux[A, B, T, Option[A[T]]],
-    ): Option[A[T]] = st(a, b, 0)
+    def ++[B[_]](a: A[T], b: B[T])(implicit 
+      st: Stack[A, B, T],
+    ): st.Out = st(a, b, 0)
+    def stack[B[_]](a: A[T], b: B[T], dim: Int)(implicit 
+      st: Stack[A, B, T],
+    ): st.Out = st(a, b, dim)
     def toList(a: A[T]): List[S] = (for(i <- 0 to length(a) - 1) yield (getAtN(a, i))).toList
     def fromList(listS: List[S]): A[T] = 
       listS.reverse.foldLeft(getEmpty[T])((e, s) => cons(e, s))
@@ -101,7 +104,8 @@ object ArrayDefs {
       def getAtN(n: Int): _S = tc.getAtN(a, n)
       def apply[R](r: R)(implicit getILoc: GetILoc[A[T], R]) = tc.apply(a, r)
       def ::(other: _S) = tc.cons(a, other)
-      def ++[B[_]](b: B[T])(implicit cb: Stack.Aux[A, B, T, Option[A[T]]]) = tc.++(a, b)
+      def ++[B[_]](b: B[T])(implicit st: Stack[A, B, T]) = tc.++(a, b)
+      def stack[B[_]](b: B[T], dim: Int)(implicit st: Stack[A, B, T]) = tc.stack(a, b, dim)
       def length: Int = tc.length(a)
       def toList: List[_S] = tc.toList(a)
       def fromList(listS: List[_S]): A[T] = tc.fromList(listS)

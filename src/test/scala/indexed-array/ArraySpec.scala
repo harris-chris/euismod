@@ -138,6 +138,67 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("The Concatenate typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object ConcatenateTest extends Tag("ConcatenateTest")
+    val l3d = List3d[Int](
+      List(
+        List(
+          List(1, 2, 3, 4),
+          List(5, 6, 7, 8),
+          List(9, 10, 11, 12),
+        ),
+        List(
+          List(13, 14, 15, 16),
+          List(17, 18, 19, 20),
+          List(21, 22, 23, 24),
+        )
+      )
+    )
+    scenario("Concatenating a 3d array along dimension 0 returns the correct result", ConcatenateTest) {
+      val conc = l3d.stack(l3d.map(_+1).apply(List(0)), 0).get
+      assert(conc.shape == 3 :: 3 :: 4 :: HNil)
+      assert(conc.data == 
+        List(
+          List(
+            List(1, 2, 3, 4),
+            List(5, 6, 7, 8),
+            List(9, 10, 11, 12),
+          ),
+          List(
+            List(13, 14, 15, 16),
+            List(17, 18, 19, 20),
+            List(21, 22, 23, 24),
+          ),
+          List(
+            List(2, 3, 4, 5),
+            List(6, 7, 8, 9),
+            List(10, 11, 12, 13),
+      )))
+    }
+    scenario("Stacking a 3d array along dimension 1 returns the correct result", ConcatenateTest) {
+      val conc = l3d.stack(l3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil), 1).get
+      assert(conc.shape == 2 :: 4 :: 4 :: HNil)
+      assert(conc.data == 
+        List(
+          List(
+            List(1, 2, 3, 4),
+            List(5, 6, 7, 8),
+            List(9, 10, 11, 12),
+            List(2, 3, 4, 5),
+          ),
+          List(
+            List(13, 14, 15, 16),
+            List(17, 18, 19, 20),
+            List(21, 22, 23, 24),
+            List(14, 15, 16, 17),
+      )))
+    }
+  }
+
   feature("IsArray.++") {
     import Dummy.Types._
     import Dummy.Values._
@@ -168,16 +229,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
       assert(l1 ++ l2 === None)
     }
-    //scenario("adding a List3d to a List3d with dim1 and dim2 lengths the same returns a combined array", AddTest) {
-      //val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
-      //val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
-      //assert(l1 ++ l2 === None)
-    //}
-    //scenario("adding a List3d to a List3d with different dim1 length returns None", AddTest) {
-      //val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
-      //val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
-      //assert(l1 ++ l2 === None)
-    //}
+    scenario("adding a List3d to a List3d with dim1 and dim2 lengths the same returns a combined array", AddTest) {
+      val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
+      val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
+      assert(l1 ++ l2 === None)
+    }
+    scenario("adding a List3d to a List3d with different dim1 length returns None", AddTest) {
+      val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
+      val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
+      assert(l1 ++ l2 === None)
+    }
   }
 
   feature("IsXd typeclass") {
