@@ -151,12 +151,33 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val t: List[Int] = l1.flatten
       assert(l1 ++ l2 === Some(exp))
     }
-    scenario("adding a List2d to a List2d produces a combined array", AddTest) {
+    scenario("adding a List2d to a List2d returns a combined array", AddTest) {
       val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = List2d[Int](List(List(7, 8, 9), List(10, 11, 12)))
-      val exp = List2d[Int](List(List(1, 2, 3, 4, 5, 6), List(7, 8, 9, 10, 11, 12)))
+      val ex = List2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9), List(10, 11, 12)))
+      assert(l1 ++ l2 === Some(ex))
+    }
+    scenario("adding a List2d to a List2d with different dim0 size returns a combined array", AddTest) {
+      val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
+      val l2 = List2d[Int](List(List(7, 8, 9)))
+      val exp = List2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9)))
       assert(l1 ++ l2 === Some(exp))
     }
+    scenario("adding a List2d to a List2d with different dim1 length returns None", AddTest) {
+      val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
+      val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
+      assert(l1 ++ l2 === None)
+    }
+    //scenario("adding a List3d to a List3d with dim1 and dim2 lengths the same returns a combined array", AddTest) {
+      //val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
+      //val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
+      //assert(l1 ++ l2 === None)
+    //}
+    //scenario("adding a List3d to a List3d with different dim1 length returns None", AddTest) {
+      //val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
+      //val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
+      //assert(l1 ++ l2 === None)
+    //}
   }
 
   feature("IsXd typeclass") {

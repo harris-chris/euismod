@@ -147,32 +147,58 @@ object ArrayDefs {
       bFl: Flatten[B, T],
       aSh: GetShape[A[T], T, HNil] { type Out = SH },
       bSh: GetShape[B[T], T, HNil] { type Out = SH },
-      cs: CombineShapes[SH] { type Out = SH },
+      cs: CombineShapes[SH, SH] { type Out = Option[SH] },
       fr: FromElems[T, Arrs, SH] { type Out = Option[A[T]] },
     ): Combine[A, B, T] = instance((a, b) => {
       val elems: List[T] = aFl(a) ++ bFl(b)
       println(s"ELEMS ${elems}")
       val newShape = cs(aSh(a, HNil), bSh(b, HNil))
       println(s"SHAPE ${newShape}")
-      val out = fr(elems, ga(HNil), newShape)
-      println(s"OUT ${out}")
-      out
+      newShape.flatMap(ns => {
+        val out = fr(elems, ga(HNil), ns)
+        println(s"OUT ${out}")
+        out
+      })
     })
   }
-  
-  sealed trait CombineShapes[SH <: HList] {
-    type Out = SH
-    def apply(a: SH, b: SH): Out
+
+  sealed trait CombineShapes[A, B] {
+    type Out
+    def apply(a: A, b: B): Out
   }
   object CombineShapes {
-    def instance[SH <: HList](f: (SH, SH) => SH): CombineShapes[SH] = new CombineShapes[SH] {
-      override type Out = SH
-      def apply(a: SH, b: SH): SH = f(a, b)
+    type Aux[A, B, O] = CombineShapes[A, B] { type Out = O }
+    def instance[A, B, O](f: (A, B) => O): Aux[A, B, O] = new CombineShapes[A, B] {
+      type Out = O
+      def apply(a: A, b: B): Out = f(a, b)
     }
-    implicit def ifHeadIsInt[T <: HList](implicit 
-      cb: CombineShapes[T],
-    ): CombineShapes[Int :: T] = instance((a, b) => (a.head + b.head) :: cb(a.tail, b.tail))
-    implicit val ifHNil: CombineShapes[HNil] = instance((a, b) => HNil)
+    def apply[A, B](implicit cs: CombineShapes[A, B]): CombineShapes[A, B] = cs
+    implicit def ifMatchingHLists[SH <: HList](implicit 
+      csrt: CombineShapesRT[SH]
+    ): Aux[SH, SH, Option[SH]] = instance(
+      (a, b) => csrt(a, b, true)
+    )
+  }
+  
+  sealed trait CombineShapesRT[SH <: HList] {
+    type Out = Option[SH]
+    def apply(a: SH, b: SH, isHead: Boolean): Out
+  }
+  object CombineShapesRT {
+    def instance[SH <: HList](f: (SH, SH, Boolean) => Option[SH]): CombineShapesRT[SH] = new CombineShapesRT[SH] {
+      def apply(a: SH, b: SH, isHead: Boolean): Out = f(a, b, isHead)
+    }
+    implicit def ifHeadIsInt[Tl <: HList](implicit 
+      cb: CombineShapesRT[Tl],
+    ): CombineShapesRT[Int :: Tl] = instance((a, b, isHead) => 
+      if(isHead){
+        val t1: Option[HList] = cb(a.tail, b.tail, false)
+        cb(a.tail, b.tail, false).map(tl => (a.head + b.head) :: tl)
+      } else {
+        if(a.head == b.head) {cb(a.tail, b.tail, false).map(tl => a.head :: tl)} else { None }
+      }
+    )
+    implicit val ifHNil: CombineShapesRT[HNil] = instance((a, b, isHead) => Some(HNil))
   }
 
   sealed trait GetRdcArrs[A[_], T, I] {self =>
