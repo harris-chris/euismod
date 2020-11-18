@@ -158,45 +158,61 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         )
       )
     )
-    scenario("Concatenating a 3d array along dimension 0 returns the correct result", ConcatenateTest) {
-      val conc = l3d.stack(l3d.map(_+1).apply(List(0)), 0).get
-      assert(conc.shape == 3 :: 3 :: 4 :: HNil)
-      assert(conc.data == 
-        List(
-          List(
-            List(1, 2, 3, 4),
-            List(5, 6, 7, 8),
-            List(9, 10, 11, 12),
-          ),
-          List(
-            List(13, 14, 15, 16),
-            List(17, 18, 19, 20),
-            List(21, 22, 23, 24),
-          ),
-          List(
-            List(2, 3, 4, 5),
-            List(6, 7, 8, 9),
-            List(10, 11, 12, 13),
-      )))
-    }
-    scenario("Stacking a 3d array along dimension 1 returns the correct result", ConcatenateTest) {
-      val conc = l3d.stack(l3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil), 1).get
-      assert(conc.shape == 2 :: 4 :: 4 :: HNil)
-      assert(conc.data == 
-        List(
-          List(
-            List(1, 2, 3, 4),
-            List(5, 6, 7, 8),
-            List(9, 10, 11, 12),
-            List(2, 3, 4, 5),
-          ),
-          List(
-            List(13, 14, 15, 16),
-            List(17, 18, 19, 20),
-            List(21, 22, 23, 24),
-            List(14, 15, 16, 17),
-      )))
-    }
+    //scenario("Concatenating a 3d array along dimension 0 returns the correct result", ConcatenateTest) {
+      //val conc = l3d.stack(l3d.map(_+1).apply(List(0)), 0).get
+      //assert(conc.shape == 3 :: 3 :: 4 :: HNil)
+      //assert(conc.data == 
+        //List(
+          //List(
+            //List(1, 2, 3, 4),
+            //List(5, 6, 7, 8),
+            //List(9, 10, 11, 12),
+          //),
+          //List(
+            //List(13, 14, 15, 16),
+            //List(17, 18, 19, 20),
+            //List(21, 22, 23, 24),
+          //),
+          //List(
+            //List(2, 3, 4, 5),
+            //List(6, 7, 8, 9),
+            //List(10, 11, 12, 13),
+      //)))
+    //}
+    //scenario("Concatenating a 3d array along dimension 1 returns the correct result", ConcatenateTest) {
+      //val conc = l3d.stack(l3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil), 1).get
+      //assert(conc.shape == 2 :: 4 :: 4 :: HNil)
+      //assert(conc.data == 
+        //List(
+          //List(
+            //List(1, 2, 3, 4),
+            //List(5, 6, 7, 8),
+            //List(9, 10, 11, 12),
+            //List(2, 3, 4, 5),
+          //),
+          //List(
+            //List(13, 14, 15, 16),
+            //List(17, 18, 19, 20),
+            //List(21, 22, 23, 24),
+            //List(14, 15, 16, 17),
+      //)))
+    //}
+    //scenario("Concatenating a 3d array along dimension 2 returns the correct result", ConcatenateTest) {
+      //val conc = l3d.stack(l3d.map(_+1).apply(List(0, 1) :: List(0, 1, 2) :: List(0) :: HNil), 2).get
+      //assert(conc.shape == 2 :: 3 :: 5 :: HNil)
+      //assert(conc.data == 
+        //List(
+          //List(
+            //List( 1,  2,  3,  4,  2),
+            //List( 5,  6,  7,  8,  6),
+            //List( 9, 10, 11, 12, 10),
+          //),
+          //List(
+            //List( 13, 14, 15, 16, 14),
+            //List( 17, 18, 19, 20, 18),
+            //List( 21, 22, 23, 24, 22),
+    //)))
+    //}
   }
 
   feature("IsArray.++") {
@@ -546,20 +562,25 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("IsArray.flatten") {
+  feature("The Flatten typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import ArrayDefs.IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object FlattenTest extends Tag("FlattenTest")
     scenario("list1d.flatten returns the correct List[T]", FlattenTest) {
-      assert(list1d.flatten === list1d.data)
+      assert(Flatten[List1d, Double].apply(list1d) === list1d.data)
     }
     scenario("list2d.flatten returns the correct List[T]", FlattenTest) {
-      assert(list2d.flatten === list2d.data.flatten)
+      assert(Flatten[List2d, Double].apply(list2d) === list2d.data.flatten)
     }
     scenario("list3d.flatten returns the correct List[T]", FlattenTest) {
-      assert(list3d.flatten === list3d.data.flatten.flatten)
+      // check from flatten_test
+      assert(Flatten[List3d, Double].apply(list3d) === List(
+        0.1, 0.2, 0.3, 0.4, 0.5, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3,
+        2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1,
+        5.2, 5.3, 5.4, 5.5
+      ))
     }
   }
 

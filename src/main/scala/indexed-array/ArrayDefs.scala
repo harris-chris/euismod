@@ -376,6 +376,7 @@ object ArrayDefs {
     def apply(a: A[T]): List[T]
   }
   object Flatten {
+    def apply[A[_], T](implicit fl: Flatten[A, T]): Flatten[A, T] = fl
     def instance[A[_], T](f: A[T] => List[T]): Flatten[A, T] { type Out = List[T] } = 
     new Flatten[A, T] {
       override type Out = List[T]
