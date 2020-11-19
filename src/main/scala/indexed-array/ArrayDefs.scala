@@ -41,9 +41,6 @@ object ArrayDefs {
     def ++[B[_]](a: A[T], b: B[T])(implicit 
       cnCt: ConcatenateCT[A, B, T, Nat._0],
     ): cnCt.Out = cnCt(a, b)
-    def stack[B[_]](a: A[T], b: B[T], dim: Int)(implicit 
-      st: Stack[A, B, T],
-    ): st.Out = st(a, b, dim)
     def toList(a: A[T]): List[S] = (for(i <- 0 to length(a) - 1) yield (getAtN(a, i))).toList
     def fromList(listS: List[S]): A[T] = 
       listS.reverse.foldLeft(getEmpty[T])((e, s) => cons(e, s))
@@ -105,7 +102,6 @@ object ArrayDefs {
       def apply[R](r: R)(implicit getILoc: GetILoc[A[T], R]) = tc.apply(a, r)
       def ::(other: _S) = tc.cons(a, other)
       def ++[B[_]](b: B[T])(implicit cn: ConcatenateCT[A, B, T, Nat._0]) = tc.++(a, b)
-      def stack[B[_]](b: B[T], dim: Int)(implicit st: Stack[A, B, T]) = tc.stack(a, b, dim)
       def length: Int = tc.length(a)
       def toList: List[_S] = tc.toList(a)
       def fromList(listS: List[_S]): A[T] = tc.fromList(listS)
@@ -135,40 +131,6 @@ object ArrayDefs {
         fr: FromElems[_T, GAOut, SH] { type Out = Option[A[_T]] },
       ): A[_T] = tc.map(a, f)
     }
-  }
-
-  sealed trait Stack[A[_], B[_], T] {self =>
-    type Out
-    def apply(a: A[T], b: B[T], dim: Int): Out
-  }
-  object Stack {
-    type Aux[A[_], B[_], T, O] = Stack[A, B, T] { type Out = O }
-    def apply[A[_], B[_], T](implicit st: Stack[A, B, T]): Stack[A, B, T] = st
-    def instance[A[_], B[_], T, O](f: (A[T], B[T], Int) => O): Aux[A, B, T, O] = new Stack[A, B, T] {
-      type Out = O
-      def apply(a: A[T], b: B[T], dim: Int): Out = f(a, b, dim)
-    }
-    implicit def ifArraysUnsizedDim1p[A[_], B[_], T, Arrs <: HList, SH <: HList]( implicit 
-      ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
-      aFl: Flatten[A, T],
-      bFl: Flatten[B, T],
-      aSh: Shape[A, T] { type Out = SH },
-      bSh: Shape[B, T] { type Out = SH },
-      cs: CombineShapes[SH, SH] { type Out = Option[SH] },
-      fr: FromElems[T, Arrs, SH] { type Out = Option[A[T]] },
-    ): Aux[A, B, T, Option[A[T]]] = instance((a, b, dim) => {
-      println(s"A SHAPE ${aSh(a)}")
-      println(s"B SHAPE ${bSh(b)}")
-      val elems: List[T] = aFl(a) ++ bFl(b)
-      println(s"ELEMS ${elems}")
-      val newShape = cs(aSh(a), bSh(b), dim)
-      println(s"SHAPE ${newShape}")
-      newShape.flatMap(ns => {
-        val out = fr(elems, ga(HNil), ns)
-        println(s"OUT ${out}")
-        out
-      })
-    })
   }
 
   sealed trait CombineShapes[A, B] {
