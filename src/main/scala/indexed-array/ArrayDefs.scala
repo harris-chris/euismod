@@ -274,6 +274,22 @@ object ArrayDefs {
     ): Aux[A, T, L, rv.Out] = instance(l => rv(ga(l)))
   }
 
+  sealed trait Depth[A[_], T] { self =>
+    type Out
+    def apply(a: A[T]): Out
+  }
+  object Depth {
+    type Aux[A[_], T, O] = Depth[A, T] { type Out = O }
+    def instance[A[_], T, O](f: A[T] => O): Aux[A, T, O] = new Depth[A, T] {
+      type Out = O
+      def apply(a: A[T]): Out = f(a)
+    }
+    def ifCT[A[_], T, O <: Nat, Arrs <: HList](implicit 
+      ar: GetArrsDesc.Aux[A, T, Arrs],
+      le: Length[Arrs],
+    ): Aux[A, T, Length.Out] = instance(a => le(a)) 
+  }
+
   sealed trait Shape[A[_], T] { self =>
     type Out
     def apply(a: A[T]): Out
@@ -390,6 +406,61 @@ object ArrayDefs {
       sIsArr: IsArray[_S, T], 
       sFl: Flatten[_S, T],
     ): Flatten[A, T] = instance(a => aIsArr.toList(a).map(sIsArr.flatten(_)).flatten) 
+  }
+  
+  trait Concatenate[A[_], B[_], T] { self =>
+    type Out
+    def apply(a: A[T], b: B[T], dim: Int): Out
+  }
+  object Concatenate {
+    type Aux[A[_], B[_], T, O] = Concatenate[A, B, T] { type Out = O }
+    def apply[A[_], B[_], T](implicit cn: Concatenate[A, B, T]): Concatenate[A, B, T] = cn
+    def instance[A[_], B[_], T, O](f: (A[T], B[T]) => O): Aux[A, B, T, O] = 
+    new Concatenate[A, B, T] {
+      type Out = O
+      def apply(a: A[T]): List[T] = f(a)
+    }
+
+    implicit def ifEqualLenghtsRT[A[_], B[_], T, dA <: Nat, dB <: Nat](implicit 
+      deA: Depth.Aux[A, T, dA],
+      deB: Depth.Aux[A, T, dB],
+      ev: dA =:= dB,
+      cn: ConcatenateRT[A, B, T],
+    ): Aux[A, B, T, cn.Out] = 
+      instance((a, b, dim) => cn(a, b, dim))
+  }
+
+  trait ConcatenateRT[A[_], B[_], T] { self =>
+    type Out = Option[A[T]]
+    def apply(a: A[T], b: B[T], dim: Int): Out
+  }
+  object ConcatenateRT {
+    type Aux[A[_], B[_], T] = ConcentrateRT[A, B, T]
+    def apply[A[_], B[_], T](implicit cn: Concatenate[A, B, T]): Concatenate[A, B, T] = cn
+    def instance[A[_], B[_], T](f: (A[T], B[T]) => ConcentrateRT#Out,
+    ): Aux[A, B, T] = 
+    new Concatenate[A, B, T] {
+      def apply(a: A[T], b: B[T], dim: Int): Aux = f(a, b, dim)
+    }
+    implicit def ifSIsEle[A[_], B[_], T](implicit 
+      aIsArr: IsArray[A, T] { type S = T },
+    ): Aux[A, B, T] = instance((a, b, dim) => 
+      if(dim == 0) {a ++ b} else {None}
+    )
+    implicit def ifSIsArr[A[_], B[_], T, _SA[_], _SB[_]](implicit 
+      aIsArr: IsArray[A, T] { type S = _SA[T] },
+      bIsArr: IsArray[B, T] { type S = _SB[T] },
+      sAIsArr: IsArray[_SA, T],
+      sBIsArr: IsArray[_SB, T],
+      sConc: Aux[_SA, _SB, T],
+    ): Aux[A, B, T] = instance((a, b, dim) => 
+      if(dim == 0) {
+        Some(a ++ b)
+      } else {
+        val cO: List[A[T]] = for((sA, sB) <- a.toList.zip(b.toList)) yield (sConc(sA, sB, dim-1))
+        a.fromList(c0)
+      }
+    )
   }
 
   abstract class FullyTyped[A] {}
