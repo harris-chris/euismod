@@ -10,7 +10,7 @@ import shapeless.{HList, HNil, Lazy, :: => #:}
 import shapeless.ops.hlist._
 import shapeless._
 import nat._
-import shapeless.ops.nat.{Diff => NatDiff}
+import shapeless.ops.nat.{GT, Pred, Diff => NatDiff}
 
 object ArrayDefs {
 
@@ -39,8 +39,8 @@ object ArrayDefs {
     def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
     def ++[B[_]](a: A[T], b: B[T])(implicit 
-      st: Stack[A, B, T],
-    ): st.Out = st(a, b, 0)
+      cnCt: ConcatenateCT[A, B, T, Nat._0],
+    ): cnCt.Out = cnCt(a, b)
     def stack[B[_]](a: A[T], b: B[T], dim: Int)(implicit 
       st: Stack[A, B, T],
     ): st.Out = st(a, b, dim)
@@ -104,7 +104,7 @@ object ArrayDefs {
       def getAtN(n: Int): _S = tc.getAtN(a, n)
       def apply[R](r: R)(implicit getILoc: GetILoc[A[T], R]) = tc.apply(a, r)
       def ::(other: _S) = tc.cons(a, other)
-      def ++[B[_]](b: B[T])(implicit st: Stack[A, B, T]) = tc.++(a, b)
+      def ++[B[_]](b: B[T])(implicit cn: ConcatenateCT[A, B, T, Nat._0]) = tc.++(a, b)
       def stack[B[_]](b: B[T], dim: Int)(implicit st: Stack[A, B, T]) = tc.stack(a, b, dim)
       def length: Int = tc.length(a)
       def toList: List[_S] = tc.toList(a)
@@ -441,71 +441,71 @@ object ArrayDefs {
     )
   }
   
-  //trait Concatenate[A[_], B[_], T, D] { self =>
-    //type Out
-    //def apply(a: A[T], b: B[T], dim: D): Out
-  //}
-  //object Concatenate {
-    //type Aux[A[_], B[_], T, D, O] = Concatenate[A, B, T, D] { type Out = O }
-    //def apply[A[_], B[_], T, D](implicit cn: Concatenate[A, B, T, D]): Concatenate[A, B, T, D] = cn
-    //def instance[A[_], B[_], T, D, O](f: (A[T], B[T], D) => O): Aux[A, B, T, D, O] = 
-    //new Concatenate[A, B, T, D] {
-      //type Out = O
-      //def apply(a: A[T], b: B[T], dim: D): Out = f(a, b, dim)
-    //}
+  trait ConcatenateCT[A[_], B[_], T, D <: Nat] { self =>
+    type Out = Option[A[T]]
+    def apply(a: A[T], b: B[T]): Out
+  }
+  object ConcatenateCT {
+    def apply[A[_], B[_], T, D <: Nat](implicit cn: ConcatenateCT[A, B, T, D]): ConcatenateCT[A, B, T, D] = cn
+    implicit def ifDim0[A[_], B[_], T](implicit 
+      ad: AddRT.Aux[A, B, T],
+    ): ConcatenateCT[A, B, T, Nat._0] = new ConcatenateCT[A, B, T, Nat._0] { 
+      def apply(a: A[T], b: B[T]): Out = ad(a, b)
+    }
+    implicit def ifNotDim0[A[_], B[_], T, D <: Nat, Dm1 <: Nat, _SA[_], _SB[_]](implicit
+      aIsArr: IsArray[A, T] { type S = _SA[T] },
+      bIsArr: IsArray[B, T] { type S = _SB[T] },
+      dIsGt0: GT[D, Nat._0],
+      sAIsArr: IsArray[_SA, T],
+      sBIsArr: IsArray[_SB, T],
+      dm1: Pred.Aux[D, Dm1],
+      sConc: ConcatenateCT[_SA, _SB, T, Dm1] { type Out = Option[_SA[T]] },
+    ): ConcatenateCT[A, B, T, D] = new ConcatenateCT[A, B, T, D] {
+      def apply(a: A[T], b: B[T]): Out = {
+        val cs = for((sA, sB) <- aIsArr.toList(a).zip(bIsArr.toList(b))) yield (sConc(sA, sB))
+        if(cs.forall(_.isDefined)) {Some(aIsArr.fromList(cs.map(_.get)))} else {None}
+      }
+    }
+  }
 
-    //implicit def ifSameTypeAndDimNat0[A[_], T](implicit 
-      //isArr: IsArray[A, T],
-    //): Aux[A, A, T, Nat._0, A[T]] = instance((a, b, dim) => 
-      //isArr.fromList(isArr.toList(a) ++ isArr.toList(b)) //REFACTOR
-    //)
-
-    //implicit def ifEqualLenghtsRT[A[_], B[_], T, dA <: Nat, dB <: Nat](implicit 
-      //deA: Depth.Aux[A, T, dA],
-      //deB: Depth.Aux[A, T, dB],
-      //ev: dA =:= dB,
-      //cn: ConcatenateRT[A, B, T],
-    //): Aux[A, B, T, Int, cn.Out] = 
-      //instance((a, b, dim) => cn(a, b, dim))
-  //}
-
-  //trait ConcatenateRT[A[_], B[_], T] { self =>
-    //type Out = Option[A[T]]
-    //def apply(a: A[T], b: B[T], dim: Int): Out
-  //}
-  //object ConcatenateRT {
-    //type Aux[A[_], B[_], T] = ConcatenateRT[A, B, T]
-    //def apply[A[_], B[_], T](implicit cn: ConcatenateRT[A, B, T]): ConcatenateRT[A, B, T] = cn
-    //def instance[A[_], B[_], T](f: (A[T], B[T], Int) => Option[A[T]],
-    //): Aux[A, B, T] = 
-    //new ConcatenateRT[A, B, T] {
-      //def apply(a: A[T], b: B[T], dim: Int): Option[A[T]] = f(a, b, dim)
-    //}
-    //implicit def ifSIsEle[A[_], B[_], T](implicit 
-      //aIsArr: IsArray[A, T] { type S = T },
-      //bIsArr: IsArray[B, T] { type S = T },
-    //): Aux[A, B, T] = instance((a, b, dim) => 
-      //if(dim == 0) {
-        //Some(
-          //aIsArr.fromList(aIsArr.toList(a) ++ bIsArr.toList(b))
-        //)
-      //} else {None}
-    //)
-    //implicit def ifSIsArr[A[_], B[_], T, _SA[_], _SB[_]](implicit 
-      //aIsArr: IsArray[A, T] { type S = _SA[T] },
-      //bIsArr: IsArray[B, T] { type S = _SB[T] },
-      //sAIsArr: IsArray[_SA, T],
-      //sBIsArr: IsArray[_SB, T],
-      //sConc: Aux[_SA, _SB, T],
-    //): Aux[A, B, T] = instance((a, b, dim) => 
-      //if(dim == 0) {
-        //Some(implicitly[Add[A, B, T].apply(a, b))
-      //} else {
-        //val cO: List[A[T]] = for((sA, sB) <- a.toList.zip(b.toList)) yield (sConc(sA, sB, dim-1))
-        //a.fromList(c0)
-      //}
-    //)
-  //}
+  trait ConcatenateRT[A[_], B[_], T] { self =>
+    type Out = Option[A[T]]
+    def apply(a: A[T], b: B[T], dim: Int): Out
+  }
+  object ConcatenateRT {
+    type Aux[A[_], B[_], T] = ConcatenateRT[A, B, T]
+    def apply[A[_], B[_], T](implicit cn: ConcatenateRT[A, B, T]): ConcatenateRT[A, B, T] = cn
+    def instance[A[_], B[_], T](f: (A[T], B[T], Int) => Option[A[T]],
+    ): Aux[A, B, T] = new ConcatenateRT[A, B, T] {
+      def apply(a: A[T], b: B[T], dim: Int): Option[A[T]] = f(a, b, dim)
+    }
+    implicit def ifNoSubConc[A[_], B[_], T](implicit 
+      aIsArr: IsArray[A, T] { type S = T },
+      bIsArr: IsArray[B, T] { type S = T },
+      cnCt: ConcatenateCT[A, B, T, Nat._0],
+    ): Aux[A, B, T] = instance((a, b, dim) => 
+      if(dim == 0) {
+        cnCt(a, b)
+      } else {None}
+    )
+    implicit def ifSubConc[A[_], B[_], T, _SA[_], _SB[_]](implicit 
+      aIsArr: IsArray[A, T] { type S = _SA[T] },
+      bIsArr: IsArray[B, T] { type S = _SB[T] },
+      sAIsArr: IsArray[_SA, T],
+      sBIsArr: IsArray[_SB, T],
+      ad: AddRT[A, B, T],
+      sConc: Aux[_SA, _SB, T],
+    ): Aux[A, B, T] = instance((a, b, dim) => 
+      if(dim == 0) {
+        ad(a, b)
+      } else {
+        val cO: List[Option[_SA[T]]] = for(
+          (sA, sB) <- aIsArr.toList(a).zip(bIsArr.toList(b))
+        ) yield (sConc(sA, sB, dim-1))
+        if(cO.forall(_.isDefined)){Some(aIsArr.fromList(cO.map(_.get)))} else {None}
+      }
+    )
+  }
 
   abstract class FullyTyped[A] {}
 
