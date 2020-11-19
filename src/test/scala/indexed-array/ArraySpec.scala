@@ -646,17 +646,17 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
     scenario("dbl2d.reshape(5, 3) returns a 5, 3 shaped Dbl2d", ReshapesTest) {
       val dbl2dFlat = dbl2d.data.flatten
-      val dbl2dReshaped = shapeList(dbl2dFlat, 5 :: 3 :: HNil)
+      val dbl2dReshaped = shapeList(dbl2dFlat, 3 :: 5 :: HNil)
       assert(dbl2d.reshape(5 :: 3 :: HNil) === dbl2dReshaped.map(Dbl2d[Double](_)))
     }
     scenario("dbl3d.reshape(2, 3, 6) returns a correctly shaped Dbl3d", ReshapesTest) {
       val dbl3dFlat = dbl3d.flatten
-      val dbl3dReshaped = shapeList(dbl3dFlat, 2 :: 3 :: 6 :: HNil)
+      val dbl3dReshaped = shapeList(dbl3dFlat, 6 :: 3 :: 2 :: HNil)
       assert(dbl3d.reshape(2 :: 3 :: 6 :: HNil) === dbl3dReshaped.map(Dbl3d[Double](_)))
     }
     scenario("dbl3d.reshape(15, 2) returns a correctly shaped Dbl2d", ReshapesTest) {
       val dbl3dFlat = dbl3d.flatten
-      val dbl3dReshaped = shapeList(dbl3dFlat, 15 :: 2 :: HNil)
+      val dbl3dReshaped = shapeList(dbl3dFlat, 2 :: 15 :: HNil)
       assert(dbl3d.reshape(15 :: 2 :: HNil) === dbl3dReshaped.map(Dbl2d[Double](_)))
     }
     scenario("dbl3d.reshape(1, 1, 1, 1) does not compile", ReshapesTest) {
