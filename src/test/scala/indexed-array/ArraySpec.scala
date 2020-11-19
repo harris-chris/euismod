@@ -217,45 +217,45 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     //}
   }
 
-  feature("IsArray.++") {
+  feature("The AddRT typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    object AddTest extends Tag("AddTest")
-    scenario("adding a Dbl1d to a Dbl1d produces a combined array", AddTest) {
+    object AddRTTest extends Tag("AddRTTest")
+    scenario("adding a Dbl1d to a Dbl1d produces a combined array", AddRTTest) {
       val l1 = Dbl1d[Int](List(1, 2, 3))
       val l2 = Dbl1d[Int](List(4, 5, 6))
       val exp = Dbl1d[Int](List(1, 2, 3, 4, 5, 6))
       val t: List[Int] = l1.flatten
-      assert(l1 ++ l2 === Some(exp))
+      assert(AddRT[Dbl1d, Dbl1d, Int].apply(l1, l2) === Some(exp))
     }
-    scenario("adding a Dbl2d to a Dbl2d returns a combined array", AddTest) {
+    scenario("adding a Dbl2d to a Dbl2d returns a combined array", AddRTTest) {
       val l1 = Dbl2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = Dbl2d[Int](List(List(7, 8, 9), List(10, 11, 12)))
-      val ex = Dbl2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9), List(10, 11, 12)))
-      assert(l1 ++ l2 === Some(ex))
+      val exp = Dbl2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9), List(10, 11, 12)))
+      assert(AddRT[Dbl2d, Dbl2d, Int].apply(l1, l2) === Some(exp))
     }
-    scenario("adding a Dbl2d to a Dbl2d with different dim0 size returns a combined array", AddTest) {
+    scenario("adding a Dbl2d to a Dbl2d with different dim0 size returns a combined array", AddRTTest) {
       val l1 = Dbl2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = Dbl2d[Int](List(List(7, 8, 9)))
       val exp = Dbl2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9)))
-      assert(l1 ++ l2 === Some(exp))
+      assert(AddRT[Dbl2d, Dbl2d, Int].apply(l1, l2) === Some(exp))
     }
-    scenario("adding a Dbl2d to a Dbl2d with different dim1 length returns None", AddTest) {
+    scenario("adding a Dbl2d to a Dbl2d with different dim1 length returns None", AddRTTest) {
       val l1 = Dbl2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = Dbl2d[Int](List(List(7, 8), List(10, 11)))
-      assert(l1 ++ l2 === None)
+      assert(AddRT[Dbl2d, Dbl2d, Int].apply(l1, l2) === None)
     }
-    scenario("adding a Dbl3d to a Dbl3d with dim1 and dim2 lengths the same returns a combined array", AddTest) {
+    scenario("adding a Dbl3d to a Dbl3d with dim1 and dim2 lengths the same returns a combined array", AddRTTest) {
       val l1 = Dbl2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = Dbl2d[Int](List(List(7, 8), List(10, 11)))
-      assert(l1 ++ l2 === None)
+      assert(AddRT[Dbl2d, Dbl2d, Int].apply(l1, l2) === None)
     }
-    scenario("adding a Dbl3d to a Dbl3d with different dim1 length returns None", AddTest) {
+    scenario("adding a Dbl3d to a Dbl3d with different dim1 length returns None", AddRTTest) {
       val l1 = Dbl2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = Dbl2d[Int](List(List(7, 8), List(10, 11)))
-      assert(l1 ++ l2 === None)
+      assert(AddRT[Dbl2d, Dbl2d, Int].apply(l1, l2) === None)
     }
   }
 
