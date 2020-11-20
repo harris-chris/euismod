@@ -133,6 +133,41 @@ object ArrayDefs {
     }
   }
 
+  sealed trait PrettyPrint[A[_], T] {
+    type Out = String
+    def apply(a: A[T], indent: String = ""): Out
+  }
+  object PrettyPrint {
+    def instance[A[_], T](f: (A[T], String) => String): PrettyPrint[A, T] = new PrettyPrint[A, T] {
+      def apply(a: A[T], ind: String): String = f(a, ind)
+    }
+    def apply[A[_], T](implicit pp: PrettyPrint[A, T]): PrettyPrint[A, T] = pp
+    def maxWidth[A[_], T](a: A[T])(implicit 
+      aIsArr: IsArray[A, T],
+      fl: Flatten[A, T],
+    ): Int = 
+      aIsArr.flatten(a).map(_.toString.length).max
+    implicit def ifIs1d[A[_], T](implicit 
+      aIsArr: IsArray[A, T],
+      de: DepthCT.Aux[A, T, Nat._1],
+      fl: Flatten[A, T],
+    ): PrettyPrint[A, T] = instance((a, ind) => {
+      val mW = maxWidth(a)
+      ind ++ "[ " ++ aIsArr.toList(a).map(_.toString.padTo(mW, ' ')).mkString(", ") ++ "]"
+    })
+    implicit def ifIs2d[A[_], T, _S[_]](implicit 
+      aIsArr: IsArray[A, T] { type S = _S[T] },
+      de: DepthCT.Aux[A, T, Nat._2],
+      fl: Flatten[A, T],
+      pp: PrettyPrint[_S, T],
+    ): PrettyPrint[A, T] = instance((a, ind) => {
+      val mW = maxWidth(a)
+      val ls: List[_S[T]] = aIsArr.toList(a)
+      val lspp = (pp(ls.head, "") :: ls.tail.map(pp(_, " "))).mkString(",\n")
+      ind ++ "[" ++ lspp ++ "]"
+    })
+  }
+
   sealed trait CombineShapes[A, B] {
     type Out
     def apply(a: A, b: B, dim: Int): Out
@@ -236,20 +271,16 @@ object ArrayDefs {
     ): Aux[A, T, L, rv.Out] = instance(l => rv(ga(l)))
   }
 
-  sealed trait Depth[A[_], T] { self =>
-    type Out
-    def apply(a: A[T]): Out
+  sealed trait DepthCT[A[_], T] { self =>
+    type Out <: Nat
   }
-  object Depth {
-    type Aux[A[_], T, O] = Depth[A, T] { type Out = O }
-    def instance[A[_], T, O](f: A[T] => O): Aux[A, T, O] = new Depth[A, T] {
-      type Out = O
-      def apply(a: A[T]): Out = f(a)
-    }
-    def ifCT[A[_], T, O <: Nat, Arrs <: HList](implicit 
+  object DepthCT {
+    type Aux[A[_], T, O <: Nat] = DepthCT[A, T] { type Out = O }
+    def apply[A[_], T](implicit de: DepthCT[A, T]): DepthCT[A, T] = de
+    implicit def ifArr[A[_], T, O <: Nat, Arrs <: HList](implicit 
       ar: GetArrsDesc.Aux[A, T, HNil, Arrs],
       le: Length.Aux[Arrs, O],
-    ): Aux[A, T, O] = instance(a => le()) 
+    ): DepthCT[A, T] { type Out =  O } = new DepthCT[A, T] { type Out = O }
   }
 
   sealed trait Shape[A[_], T] { self =>

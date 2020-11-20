@@ -152,6 +152,37 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("The DepthCT typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object DepthCTTest extends Tag("DepthCTTest")
+    scenario("DepthCT has type Out of Nat 1 for a 1d array", DepthCTTest) {
+      "implicitly[DepthCT[List1d, Double] { type Out = Nat._1 }]" should compile
+    }
+    scenario("DepthCT has type Out of Nat 2 for a 2d array", DepthCTTest) {
+      "implicitly[DepthCT[List2d, Double] { type Out = Nat._2 }]" should compile
+    }
+    scenario("DepthCT has type Out of Nat 3 for a 3d array", DepthCTTest) {
+      "implicitly[DepthCT[List3d, Double] { type Out = Nat._3 }]" should compile
+    }
+  }
+
+  feature("The PrettyPrint typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object PrettyPrintTest extends Tag("PrettyPrintTest")
+    scenario("Pretty printing a 1d array produces numpy-like output", PrettyPrintTest) {
+      //println(PrettyPrint[List1d, Double].apply(dbl1d))
+    }
+    scenario("Pretty printing a 2d array produces numpy-like output", PrettyPrintTest) {
+      println(PrettyPrint[List2d, Double].apply(dbl2d))
+    }
+  }
+
   feature("The ConcatenateRT typeclass") {
     import Dummy.Types._
     import Dummy.Values._
@@ -181,40 +212,40 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
             List(10, 11, 12, 13),
       )))
     }
-    scenario("Concatenating a 3d array along dimension 1 returns the correct result", ConcatenateRTTest) {
-      val conc = ints3d.stack(ints3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil), 1).get
-      assert(conc.shape == 2 :: 4 :: 4 :: HNil)
-      assert(conc.data == 
-        List(
-          List(
-            List(1, 2, 3, 4),
-            List(5, 6, 7, 8),
-            List(9, 10, 11, 12),
-            List(2, 3, 4, 5),
-          ),
-          List(
-            List(13, 14, 15, 16),
-            List(17, 18, 19, 20),
-            List(21, 22, 23, 24),
-            List(14, 15, 16, 17),
-      )))
-    }
-    scenario("Concatenating a 3d array along dimension 2 returns the correct result", ConcatenateRTTest) {
-      val conc = ints3d.stack(ints3d.map(_+1).apply(List(0, 1) :: List(0, 1, 2) :: List(0) :: HNil), 2).get
-      assert(conc.shape == 2 :: 3 :: 5 :: HNil)
-      assert(conc.data == 
-        List(
-          List(
-            List( 1,  2,  3,  4,  2),
-            List( 5,  6,  7,  8,  6),
-            List( 9, 10, 11, 12, 10),
-          ),
-          List(
-            List( 13, 14, 15, 16, 14),
-            List( 17, 18, 19, 20, 18),
-            List( 21, 22, 23, 24, 22),
-      )))
-    }
+    //scenario("Concatenating a 3d array along dimension 1 returns the correct result", ConcatenateRTTest) {
+      //val conc = ints3d.stack(ints3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil), 1).get
+      //assert(conc.shape == 2 :: 4 :: 4 :: HNil)
+      //assert(conc.data == 
+        //List(
+          //List(
+            //List(1, 2, 3, 4),
+            //List(5, 6, 7, 8),
+            //List(9, 10, 11, 12),
+            //List(2, 3, 4, 5),
+          //),
+          //List(
+            //List(13, 14, 15, 16),
+            //List(17, 18, 19, 20),
+            //List(21, 22, 23, 24),
+            //List(14, 15, 16, 17),
+      //)))
+    //}
+    //scenario("Concatenating a 3d array along dimension 2 returns the correct result", ConcatenateRTTest) {
+      //val conc = ints3d.stack(ints3d.map(_+1).apply(List(0, 1) :: List(0, 1, 2) :: List(0) :: HNil), 2).get
+      //assert(conc.shape == 2 :: 3 :: 5 :: HNil)
+      //assert(conc.data == 
+        //List(
+          //List(
+            //List( 1,  2,  3,  4,  2),
+            //List( 5,  6,  7,  8,  6),
+            //List( 9, 10, 11, 12, 10),
+          //),
+          //List(
+            //List( 13, 14, 15, 16, 14),
+            //List( 17, 18, 19, 20, 18),
+            //List( 21, 22, 23, 24, 22),
+      //)))
+    //}
   }
 
   feature("The AddRT typeclass") {
