@@ -10,7 +10,7 @@ import shapeless.{HList, HNil, Lazy, :: => #:}
 import shapeless.ops.hlist._
 import shapeless._
 import nat._
-import shapeless.ops.nat.{GT, Pred, Diff => NatDiff}
+import shapeless.ops.nat.{GT, Pred, Diff => NatDiff, ToInt}
 
 object ArrayDefs {
 
@@ -135,11 +135,11 @@ object ArrayDefs {
 
   sealed trait PrettyPrint[A[_], T] {
     type Out = String
-    def apply(a: A[T], indent: String = ""): Out
+    def apply(a: A[T], prefix: String = "", separator: String = "", suffix: String = ""): Out
   }
   object PrettyPrint {
-    def instance[A[_], T](f: (A[T], String) => String): PrettyPrint[A, T] = new PrettyPrint[A, T] {
-      def apply(a: A[T], ind: String): String = f(a, ind)
+    def instance[A[_], T](f: (A[T], String, String, String) => String): PrettyPrint[A, T] = new PrettyPrint[A, T] {
+      def apply(a: A[T], pre: String, sep: String, suf: String): String = f(a, pre, sep, suf)
     }
     def apply[A[_], T](implicit pp: PrettyPrint[A, T]): PrettyPrint[A, T] = pp
     def maxWidth[A[_], T](a: A[T])(implicit 
@@ -151,20 +151,27 @@ object ArrayDefs {
       aIsArr: IsArray[A, T],
       de: DepthCT.Aux[A, T, Nat._1],
       fl: Flatten[A, T],
-    ): PrettyPrint[A, T] = instance((a, ind) => {
+    ): PrettyPrint[A, T] = instance((a, pre, sep, suf) => {
       val mW = maxWidth(a)
-      ind ++ "[ " ++ aIsArr.toList(a).map(_.toString.padTo(mW, ' ')).mkString(", ") ++ "]"
+      pre ++ aIsArr.toList(a).map(_.toString.padTo(mW, ' ')).mkString(sep) ++ suf
     })
-    implicit def ifIs2d[A[_], T, _S[_]](implicit 
+    implicit def ifIs1dp[A[_], T, _S[_], DE <: Nat](implicit 
       aIsArr: IsArray[A, T] { type S = _S[T] },
-      de: DepthCT.Aux[A, T, Nat._2],
+      de: DepthCT.Aux[A, T, DE],
+      deIsGt2: GT[DE, Nat._1],
+      toInt: ToInt[DE],
       fl: Flatten[A, T],
       pp: PrettyPrint[_S, T],
-    ): PrettyPrint[A, T] = instance((a, ind) => {
-      val mW = maxWidth(a)
+    ): PrettyPrint[A, T] = instance((a, pre, sep, suf) => {
       val ls: List[_S[T]] = aIsArr.toList(a)
-      val lspp = (pp(ls.head, "") :: ls.tail.map(pp(_, " "))).mkString(",\n")
-      ind ++ "[" ++ lspp ++ "]"
+      val pre = "["
+      println(s"DEPTH ${toInt()} PRE ${pre}")
+      val eoLine = ", " ++ "\n" * (toInt()-1)
+      val soLine = " " * (toInt() -1)
+      val sep = eoLine ++ soLine 
+      val nextSep = eoLine.dropRight(1) ++ soLine.dropRight(1)
+      val suf = "]"
+      pre ++ ls.map(pp(_, pre, nextSep, suf)).mkString(sep) ++ suf
     })
   }
 
