@@ -135,25 +135,31 @@ object ArrayDefs {
 
   sealed trait PrettyPrint[A[_], T] {
     type Out = String
-    def apply(a: A[T], prefix: String = "", separator: String = "", suffix: String = ""): Out
+    def apply(a: A[T], indO: Option[String] = None): Out
   }
   object PrettyPrint {
-    def instance[A[_], T](f: (A[T], String, String, String) => String): PrettyPrint[A, T] = new PrettyPrint[A, T] {
-      def apply(a: A[T], pre: String, sep: String, suf: String): String = f(a, pre, sep, suf)
+
+    def instance[A[_], T](
+      f: (A[T], Option[String]) => String,
+    ): PrettyPrint[A, T] = new PrettyPrint[A, T] {
+      def apply(a: A[T], indO: Option[String]): String = f(a, indO)
     }
+
     def apply[A[_], T](implicit pp: PrettyPrint[A, T]): PrettyPrint[A, T] = pp
+
     def maxWidth[A[_], T](a: A[T])(implicit 
       aIsArr: IsArray[A, T],
       fl: Flatten[A, T],
     ): Int = 
       aIsArr.flatten(a).map(_.toString.length).max
+
     implicit def ifIs1d[A[_], T](implicit 
       aIsArr: IsArray[A, T],
       de: DepthCT.Aux[A, T, Nat._1],
       fl: Flatten[A, T],
-    ): PrettyPrint[A, T] = instance((a, pre, sep, suf) => {
+    ): PrettyPrint[A, T] = instance((a, indO) => {
       val mW = maxWidth(a)
-      pre ++ aIsArr.toList(a).map(_.toString.padTo(mW, ' ')).mkString(sep) ++ suf
+      "[" ++ aIsArr.toList(a).map(_.toString.padTo(mW, ' ')).mkString(", ") ++ "]"
     })
     implicit def ifIs1dp[A[_], T, _S[_], DE <: Nat](implicit 
       aIsArr: IsArray[A, T] { type S = _S[T] },
@@ -162,16 +168,17 @@ object ArrayDefs {
       toInt: ToInt[DE],
       fl: Flatten[A, T],
       pp: PrettyPrint[_S, T],
-    ): PrettyPrint[A, T] = instance((a, pre, sep, suf) => {
+    ): PrettyPrint[A, T] = instance((a, indO) => {
+      //val (ind, nextInd) = indO match {
+        //case None => ("", " " * (toInt() - 1))
+        //case Some(x) => (x, x.dropRight(1))
+      //}
+      val ind = indO.getOrElse(" ")
+      val nextInd = ind ++ " "
+      val lineB = ",\n" ++ ind
       val ls: List[_S[T]] = aIsArr.toList(a)
-      val pre = "["
-      println(s"DEPTH ${toInt()} PRE ${pre}")
-      val eoLine = ", " ++ "\n" * (toInt()-1)
-      val soLine = " " * (toInt() -1)
-      val sep = eoLine ++ soLine 
-      val nextSep = eoLine.dropRight(1) ++ soLine.dropRight(1)
-      val suf = "]"
-      pre ++ ls.map(pp(_, pre, nextSep, suf)).mkString(sep) ++ suf
+      "[" ++ pp(ls.head, Some(nextInd)) ++ lineB ++ ls.tail.map(pp(_, Some(nextInd))).mkString(lineB) ++ "]"
+      // each time we go a layer down we want to swap a [ for a space
     })
   }
 

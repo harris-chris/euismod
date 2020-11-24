@@ -176,7 +176,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     object PrettyPrintTest extends Tag("PrettyPrintTest")
     scenario("Pretty printing a 1d array produces numpy-like output", PrettyPrintTest) {
-      //println(PrettyPrint[List1d, Double].apply(dbl1d))
+      println("1D")
+      println(PrettyPrint[List1d, Double].apply(dbl1d))
     }
     scenario("Pretty printing a 2d array produces numpy-like output", PrettyPrintTest) {
       println("2D")
