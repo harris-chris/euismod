@@ -27,6 +27,9 @@ object Dummy {
     case class List3d[T] ( 
       data: List[List[List[T]]],
     )
+    case class List4d[T] ( 
+      data: List[List[List[List[T]]]],
+    )
   }
   object Values {
     import Types._
@@ -58,35 +61,69 @@ object Dummy {
         List(5.1, 5.2, 5.3, 5.4, 5.5),
       ),
     )
+    val dblVals4d = List(
+      List(
+        List(
+          List(0.0000, 0.0001, 0.0002, 0.0003, 0.0004),
+          List(0.0010, 0.0011, 0.0012, 0.0013, 0.0014),
+          List(0.0020, 0.0021, 0.0022, 0.0023, 0.0024),
+        ),
+        List(
+          List(0.0100, 0.0101, 0.0102, 0.0103, 0.0104),
+          List(0.0110, 0.0111, 0.0112, 0.0113, 0.0114),
+          List(0.0120, 0.0121, 0.0122, 0.0123, 0.0124),
+        ),
+      ),
+      List(
+        List(
+          List(0.1000, 0.1001, 0.1002, 0.1003, 0.1004),
+          List(0.1010, 0.1011, 0.1012, 0.1013, 0.1014),
+          List(0.1020, 0.1021, 0.1022, 0.1023, 0.1024),
+        ),
+        List(
+          List(0.1100, 0.1101, 0.1102, 0.1103, 0.1104),
+          List(0.1110, 0.1111, 0.1112, 0.1113, 0.1114),
+          List(0.1120, 0.1121, 0.1122, 0.1123, 0.1124),
+        ),
+      )
+    )
     val dbl1d = List1d[Double](dblVals1d)
     val dbl2d = List2d[Double](dblVals2d)
     val dbl3d = List3d[Double](dblVals3d)
+    val dbl4d = List4d[Double](dblVals4d)
   }
   object IsArrayImplicits {
     import Types._
     import Values._
     import ArrayDefs._
     import ArrayDefs.IsArraySyntax._
-    implicit def dbl1dIsArray[T] = new IsArray[List1d, T] {
+    implicit def list1dIsArray[T] = new IsArray[List1d, T] {
       type S = T
       def getEmpty[_T] = List1d[_T](Nil: List[_T])
       def getAtN(a: List1d[T], n: Int) = a.data(n)
       def length(a: List1d[T]) = a.data.length
       def cons(a: List1d[T], other: S) = List1d(other :: a.data)
     }
-    implicit def dbl2dIsArray[T] = new IsArray[List2d, T] {
+    implicit def list2dIsArray[T] = new IsArray[List2d, T] {
       type S = List1d[T]
       def getEmpty[_T]: List2d[_T] = List2d[_T](Nil: List[List[_T]])
       def getAtN(a: List2d[T], n: Int): S = List1d(a.data(n))
       def length(a: List2d[T]): Int = a.data.length
       def cons(a: List2d[T], sub: S): List2d[T] = List2d(sub.data :: a.data)
     }
-    implicit def dbl3dIsArray[T] = new IsArray[List3d, T] {
+    implicit def list3dIsArray[T] = new IsArray[List3d, T] {
       type S = List2d[T]
       def getEmpty[_T] = List3d[_T](Nil: List[List[List[_T]]])
       def getAtN(a: List3d[T], n: Int) = List2d(a.data(n))
       def length(a: List3d[T]) = a.data.length
       def cons(a: List3d[T], sub: S): List3d[T] = List3d(sub.data :: a.data)
+    }
+    implicit def list4dIsArray[T] = new IsArray[List4d, T] {
+      type S = List3d[T]
+      def getEmpty[_T] = List4d[_T](Nil: List[List[List[List[_T]]]])
+      def getAtN(a: List4d[T], n: Int) = List3d(a.data(n))
+      def length(a: List4d[T]) = a.data.length
+      def cons(a: List4d[T], sub: S): List4d[T] = List4d(sub.data :: a.data)
     }
   }
 }
@@ -186,6 +223,10 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("Pretty printing a 3d array produces numpy-like output", PrettyPrintTest) {
       println("3D")
       println(PrettyPrint[List3d, Double].apply(dbl3d))
+    }
+    scenario("Pretty printing a 3d array produces numpy-like output", PrettyPrintTest) {
+      println("4D")
+      println(PrettyPrint[List4d, Double].apply(dbl4d))
     }
   }
 
