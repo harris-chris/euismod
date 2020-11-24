@@ -35,6 +35,7 @@ object ArrayDefs {
     def length(a: A[T]): Int
     def cons(a: A[T], sub: S): A[T]
 
+    def setAtN(a: A[T], n: Int, elem: S): A[T] = fromList(toList(a).updated(n, elem))
     def apply[R](a: A[T], r: R)(implicit gi: GetILoc[A[T], R]): gi.Out = gi(a, r)
     def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
@@ -99,6 +100,7 @@ object ArrayDefs {
       def getEmpty[_T] = tc.getEmpty[_T]
       def empty = tc.getEmpty[T]
       def getAtN(n: Int): _S = tc.getAtN(a, n)
+      def setAtN(n: Int, elem: _S) = tc.setAtN(a, n, elem)
       def apply[R](r: R)(implicit getILoc: GetILoc[A[T], R]) = tc.apply(a, r)
       def ::(other: _S) = tc.cons(a, other)
       def ++[B[_]](b: B[T])(implicit cn: ConcatenateCT[A, B, T, Nat._0]) = tc.++(a, b)
@@ -174,7 +176,6 @@ object ArrayDefs {
       val lineB = "," ++ "\n" * (toInt()-1) ++ ind
       val ls: List[_S[T]] = aIsArr.toList(a)
       "[" ++ pp(ls.head, Some(nextInd)) ++ lineB ++ ls.tail.map(pp(_, Some(nextInd))).mkString(lineB) ++ "]"
-      // each time we go a layer down we want to swap a [ for a space
     })
   }
 
@@ -304,7 +305,7 @@ object ArrayDefs {
       def apply(a: A[T]): Out = f(a)
     }
     def apply[A[_], T](implicit sh: Shape[A, T]): Shape[A, T] = sh
-    implicit def ifFullyTyped[A[_], T](implicit ft: FullyTyped[A[T]]) = ???
+    //implicit def ifFullyTyped[A[_], T](implicit ft: FullyTyped[A[T]]) = ???
     implicit def ifShapeRT[A[_], T](implicit sh: ShapeRT[A, T, HNil]): Aux[A, T, sh.Out] = 
       instance(a => sh(a, HNil))
   }
@@ -510,8 +511,6 @@ object ArrayDefs {
     )
   }
 
-  abstract class FullyTyped[A] {}
-
   abstract class Is1d[A] private {}
   object Is1d {
     def apply[A[_], T](implicit aIsArr: IsArrBase[A[T], T] { type S = T }): Is1d[A[T]] = new Is1d[A[T]] {}
@@ -533,15 +532,33 @@ object ArrayDefs {
     ): Is3d[A[T]] = new Is3d[A[T]] {}
   }
 
-  trait GetSome[A[_], T, R] {
-    type Out
-    def iloc(a: A[T], ref: R): Out
+  trait Mask[A[_], T, R] {
+    def apply(a: A[T], ref: R): A[Boolean]
   }
-  object GetSome {
-    implicit def ifListInt[A[_], T]: GetSome[A, T, Double] { type Out = A[T] } = new GetSome[A, T, Double] {
-      type Out = A[T]
-      def iloc(a: A[T], ref: Double): Out = a
+  object Mask { }
+
+  trait MaskDT[A, R <: HList] {
+    type Out = A
+    def apply(ref: R, mask: A): Out
+  }
+  object MaskDT {
+    type Aux[A, R <: HList] = MaskDT[A, R]
+    def instance[A, R <: HList](f: (R, A) => A): Aux[A, R] = new MaskDT[A, R] { 
+      def apply(ref: R, mask: A): A = f(ref, mask)
     }
+    def apply[A, R <: HList](implicit ma: MaskDT[A, R]): MaskDT[A, R] = ma 
+
+    implicit def ifRefIsHNil[A]: Aux[A, HNil] = instance((r, m) => m)
+
+    implicit def ifHeadIsListInt[A[_], _S, R1p <: HList](implicit
+      aIsArr: IsArray[A, Boolean] { type S = _S },
+      maskS: MaskDT[_S, R1p] { type Out = _S }, 
+    ): Aux[A[Boolean], List[Int] :: R1p] = instance((r, m) => {
+      val newS = for((s, i) <- aIsArr.toList(m).zipWithIndex) yield (
+        if (r.head.contains(i)) {maskS(r.tail, s)} else {s}
+      )
+      aIsArr.fromList(newS)
+    })
   }
 
   trait GetILoc[A, R] {

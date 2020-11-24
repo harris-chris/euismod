@@ -213,20 +213,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     object PrettyPrintTest extends Tag("PrettyPrintTest")
     scenario("Pretty printing a 1d array produces numpy-like output", PrettyPrintTest) {
-      println("1D")
-      println(PrettyPrint[List1d, Double].apply(dbl1d))
+      val pp = PrettyPrint[List1d, Double].apply(dbl1d)
     }
     scenario("Pretty printing a 2d array produces numpy-like output", PrettyPrintTest) {
-      println("2D")
-      println(PrettyPrint[List2d, Double].apply(dbl2d))
+      val pp = PrettyPrint[List2d, Double].apply(dbl2d)
     }
     scenario("Pretty printing a 3d array produces numpy-like output", PrettyPrintTest) {
-      println("3D")
-      println(PrettyPrint[List3d, Double].apply(dbl3d))
+      val pp = PrettyPrint[List3d, Double].apply(dbl3d)
     }
     scenario("Pretty printing a 4d array produces numpy-like output", PrettyPrintTest) {
-      println("4D")
-      println(PrettyPrint[List4d, Double].apply(dbl4d))
+      val pp = PrettyPrint[List4d, Double].apply(dbl4d)
     }
   }
 
@@ -259,40 +255,44 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
             List(10, 11, 12, 13),
       )))
     }
-    //scenario("Concatenating a 3d array along dimension 1 returns the correct result", ConcatenateRTTest) {
-      //val conc = ints3d.stack(ints3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil), 1).get
-      //assert(conc.shape == 2 :: 4 :: 4 :: HNil)
-      //assert(conc.data == 
-        //List(
-          //List(
-            //List(1, 2, 3, 4),
-            //List(5, 6, 7, 8),
-            //List(9, 10, 11, 12),
-            //List(2, 3, 4, 5),
-          //),
-          //List(
-            //List(13, 14, 15, 16),
-            //List(17, 18, 19, 20),
-            //List(21, 22, 23, 24),
-            //List(14, 15, 16, 17),
-      //)))
-    //}
-    //scenario("Concatenating a 3d array along dimension 2 returns the correct result", ConcatenateRTTest) {
-      //val conc = ints3d.stack(ints3d.map(_+1).apply(List(0, 1) :: List(0, 1, 2) :: List(0) :: HNil), 2).get
-      //assert(conc.shape == 2 :: 3 :: 5 :: HNil)
-      //assert(conc.data == 
-        //List(
-          //List(
-            //List( 1,  2,  3,  4,  2),
-            //List( 5,  6,  7,  8,  6),
-            //List( 9, 10, 11, 12, 10),
-          //),
-          //List(
-            //List( 13, 14, 15, 16, 14),
-            //List( 17, 18, 19, 20, 18),
-            //List( 21, 22, 23, 24, 22),
-      //)))
-    //}
+    scenario("Concatenating a 3d array along dimension 1 returns the correct result", ConcatenateRTTest) {
+      val cn = ConcatenateRT[List3d, List3d, Int]
+      val b = ints3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil)
+      val conc =  cn(ints3d, b, 1).get
+      assert(conc.shape == 2 :: 4 :: 4 :: HNil)
+      assert(conc.data == 
+        List(
+          List(
+            List(1, 2, 3, 4),
+            List(5, 6, 7, 8),
+            List(9, 10, 11, 12),
+            List(2, 3, 4, 5),
+          ),
+          List(
+            List(13, 14, 15, 16),
+            List(17, 18, 19, 20),
+            List(21, 22, 23, 24),
+            List(14, 15, 16, 17),
+      )))
+    }
+    scenario("Concatenating a 3d array along dimension 2 returns the correct result", ConcatenateRTTest) {
+      val cn = ConcatenateRT[List3d, List3d, Int]
+      val b = ints3d.map(_+1).apply(List(0, 1) :: List(0, 1, 2) :: List(0) :: HNil)
+      val conc = cn(ints3d, b, 2).get
+      assert(conc.shape == 2 :: 3 :: 5 :: HNil)
+      assert(conc.data == 
+        List(
+          List(
+            List( 1,  2,  3,  4,  2),
+            List( 5,  6,  7,  8,  6),
+            List( 9, 10, 11, 12, 10),
+          ),
+          List(
+            List( 13, 14, 15, 16, 14),
+            List( 17, 18, 19, 20, 18),
+            List( 21, 22, 23, 24, 22),
+      )))
+    }
   }
 
   feature("The AddRT typeclass") {
@@ -334,6 +334,28 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
       assert(AddRT[List2d, List2d, Int].apply(l1, l2) === None)
+    }
+  }
+
+  feature("MaskDT typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object MaskDTTest extends Tag("MaskDTTest")
+    scenario("MaskDT returns a correct mask for a 1d array", MaskDTTest) {
+      val allFalse = dbl1d.map(_ => false)
+      assert(
+        MaskDT[List1d[Boolean], List[Int] :: HNil].apply(List(1, 2) :: HNil, allFalse) ===
+        List1d[Boolean](allFalse.data.updated(1, true).updated(2, true))
+      )
+    }
+    scenario("MaskDT returns a correct mask for a 2d array", MaskDTTest) {
+      val allFalse = dbl2d.map(_ => false)
+      assert(
+        MaskDT[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(List(1, 2) :: List(3,4) :: HNil, allFalse) ===
+        List1d[Boolean](allFalse.data.updated(1, true).updated(2, true))
+      )
     }
   }
 
@@ -639,6 +661,17 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val l1d = dbl3d.getAtN(0).length
       val l0d = dbl3d.length
       assert(dbl3d.shape === l0d :: l1d :: l2d :: HNil)
+    }
+  }
+
+  feature("IsArray.setAtN") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.IsArrayImplicits._
+    object SetAtNTest extends Tag("SetAtNTest")
+    scenario("dbl1d.setAtN returns the correct List[T]", SetAtNTest) {
+      assert(dbl1d.setAtN(1, 0.01) === List1d(dbl1d.data.updated(1, 0.01)))
     }
   }
 
