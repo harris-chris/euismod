@@ -224,7 +224,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       println("3D")
       println(PrettyPrint[List3d, Double].apply(dbl3d))
     }
-    scenario("Pretty printing a 3d array produces numpy-like output", PrettyPrintTest) {
+    scenario("Pretty printing a 4d array produces numpy-like output", PrettyPrintTest) {
       println("4D")
       println(PrettyPrint[List4d, Double].apply(dbl4d))
     }

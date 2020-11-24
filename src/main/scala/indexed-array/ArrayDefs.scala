@@ -169,13 +169,9 @@ object ArrayDefs {
       fl: Flatten[A, T],
       pp: PrettyPrint[_S, T],
     ): PrettyPrint[A, T] = instance((a, indO) => {
-      //val (ind, nextInd) = indO match {
-        //case None => ("", " " * (toInt() - 1))
-        //case Some(x) => (x, x.dropRight(1))
-      //}
       val ind = indO.getOrElse(" ")
       val nextInd = ind ++ " "
-      val lineB = ",\n" ++ ind
+      val lineB = "," ++ "\n" * (toInt()-1) ++ ind
       val ls: List[_S[T]] = aIsArr.toList(a)
       "[" ++ pp(ls.head, Some(nextInd)) ++ lineB ++ ls.tail.map(pp(_, Some(nextInd))).mkString(lineB) ++ "]"
       // each time we go a layer down we want to swap a [ for a space
