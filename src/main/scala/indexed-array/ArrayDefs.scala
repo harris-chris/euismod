@@ -36,7 +36,7 @@ object ArrayDefs {
     def cons(a: A[T], sub: S): A[T]
 
     def setAtN(a: A[T], n: Int, elem: S): A[T] = fromList(toList(a).updated(n, elem))
-    def apply[R](a: A[T], r: R)(implicit gi: GetILoc[A[T], R]): gi.Out = gi(a, r)
+    def apply[R](a: A[T], r: R)(implicit ai: ApplyIndex[A[T], R]): ai.Out = ai(a, r)
     def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
     def ++[B[_]](a: A[T], b: B[T])(implicit 
@@ -101,7 +101,7 @@ object ArrayDefs {
       def empty = tc.getEmpty[T]
       def getAtN(n: Int): _S = tc.getAtN(a, n)
       def setAtN(n: Int, elem: _S) = tc.setAtN(a, n, elem)
-      def apply[R](r: R)(implicit getILoc: GetILoc[A[T], R]) = tc.apply(a, r)
+      def apply[R](r: R)(implicit ai: ApplyIndex[A[T], R]) = tc.apply(a, r)
       def ::(other: _S) = tc.cons(a, other)
       def ++[B[_]](b: B[T])(implicit cn: ConcatenateCT[A, B, T, Nat._0]) = tc.++(a, b)
       def length: Int = tc.length(a)
@@ -134,6 +134,37 @@ object ArrayDefs {
       ): A[_T] = tc.map(a, f)
     }
   }
+
+  sealed trait ApplyIndex[A, IDX] {
+    type Out
+    def apply(a: A, idx: IDX): Out
+  }
+  object ApplyIndex {
+    type Aux[A, IDX, O] = ApplyIndex[A, IDX] { type Out = O }
+    def instance[A, IDX, O](
+      f: (A, IDX) => O,
+    ): Aux[A, IDX, O] = new ApplyIndex[A, IDX] {
+      type Out = O
+      def apply(a: A, idx: IDX): O = f(a, idx)
+    }
+    def apply[A, IDX](implicit ai: ApplyIndex[A, IDX]): ApplyIndex[A, IDX] = ai
+    
+    implicit def ifIdxIsInt[A[_], T, _S](implicit
+      aIsArr: IsArray[A, T] { type S = _S }
+    ): Aux[A[T], Int, _S] = instance((a, r) => aIsArr.getAtN(a, r))
+
+    implicit def ifIdxIsListInt[A[_], T](implicit
+      aIsArr: IsArray[A, T],
+    ): Aux[A[T], List[Int], A[T]] = instance((a, rs) => aIsArr.fromList(
+      rs.map(aIsArr.getAtN(a, _)))
+    )
+
+    implicit def ifIdxIsHList[A[_], T, IDX <: HList, Rd <: HList](implicit 
+      rd: GetRdcArrs.Aux[A, T, IDX, Rd],
+      gi: GetILocHList[A[T], IDX, Rd],
+    ): Aux[A[T], IDX, gi.Out] = instance((a, r) => gi(a, r, rd(a, r))) 
+  }
+
 
   sealed trait PrettyPrint[A[_], T] {
     type Out = String
