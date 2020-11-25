@@ -147,7 +147,7 @@ object ArrayDefs {
       type Out = O
       def apply(a: A, idx: IDX): O = f(a, idx)
     }
-    def apply[A, IDX](implicit ai: ApplyIndex[A, IDX]): ApplyIndex[A, IDX] = ai
+    def apply[A, IDX](implicit ai: ApplyIndex[A, IDX]): Aux[A, IDX, ai.Out] = ai
     
     implicit def ifIdxIsInt[A[_], T, _S](implicit
       aIsArr: IsArray[A, T] { type S = _S }
