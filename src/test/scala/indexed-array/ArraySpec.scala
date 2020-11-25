@@ -55,14 +55,14 @@ object Dummy {
     )
     val dblVals3d = List(
       List(
-        List(0.1, 0.2, 0.3, 0.4, 0.5),
-        List(1.1, 1.2, 1.3, 1.4, 1.5),
-        List(2.1, 2.2, 2.3, 2.4, 2.5),
+        List(0.000, 0.001, 0.002, 0.003, 0.004),
+        List(0.010, 0.011, 0.012, 0.013, 0.014),
+        List(0.020, 0.021, 0.022, 0.023, 0.024),
       ),
       List(
-        List(3.1, 3.2, 3.3, 3.4, 3.5),
-        List(4.1, 4.2, 4.3, 4.4, 4.5),
-        List(5.1, 5.2, 5.3, 5.4, 5.5),
+        List(0.100, 0.101, 0.102, 0.103, 0.104),
+        List(0.110, 0.111, 0.112, 0.113, 0.114),
+        List(0.120, 0.121, 0.122, 0.123, 0.124),
       ),
     )
     val dblVals4d = List(
@@ -719,17 +719,17 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("dbl2d.flatten returns the correct List[T]", FlattenTest) {
       // check taken from flatten_test.ipynb
       assert(Flatten[List2d, Double].apply(dbl2d) === List(
-        0.00, 0.01, 0.02, 0.03, 0.04, 0.10, 0.11, 0.12, 0.13, 0.14, 0.20, 0.21, 0.22,
-        0.23, 0.24)
-      )
+        0.0, 0.01, 0.02, 0.03, 0.04, 0.1 , 0.11, 0.12, 0.13, 0.14, 0.2 , 0.21, 0.22, 0.23, 0.24
+      ))
     }
     scenario("dbl3d.flatten returns the correct List[T]", FlattenTest) {
       // check taken from flatten_test.ipynb
       assert(Flatten[List3d, Double].apply(dbl3d) === List(
-        0.1, 0.2, 0.3, 0.4, 0.5, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3,
-        2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1,
-        5.2, 5.3, 5.4, 5.5
-      ))
+        0.0 , 0.001, 0.002, 0.003, 0.004, 0.01 , 0.011, 0.012, 0.013,
+        0.014, 0.02 , 0.021, 0.022, 0.023, 0.024, 0.1  , 0.101, 0.102,
+        0.103, 0.104, 0.11 , 0.111, 0.112, 0.113, 0.114, 0.12 , 0.121,
+        0.122, 0.123, 0.124)
+      )
     }
   }
 
