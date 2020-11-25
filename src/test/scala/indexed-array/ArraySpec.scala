@@ -214,13 +214,13 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     object DepthCTTest extends Tag("DepthCTTest")
     scenario("DepthCT has type Out of Nat 1 for a 1d array", DepthCTTest) {
-      "implicitly[DepthCT[List1d, Double] { type Out = Nat._1 }]" should compile
+      "implicitly[DepthCT[List1d[Double]] { type Out = Nat._1 }]" should compile
     }
     scenario("DepthCT has type Out of Nat 2 for a 2d array", DepthCTTest) {
-      "implicitly[DepthCT[List2d, Double] { type Out = Nat._2 }]" should compile
+      "implicitly[DepthCT[List2d[Double]] { type Out = Nat._2 }]" should compile
     }
     scenario("DepthCT has type Out of Nat 3 for a 3d array", DepthCTTest) {
-      "implicitly[DepthCT[List3d, Double] { type Out = Nat._3 }]" should compile
+      "implicitly[DepthCT[List3d[Double]] { type Out = Nat._3 }]" should compile
     }
   }
 
@@ -721,6 +721,22 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     object SetAtNTest extends Tag("SetAtNTest")
     scenario("dbl1d.setAtN returns the correct List[T]", SetAtNTest) {
       assert(dbl1d.setAtN(1, 0.01) === List1d(dbl1d.data.updated(1, 0.01)))
+    }
+  }
+
+  feature("The SetElem typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.IsArrayImplicits._
+    object SetElemTest extends Tag("SetElemTest")
+    scenario("setElem on dbl3d returns an updated array", SetElemTest) {
+      val exp = List3d[Double](
+        dbl3d.data.updated(0, dbl3d.data(0).updated(1, dbl3d.data(0)(1).updated(2, 1)))
+      )
+      assert(SetElem[List3d, Double, Int :: Int :: Int :: HNil].apply(
+        dbl3d, 0 :: 1 :: 2 :: HNil, 1) === exp
+      )
     }
   }
 
