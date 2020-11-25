@@ -532,30 +532,36 @@ object ArrayDefs {
     ): Is3d[A[T]] = new Is3d[A[T]] {}
   }
 
-  trait Mask[A[_], T, R] {
-    def apply(a: A[T], ref: R): A[Boolean]
-  }
-  object Mask { }
-
-  trait MaskDT[A, R <: HList] {
+  trait MaskDTFromNumSeq[A, R <: HList] {
     type Out = A
     def apply(ref: R, mask: A): Out
   }
-  object MaskDT {
-    type Aux[A, R <: HList] = MaskDT[A, R]
-    def instance[A, R <: HList](f: (R, A) => A): Aux[A, R] = new MaskDT[A, R] { 
+  object MaskDTFromNumSeq {
+    type Aux[A, R <: HList] = MaskDTFromNumSeq[A, R] { type Out = A }
+    def instance[A, R <: HList](f: (R, A) => A): Aux[A, R] = new MaskDTFromNumSeq[A, R] { 
       def apply(ref: R, mask: A): A = f(ref, mask)
     }
-    def apply[A, R <: HList](implicit ma: MaskDT[A, R]): MaskDT[A, R] = ma 
+    def apply[A, R <: HList](implicit ma: MaskDTFromNumSeq[A, R]): MaskDTFromNumSeq[A, R] = ma 
 
     implicit def ifRefIsHNil[A]: Aux[A, HNil] = instance((r, m) => m)
 
-    implicit def ifHeadIsListInt[A[_], _S, R1p <: HList](implicit
+    implicit def ifHeadIsListIntNotBase[A[_], _S, R1p <: HList, DE <: Nat](implicit
       aIsArr: IsArray[A, Boolean] { type S = _S },
-      maskS: MaskDT[_S, R1p] { type Out = _S }, 
+      de: DepthCT[A, Boolean] { type Out = DE },
+      deGt1: GT[DE, Nat._1],
+      maskS: MaskDTFromNumSeq[_S, R1p], 
     ): Aux[A[Boolean], List[Int] :: R1p] = instance((r, m) => {
       val newS = for((s, i) <- aIsArr.toList(m).zipWithIndex) yield (
         if (r.head.contains(i)) {maskS(r.tail, s)} else {s}
+      )
+      aIsArr.fromList(newS)
+    })
+
+    implicit def ifHeadIsListIntIsBase[A[_]](implicit
+      aIsArr: IsArray[A, Boolean] { type S = Boolean },
+    ): Aux[A[Boolean], List[Int] :: HNil] = instance((r, m) => {
+      val newS = for((s, i) <- aIsArr.toList(m).zipWithIndex) yield (
+        if (r.head.contains(i)) {true} else {false}
       )
       aIsArr.fromList(newS)
     })

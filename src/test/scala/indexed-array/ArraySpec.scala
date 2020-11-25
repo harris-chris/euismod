@@ -47,8 +47,12 @@ object Dummy {
     )
     val ints3d = List3d[Int](intsVals3d)
 
-    val dblVals1d = List(0.1, 0.2, 0.3, 0.4, 0.5)
-    val dblVals2d = List(dblVals1d, dblVals1d.map(_ + 1), dblVals1d.map(_ + 2))
+    val dblVals1d = List(0.0, 0.1, 0.2, 0.3, 0.4)
+    val dblVals2d = List(
+      List(0.00, 0.01, 0.02, 0.03, 0.04),
+      List(0.10, 0.11, 0.12, 0.13, 0.14),
+      List(0.20, 0.21, 0.22, 0.23, 0.24),
+    )
     val dblVals3d = List(
       List(
         List(0.1, 0.2, 0.3, 0.4, 0.5),
@@ -337,24 +341,52 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("MaskDT typeclass") {
+  feature("MaskDTFromNumSeq typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    object MaskDTTest extends Tag("MaskDTTest")
-    scenario("MaskDT returns a correct mask for a 1d array", MaskDTTest) {
+    object MaskDTFromNumSeqTest extends Tag("MaskDTFromNumSeqTest")
+    scenario("MaskDTFromNumSeq returns a correct mask for a 1d array", MaskDTFromNumSeqTest) {
       val allFalse = dbl1d.map(_ => false)
       assert(
-        MaskDT[List1d[Boolean], List[Int] :: HNil].apply(List(1, 2) :: HNil, allFalse) ===
+        MaskDTFromNumSeq[List1d[Boolean], List[Int] :: HNil].apply(List(1, 2) :: HNil, allFalse) ===
         List1d[Boolean](allFalse.data.updated(1, true).updated(2, true))
       )
     }
-    scenario("MaskDT returns a correct mask for a 2d array", MaskDTTest) {
+    scenario("MaskDTFromNumSeq returns a correct mask for a 2d array", MaskDTFromNumSeqTest) {
       val allFalse = dbl2d.map(_ => false)
+      val exp = List2d[Boolean](
+        List(
+          List(false, false, false, false, false),
+          List(false, false, false, true, true),
+          List(false, false, false, true, true),
+        )
+      )
       assert(
-        MaskDT[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(List(1, 2) :: List(3,4) :: HNil, allFalse) ===
-        List1d[Boolean](allFalse.data.updated(1, true).updated(2, true))
+        MaskDTFromNumSeq[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
+          List(1, 2) :: List(3,4) :: HNil, allFalse) === exp
+      )
+    }
+    scenario("MaskDTFromNumSeq returns a correct mask for a 3d array", MaskDTFromNumSeqTest) {
+      val allFalse = dbl3d.map(_ => false)
+      val exp = List3d[Boolean](
+        List(
+          List(
+            List(false, false, true, true, false),
+            List(false, false, false, false, false),
+            List(false, false, true, true, false),
+          ),
+          List(
+            List(false, false, false, false, false),
+            List(false, false, false, false, false),
+            List(false, false, false, false, false),
+          )
+        )
+      )
+      assert(
+        MaskDTFromNumSeq[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
+          List(0) :: List(0,2) :: List(2, 3) :: HNil, allFalse) === exp
       )
     }
   }
