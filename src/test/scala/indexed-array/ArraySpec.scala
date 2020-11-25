@@ -95,6 +95,20 @@ object Dummy {
     val dbl2d = List2d[Double](dblVals2d)
     val dbl3d = List3d[Double](dblVals3d)
     val dbl4d = List4d[Double](dblVals4d)
+
+    val blVals3d = List(
+      List(
+        List(true   , false   , false   , false   , false   ),
+        List(true   , false   , true    , true    , true    ),
+        List(false  , true    , true    , true    , true    ),
+      ),
+      List(
+        List(true   , true    , false   , false   , true    ),
+        List(true   , false   , true    , true    , true    ),
+        List(false  , false   , false   , true    , true    ),
+      ),
+    )
+    val bl3d = List3d[Boolean](blVals3d)
   }
   object IsArrayImplicits {
     import Types._
@@ -341,20 +355,20 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("MaskDTFromNumSeq typeclass") {
+  feature("MaskFromNumSeqDT typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    object MaskDTFromNumSeqTest extends Tag("MaskDTFromNumSeqTest")
-    scenario("MaskDTFromNumSeq returns a correct mask for a 1d array", MaskDTFromNumSeqTest) {
+    object MaskFromNumSeqDTTest extends Tag("MaskFromNumSeqDTTest")
+    scenario("MaskDTFromNumSeq returns a correct mask for a 1d array", MaskFromNumSeqDTTest) {
       val allFalse = dbl1d.map(_ => false)
       assert(
-        MaskDTFromNumSeq[List1d[Boolean], List[Int] :: HNil].apply(List(1, 2) :: HNil, allFalse) ===
+        MaskFromNumSeqDT[List1d[Boolean], List[Int] :: HNil].apply(List(1, 2) :: HNil, allFalse) ===
         List1d[Boolean](allFalse.data.updated(1, true).updated(2, true))
       )
     }
-    scenario("MaskDTFromNumSeq returns a correct mask for a 2d array", MaskDTFromNumSeqTest) {
+    scenario("MaskFromNumSeqDT returns a correct mask for a 2d array", MaskFromNumSeqDTTest) {
       val allFalse = dbl2d.map(_ => false)
       val exp = List2d[Boolean](
         List(
@@ -364,11 +378,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         )
       )
       assert(
-        MaskDTFromNumSeq[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
+        MaskFromNumSeqDT[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
           List(1, 2) :: List(3,4) :: HNil, allFalse) === exp
       )
     }
-    scenario("MaskDTFromNumSeq returns a correct mask for a 3d array", MaskDTFromNumSeqTest) {
+    scenario("MaskFromNumSeqDT returns a correct mask for a 3d array", MaskFromNumSeqDTTest) {
       val allFalse = dbl3d.map(_ => false)
       val exp = List3d[Boolean](
         List(
@@ -385,7 +399,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         )
       )
       assert(
-        MaskDTFromNumSeq[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
+        MaskFromNumSeqDT[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
           List(0) :: List(0,2) :: List(2, 3) :: HNil, allFalse) === exp
       )
     }
@@ -650,6 +664,14 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("apply with an HList of more elements than array dimensions will not compile", ApplyIndexTest) {
       "ApplyIndex[List3d[Int], Int :: Int :: Int :: Int :: HNil].apply(mini233, 1 :: 1 :: 1 :: 1 :: HNil)" shouldNot compile
     }
+    scenario("ApplyIndex with a boolean array of the same shape should return an appropriate List[T]", ApplyIndexTest) {
+      // exp taken from array_mask_test.ipynb
+      val exp = List(
+        0.0, 0.01 , 0.012, 0.013, 0.014, 0.021, 0.022, 0.023, 0.024, 0.1  , 0.101, 
+        0.104, 0.11 , 0.112, 0.113, 0.114, 0.123, 0.124
+      )
+      assert(ApplyIndex[List3d[Double], List3d[Boolean]].apply(dbl3d, bl3d) === Some(exp))
+    }
   }
 
   feature("The IsArray.length method returns the length of the top dimension") {
@@ -801,123 +823,4 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       "dbl3d.reshape(1 :: 1 :: 1 :: 1 :: HNil)" shouldNot compile
     }
   }
-
-  //feature("The IsUpdatable Typeclass") { 
-    //import Dummy.Types._
-    //import Dummy.Values._
-    //import ArrayDefs.IsArraySyntax._
-    //import ArrayDefs.IsUpdatableSyntax._
-    //scenario("An Updatable array can implement IsUpdatable") {
-      //{
-        //When("An implicit conversion to IsUpdatable is in scope")
-        //implicit def dbl1dIsUpdatable[T: IsElement] = IsUpdatable[List1d, T, List1d[T]] (
-          //fgetEmpty = self => List1d[T](List()),
-          //fgetAtN = (self, n) => self.data(n),
-          //flength = self => self.data.length,
-          //fcons = (self, elem) => List1d(elem :: self.data),
-        //)
-        //Then("Implicit conversion should occur")
-        //"implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
-      //}
-      //{
-        //When("An implicit conversion to IsUpdatable is in scope, based on IsArray")
-        //import Dummy.IsArrayImplicits._
-        //implicit def dbl1dIsUpdatable[T: IsElement] = IsUpdatable.fromArray[List1d[T], T, List1d]
-        //Then("Implicit conversion should occur")
-        //"implicitly[List1d[Double] => IsUpdatableOps[List1d[Double], Double]]" should compile
-      //}
-    //}
-    //scenario("IsUpdatable is used with .map for a 1d Array") {
-      //import Dummy.IsArrayImplicits._
-      //import Dummy.IsUpdatableImplicits._
-      //implicit val intIsElement: IsElement[Int] = new IsElement[Int] {}
-      //the[IsUpdatable[List1d[Int] { type E = Int }]]
-      //ArrMap.mapIfEIsBase[List1d[Double], Double, Int]
-      //val dbl1dInt = dbl1d.map((d: Double) => d.toInt)
-    //}
-  //}
-
-  //feature("An Updatable array can be updated with .setAtN") {
-    //import Dummy._
-    //When(".setAtN with a 1d Array")
-    //implicit def dbl1dIsUpdatable[T: IsElement] = IsUpdatable[List1d[T], T](
-      //fsetAtN = (self, n, setTo) => List1d(self.data.updated(n, setTo))
-    //)
-    //scenario("Using.setAtN with a new valid value creates a new array of the same type") {
-      //val t1 = dbl1d.setAtN(1, 2.2) 
-      //assert(t1.data(1) == 2.2)
-    //}
-    //scenario("Using setAtN with an invalid value does not compile") {
-      //"dbl1d.setAtN(1, 'c')" shouldNot typeCheck
-    //}
-  //}
-
-  //feature("An Updatable array can be updated with .setILoc") {
-    //scenario("A 1d array returns a same-size 1d array if .setILoc is used") {
-    //}
-  //}
-//}
-
-
-  //"Arr1d" should "have shape(0) == length" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    //val dbl1d = List1d[Dim2T, Double](dim2, dblVals1d)
-    //assert(dbl1d.length == dblVals1d.length)
-    //assert(dbl1d.length == dim2.length)
-  //}
-  //"Arr1d" should "use fMap to apply functions to its elements" in {
-    //import ArrayDefs.IsSpArrSyntax._
-    //val dbl1d = List1d[Dim2T, Double](dim2, dblVals1d)
-    //val listmapped = dbl1d.fmap(_: Double => 'a')
-    //val c = dbl1d.fmap(_: String => 'a')
-    //assert(listmapped.toList.forall(_ == 'a'))
-  //}
-  ////"Arr1d" should "return correct Datum with .loc" in {
-    ////import ArrayDefs._
-    ////import ArrayDefs.IsSpArrSyntax._
-    ////val dbl1d = List1d[PositionsData, Dim2T](dim2, dblVals1d)
-    ////assert(
-      ////dim2.toList.zip(dblVals1d).forall({case(d, v) => dbl1d.loc(d) == Some(v)})
-    ////)
-  ////}
-  ////"Arr2d" should "return a 1d array with .iloc using Int on the second dimension" in {
-    ////import ArrayDefs._
-    ////import ArrayDefs.Is2dSpArrSyntax._
-    ////val dbl2d = List2d[Dim1T, Dim2T, PositionsData]((dim1, dim2), values2d)
-    ////assert(
-      ////values2d.zipWithIndex.forall({case(x, i) => 
-        ////dbl2d.iloc(i) == List1d[Dim2T, PositionsData](dim2, x)
-      ////})
-    ////)
-  ////}
-  ////"Arr2d" should "return a correct Arr1d with .loc" in {
-    ////val arr2d = Arr2d[Dim1T, Dim2T, PositionsData]((dim1, dim2), values2d)
-    ////assert(
-      ////arr2d.loc(dim1.vals(2)) == Some(Arr1d[Dim2T, PositionsData](dim2, values2d(2)))
-    ////)
-    ////assert(
-      ////arr2d.loc(dim2.vals(1)) == Some(Arr1d[Dim1T, PositionsData](dim1, values2d.map(_(1))))
-    ////)
-  ////}
-  ////"Arr3d" should "return a correct Arr2d with .loc" in {
-    ////val arr3d = Arr3d[Dim0T, Dim1T, Dim2T, PositionsData]((dim0, dim1, dim2), values3d)
-    ////val dim0sliceat0 = values3d(0)
-    ////assert(
-      ////arr3d.loc(dim0.vals(0)) == Some(Arr2d[Dim1T, Dim2T, PositionsData]((dim1, dim2), dim0sliceat0))
-    ////)
-    ////val dim1sliceat1 = List(
-      ////List(1.1, 1.2, 1.3, 1.4, 1.5),
-      ////List(4.1, 4.2, 4.3, 4.4, 4.5),
-    ////)
-    ////assert(
-      ////arr3d.loc(dim1.vals(1)) == Some(Arr2d[Dim0T, Dim2T, PositionsData]((dim0, dim2), dim1sliceat1))
-    ////)
-    ////val dim2sliceat2 = List(
-      ////List(0.3, 1.3, 2.3),
-      ////List(3.3, 4.3, 5.3),
-    ////)
-    ////assert(
-      ////arr3d.loc(dim2.vals(2)) == Some(Arr2d[Dim0T, Dim1T, PositionsData]((dim0, dim1), dim2sliceat2))
-    ////)
-  ////}
 }

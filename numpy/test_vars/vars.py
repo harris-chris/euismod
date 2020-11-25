@@ -43,3 +43,13 @@ ints3d = np.array(
       [17, 18, 19, 20],
       [21, 22, 23, 24]]]
     )
+
+bl3d = np.array(
+    [[[True   , False   , False   , False   , False   ],
+      [True   , False   , True    , True    , True    ],
+      [False  , True    , True    , True    , True    ]],
+     [[True   , True    , False   , False   , True    ],
+      [True   , False   , True    , True    , True    ],
+      [False  , False   , False   , True    , True    ]]]
+)
+
