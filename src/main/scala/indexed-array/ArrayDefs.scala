@@ -415,22 +415,26 @@ object ArrayDefs {
     def apply[T, Arrs <: HList, SH <: HList](implicit fe: FromElems[T, Arrs, SH]): Aux[T, Arrs, SH, fe.Out] = fe
     implicit def ifListT[T, Arrs <: HList, SH <: HList, RSH <: HList, O]( implicit 
       rv: Reverse[SH] { type Out = RSH },
-      fr: FromElemsRT[T, Arrs, RSH],
+      fr: FromElemsDT[T, Arrs, RSH],
     ): Aux[T, Arrs, SH, fr.Out] = instance((l, arrs, sh) => fr(l.reverse, arrs, rv(sh)))
   }
 
-  trait FromElemsRT[T, Arrs <: HList, SH <: HList] {
+  trait FromElemsDT[T, Arrs <: HList, SH <: HList] {
     type Out
     def apply(l: List[T], arrs: Arrs, sh: SH): Out
   }
-  object FromElemsRT {
-    type Aux[T, Arrs <: HList, SH <: HList, O] = FromElemsRT[T, Arrs, SH] { type Out = Option[O] }
+  object FromElemsDT {
+    type Aux[T, Arrs <: HList, SH <: HList, O] = FromElemsDT[T, Arrs, SH] { type Out = Option[O] }
     def instance[T, Arrs <: HList, SH <: HList, O](
       f: (List[T], Arrs, SH) => Option[O]
-    ): Aux[T, Arrs, SH, O] = new FromElemsRT[T, Arrs, SH] {
+    ): Aux[T, Arrs, SH, O] = new FromElemsDT[T, Arrs, SH] {
       type Out = Option[O]
       def apply(l: List[T], arrs: Arrs, sh: SH): Out = f(l, arrs, sh)
     }
+    def apply[T, Arrs <: HList, SH <: HList](
+      implicit fe: FromElemsDT[T, Arrs, SH],
+    ): FromElemsDT.Aux[T, Arrs, SH] = fe
+
     implicit def ifSingleElemRemainingInShape[T, H0, H1, H2p <: HList](implicit 
       hIsABs: IsArrBase[H1, T] { type S = H0 },
     ): Aux[H0, H1 :: H2p, Int :: HNil, H1] = instance((l, arrs, sh) => {
@@ -440,7 +444,7 @@ object ArrayDefs {
     })
     implicit def ifMultipleElemsRemainingInShape[T, H0, H1, H2p <: HList, SH2p <: HList, O](implicit 
       hIsABs: IsArrBase[H1, T] { type S = H0 },
-      rsForNxt: FromElemsRT.Aux[H1, H2p, Int :: SH2p, O],   
+      rsForNxt: FromElemsDT.Aux[H1, H2p, Int :: SH2p, O],   
     ): Aux[H0, H1 :: H2p, Int :: Int :: SH2p, O] = instance((l, arrs, sh) => {
       val thisA: H1 = arrs.head
       val h1Nil = Nil: List[H1]
@@ -467,12 +471,13 @@ object ArrayDefs {
   }
   object Flatten {
     type Aux[A[_], T] = Flatten[A, T]
-    def apply[A[_], T](implicit fl: Flatten[A, T]): Aux[A, T] = fl
     def instance[A[_], T](f: A[T] => List[T]): Aux[A, T] = 
     new Flatten[A, T] {
       override type Out = List[T]
       def apply(a: A[T]): List[T] = f(a)
     }
+    def apply[A[_], T](implicit fl: Flatten[A, T]): Aux[A, T] = fl
+
     implicit def flattenIfSIsT[A[_], T](implicit 
       aIsArr: IsArray[A, T] { type S = T },
     ): Flatten[A, T] = instance(a => aIsArr.toList(a))
@@ -513,6 +518,33 @@ object ArrayDefs {
     ): Aux[A, B, T] = instance((a, b) => 
       cs(aSh(a), bSh(b), 0).flatMap(sh => fe(flA(a) ++ flB(b), ga(HNil), sh))
     )
+  }
+
+  trait TransposeDT[A, AX <: HList] {
+    type Out = A
+    def apply(a: A, axes: AX): Out
+  }
+  object TransposeDT {
+    type Aux[A, AX <: HList] = TransposeDT[A, AX]
+    def apply[A, AX <: HList](implicit tr: TransposeDT[A, AX]): Aux[A, AX] = tr
+    def instance[A, AX <: HList](f: (A, AX) => A): Aux[A, AX] = new TransposeDT[A, AX] { 
+      def apply(a: A, axes: AX): A = f(a, axes)
+    }
+
+    implicit def ifAxesSameLength[A[_], T, AX <: HList, DE <: Nat, LE <: Nat, Arrs <: HList](implicit
+      de: DepthCT.Aux[A[T], DE],
+      le: Length.Aux[AX, LE],
+      ev: DE =:= LE,
+      fl: Flatten[A, T],
+      ga: GetArrsAsc.Aux[A, T, HNil, Arrs],
+      fe: FromElemsDT.Aux[T, Arrs, AX, A[T]],
+      sh: ShapeRT[A[T], HNil],
+    ): Aux[A[T], AX] = instance((a, axes) => {
+      println(s"AXES: ${axes}")
+      val out = fe(fl(a), ga(HNil), axes).get
+      println(s"OUT SHAPE ${sh(out, HNil)}")
+      out
+    })
   }
   
   trait ConcatenateCT[A[_], B[_], T, D <: Nat] { self =>
@@ -647,6 +679,8 @@ object ArrayDefs {
       type Out = O
       def apply(a: A, ref: R, arrs: Arrs): Out = f(a, ref, arrs)
     }
+    def apply[A, R, Arrs](implicit ai: ApplyIndexDT[A, R, Arrs]): Aux[A, R, Arrs, ai.Out] = ai
+
     implicit def ifHeadIsInt[A[_], T, _S, R1p <: HList, Arrs <: HList, O](implicit
       aIsArr: IsArray[A, T] { type S = _S },
       iLocS: ApplyIndexDT[_S, R1p, Arrs], 

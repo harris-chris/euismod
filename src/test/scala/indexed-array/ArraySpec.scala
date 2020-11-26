@@ -244,6 +244,49 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("The Transpose typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object TransposeTest extends Tag("TransposeTest")
+    scenario("Explicitly transposing a 3d array correctly flips the axes", TransposeTest) {
+      val rv = Reverse[Int :: Int :: Int :: HNil]
+      val newShape = rv(dbl3d.shape)
+      println(s"NEWSHAPE ${newShape}")
+      val act = TransposeDT[List3d[Double], rv.Out].apply(dbl3d, newShape)
+      println(s"ACTUAL SHAPE ${act.shape}")
+      val exp = List(
+        List(
+          List(0.0  , 0.1  ),
+          List(0.01 , 0.11 ),
+          List(0.02 , 0.12 ),
+        ),
+        List(
+          List(0.001, 0.101),
+          List(0.011, 0.111),
+          List(0.021, 0.121),
+        ),
+        List(
+          List(0.002, 0.102),
+          List(0.012, 0.112),
+          List(0.022, 0.122),
+        ),
+        List(
+          List(0.003, 0.103),
+          List(0.013, 0.113),
+          List(0.023, 0.123),
+        ),
+        List(
+          List(0.004, 0.104),
+          List(0.014, 0.114),
+          List(0.024, 0.124)
+        )
+      )
+      assert(act === exp)
+    }
+  }
+
   feature("The ConcatenateRT typeclass") {
     import Dummy.Types._
     import Dummy.Values._
@@ -537,20 +580,23 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature(".fromList") {
+  feature("The FromElemsDT typeclass") {
     import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    object FromListTest extends Tag("FromListTest")
-    scenario("a List1d can be constructed from a list of Ts", FromListTest) {
+    object FromElemsDTTest extends Tag("FromElemsDTTest")
+    scenario("a List1d can be constructed from a list of Ts", FromElemsDTTest) {
       val ts3: List[Double] = List(1.5, 2.5, 3.5)
+      val newShape = 3 :: HNil
+      val ga = GetArrsAsc[List1d, Double, HNil]
+      val fe = FromElemsDT[Double, ga.Out, Int :: HNil]
       assert(dbl1d.empty.fromElems(ts3, 3 :: HNil) match {
         case Some(l1) => l1.flatten.toList === ts3
         case None => false
       })
     }
-    scenario("a List1d can be constructed from a 2d array and a list of Ts", FromListTest) {
+    scenario("a List1d can be constructed from a 2d array and a list of Ts", FromElemsDTTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val l1O = dbl2d.empty.fromElems(ts6, 6 :: HNil)
       assert(l1O match {
@@ -558,7 +604,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case None => false
       })
     }
-    scenario("a List2d can be constructed from a 2d array and a list of Ts", FromListTest) {
+    scenario("a List2d can be constructed from a 2d array and a list of Ts", FromElemsDTTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val l2O = dbl2d.empty.fromElems(ts6, 3 :: 2 :: HNil)
       assert(l2O match {
