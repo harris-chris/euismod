@@ -244,117 +244,117 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The Transpose typeclass") {
-    import Dummy.Types._
-    import Dummy.Values._
-    import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
-    object TransposeTest extends Tag("TransposeTest")
-    scenario("Explicitly transposing a 3d array correctly flips the axes", TransposeTest) {
-      val rv = Reverse[Int :: Int :: Int :: HNil]
-      val newShape = rv(dbl3d.shape)
-      println(s"NEWSHAPE ${newShape}")
-      val act = TransposeDT[List3d[Double], rv.Out].apply(dbl3d, newShape)
-      println(s"ACTUAL SHAPE ${act.shape}")
-      val exp = List(
-        List(
-          List(0.0  , 0.1  ),
-          List(0.01 , 0.11 ),
-          List(0.02 , 0.12 ),
-        ),
-        List(
-          List(0.001, 0.101),
-          List(0.011, 0.111),
-          List(0.021, 0.121),
-        ),
-        List(
-          List(0.002, 0.102),
-          List(0.012, 0.112),
-          List(0.022, 0.122),
-        ),
-        List(
-          List(0.003, 0.103),
-          List(0.013, 0.113),
-          List(0.023, 0.123),
-        ),
-        List(
-          List(0.004, 0.104),
-          List(0.014, 0.114),
-          List(0.024, 0.124)
-        )
-      )
-      assert(act === exp)
-    }
-  }
+  //feature("The Transpose typeclass") {
+    //import Dummy.Types._
+    //import Dummy.Values._
+    //import Dummy.IsArrayImplicits._
+    //import ArrayDefs.IsArraySyntax._
+    //object TransposeTest extends Tag("TransposeTest")
+    //scenario("Explicitly transposing a 3d array correctly flips the axes", TransposeTest) {
+      //val rv = Reverse[Int :: Int :: Int :: HNil]
+      //val newShape = rv(dbl3d.shape)
+      //println(s"NEWSHAPE ${newShape}")
+      //val act = TransposeDT[List3d[Double], rv.Out].apply(dbl3d, newShape)
+      //println(s"ACTUAL SHAPE ${act.shape}")
+      //val exp = List(
+        //List(
+          //List(0.0  , 0.1  ),
+          //List(0.01 , 0.11 ),
+          //List(0.02 , 0.12 ),
+        //),
+        //List(
+          //List(0.001, 0.101),
+          //List(0.011, 0.111),
+          //List(0.021, 0.121),
+        //),
+        //List(
+          //List(0.002, 0.102),
+          //List(0.012, 0.112),
+          //List(0.022, 0.122),
+        //),
+        //List(
+          //List(0.003, 0.103),
+          //List(0.013, 0.113),
+          //List(0.023, 0.123),
+        //),
+        //List(
+          //List(0.004, 0.104),
+          //List(0.014, 0.114),
+          //List(0.024, 0.124)
+        //)
+      //)
+      //assert(act === exp)
+    //}
+  //}
 
-  feature("The ConcatenateRT typeclass") {
-    import Dummy.Types._
-    import Dummy.Values._
-    import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
-    object ConcatenateRTTest extends Tag("ConcatenateRTTest")
-    scenario("Concatenating a 3d array along dimension 0 returns the correct result", ConcatenateRTTest) {
-      val cn = ConcatenateRT[List3d, List3d, Int]
-      val b = ints3d.map(_+1).apply(List(0))
-      val conc = cn(ints3d, b, 0).get
-      assert(conc.shape == 3 :: 3 :: 4 :: HNil)
-      assert(conc.data == 
-        List(
-          List(
-            List(1, 2, 3, 4),
-            List(5, 6, 7, 8),
-            List(9, 10, 11, 12),
-          ),
-          List(
-            List(13, 14, 15, 16),
-            List(17, 18, 19, 20),
-            List(21, 22, 23, 24),
-          ),
-          List(
-            List(2, 3, 4, 5),
-            List(6, 7, 8, 9),
-            List(10, 11, 12, 13),
-      )))
-    }
-    scenario("Concatenating a 3d array along dimension 1 returns the correct result", ConcatenateRTTest) {
-      val cn = ConcatenateRT[List3d, List3d, Int]
-      val b = ints3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil)
-      val conc =  cn(ints3d, b, 1).get
-      assert(conc.shape == 2 :: 4 :: 4 :: HNil)
-      assert(conc.data == 
-        List(
-          List(
-            List(1, 2, 3, 4),
-            List(5, 6, 7, 8),
-            List(9, 10, 11, 12),
-            List(2, 3, 4, 5),
-          ),
-          List(
-            List(13, 14, 15, 16),
-            List(17, 18, 19, 20),
-            List(21, 22, 23, 24),
-            List(14, 15, 16, 17),
-      )))
-    }
-    scenario("Concatenating a 3d array along dimension 2 returns the correct result", ConcatenateRTTest) {
-      val cn = ConcatenateRT[List3d, List3d, Int]
-      val b = ints3d.map(_+1).apply(List(0, 1) :: List(0, 1, 2) :: List(0) :: HNil)
-      val conc = cn(ints3d, b, 2).get
-      assert(conc.shape == 2 :: 3 :: 5 :: HNil)
-      assert(conc.data == 
-        List(
-          List(
-            List( 1,  2,  3,  4,  2),
-            List( 5,  6,  7,  8,  6),
-            List( 9, 10, 11, 12, 10),
-          ),
-          List(
-            List( 13, 14, 15, 16, 14),
-            List( 17, 18, 19, 20, 18),
-            List( 21, 22, 23, 24, 22),
-      )))
-    }
-  }
+  //feature("The ConcatenateRT typeclass") {
+    //import Dummy.Types._
+    //import Dummy.Values._
+    //import Dummy.IsArrayImplicits._
+    //import ArrayDefs.IsArraySyntax._
+    //object ConcatenateRTTest extends Tag("ConcatenateRTTest")
+    //scenario("Concatenating a 3d array along dimension 0 returns the correct result", ConcatenateRTTest) {
+      //val cn = ConcatenateRT[List3d, List3d, Int]
+      //val b = ints3d.map(_+1).apply(List(0))
+      //val conc = cn(ints3d, b, 0).get
+      //assert(conc.shape == 3 :: 3 :: 4 :: HNil)
+      //assert(conc.data == 
+        //List(
+          //List(
+            //List(1, 2, 3, 4),
+            //List(5, 6, 7, 8),
+            //List(9, 10, 11, 12),
+          //),
+          //List(
+            //List(13, 14, 15, 16),
+            //List(17, 18, 19, 20),
+            //List(21, 22, 23, 24),
+          //),
+          //List(
+            //List(2, 3, 4, 5),
+            //List(6, 7, 8, 9),
+            //List(10, 11, 12, 13),
+      //)))
+    //}
+    //scenario("Concatenating a 3d array along dimension 1 returns the correct result", ConcatenateRTTest) {
+      //val cn = ConcatenateRT[List3d, List3d, Int]
+      //val b = ints3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil)
+      //val conc =  cn(ints3d, b, 1).get
+      //assert(conc.shape == 2 :: 4 :: 4 :: HNil)
+      //assert(conc.data == 
+        //List(
+          //List(
+            //List(1, 2, 3, 4),
+            //List(5, 6, 7, 8),
+            //List(9, 10, 11, 12),
+            //List(2, 3, 4, 5),
+          //),
+          //List(
+            //List(13, 14, 15, 16),
+            //List(17, 18, 19, 20),
+            //List(21, 22, 23, 24),
+            //List(14, 15, 16, 17),
+      //)))
+    //}
+    //scenario("Concatenating a 3d array along dimension 2 returns the correct result", ConcatenateRTTest) {
+      //val cn = ConcatenateRT[List3d, List3d, Int]
+      //val b = ints3d.map(_+1).apply(List(0, 1) :: List(0, 1, 2) :: List(0) :: HNil)
+      //val conc = cn(ints3d, b, 2).get
+      //assert(conc.shape == 2 :: 3 :: 5 :: HNil)
+      //assert(conc.data == 
+        //List(
+          //List(
+            //List( 1,  2,  3,  4,  2),
+            //List( 5,  6,  7,  8,  6),
+            //List( 9, 10, 11, 12, 10),
+          //),
+          //List(
+            //List( 13, 14, 15, 16, 14),
+            //List( 17, 18, 19, 20, 18),
+            //List( 21, 22, 23, 24, 22),
+      //)))
+    //}
+  //}
 
   feature("The AddRT typeclass") {
     import Dummy.Types._
@@ -398,55 +398,55 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("MaskFromNumSeqDT typeclass") {
-    import Dummy.Types._
-    import Dummy.Values._
-    import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
-    object MaskFromNumSeqDTTest extends Tag("MaskFromNumSeqDTTest")
-    scenario("MaskDTFromNumSeq returns a correct mask for a 1d array", MaskFromNumSeqDTTest) {
-      val allFalse = dbl1d.map(_ => false)
-      assert(
-        MaskFromNumSeqDT[List1d[Boolean], List[Int] :: HNil].apply(List(1, 2) :: HNil, allFalse) ===
-        List1d[Boolean](allFalse.data.updated(1, true).updated(2, true))
-      )
-    }
-    scenario("MaskFromNumSeqDT returns a correct mask for a 2d array", MaskFromNumSeqDTTest) {
-      val allFalse = dbl2d.map(_ => false)
-      val exp = List2d[Boolean](
-        List(
-          List(false, false, false, false, false),
-          List(false, false, false, true, true),
-          List(false, false, false, true, true),
-        )
-      )
-      assert(
-        MaskFromNumSeqDT[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
-          List(1, 2) :: List(3,4) :: HNil, allFalse) === exp
-      )
-    }
-    scenario("MaskFromNumSeqDT returns a correct mask for a 3d array", MaskFromNumSeqDTTest) {
-      val allFalse = dbl3d.map(_ => false)
-      val exp = List3d[Boolean](
-        List(
-          List(
-            List(false, false, true, true, false),
-            List(false, false, false, false, false),
-            List(false, false, true, true, false),
-          ),
-          List(
-            List(false, false, false, false, false),
-            List(false, false, false, false, false),
-            List(false, false, false, false, false),
-          )
-        )
-      )
-      assert(
-        MaskFromNumSeqDT[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
-          List(0) :: List(0,2) :: List(2, 3) :: HNil, allFalse) === exp
-      )
-    }
-  }
+  //feature("MaskFromNumSeqDT typeclass") {
+    //import Dummy.Types._
+    //import Dummy.Values._
+    //import Dummy.IsArrayImplicits._
+    //import ArrayDefs.IsArraySyntax._
+    //object MaskFromNumSeqDTTest extends Tag("MaskFromNumSeqDTTest")
+    //scenario("MaskDTFromNumSeq returns a correct mask for a 1d array", MaskFromNumSeqDTTest) {
+      //val allFalse = dbl1d.map(_ => false)
+      //assert(
+        //MaskFromNumSeqDT[List1d[Boolean], List[Int] :: HNil].apply(List(1, 2) :: HNil, allFalse) ===
+        //List1d[Boolean](allFalse.data.updated(1, true).updated(2, true))
+      //)
+    //}
+    //scenario("MaskFromNumSeqDT returns a correct mask for a 2d array", MaskFromNumSeqDTTest) {
+      //val allFalse = dbl2d.map(_ => false)
+      //val exp = List2d[Boolean](
+        //List(
+          //List(false, false, false, false, false),
+          //List(false, false, false, true, true),
+          //List(false, false, false, true, true),
+        //)
+      //)
+      //assert(
+        //MaskFromNumSeqDT[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
+          //List(1, 2) :: List(3,4) :: HNil, allFalse) === exp
+      //)
+    //}
+    //scenario("MaskFromNumSeqDT returns a correct mask for a 3d array", MaskFromNumSeqDTTest) {
+      //val allFalse = dbl3d.map(_ => false)
+      //val exp = List3d[Boolean](
+        //List(
+          //List(
+            //List(false, false, true, true, false),
+            //List(false, false, false, false, false),
+            //List(false, false, true, true, false),
+          //),
+          //List(
+            //List(false, false, false, false, false),
+            //List(false, false, false, false, false),
+            //List(false, false, false, false, false),
+          //)
+        //)
+      //)
+      //assert(
+        //MaskFromNumSeqDT[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
+          //List(0) :: List(0,2) :: List(2, 3) :: HNil, allFalse) === exp
+      //)
+    //}
+  //}
 
   feature("IsXd typeclass") {
     case class A1[T](data: List[T])
@@ -591,56 +591,113 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val newShape = 3 :: HNil
       val ga = GetArrsAsc[List1d, Double, HNil]
       val fe = FromElemsDT[Double, ga.Out, Int :: HNil]
-      assert(dbl1d.empty.fromElems(ts3, 3 :: HNil) match {
-        case Some(l1) => l1.flatten.toList === ts3
+      val act = fe(ts3, ga(HNil), newShape)
+      assert(act match {
+        case Some(l1) => {
+          println(s"SPECS ${l1}")
+          l1.flatten.toList === ts3
+        }
         case None => false
       })
     }
-    scenario("a List1d can be constructed from a 2d array and a list of Ts", FromElemsDTTest) {
-      val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
-      val l1O = dbl2d.empty.fromElems(ts6, 6 :: HNil)
-      assert(l1O match {
-        case Some(l1) => l1.flatten.toList === ts6
+    scenario("a List2d can be constructed from a list of Ts", FromElemsDTTest) {
+      val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)
+      val newShape = 2 :: 3 :: HNil
+      val ga = GetArrsAsc[List2d, Double, HNil]
+      val fe = FromElemsDT[Double, ga.Out, Int :: Int :: HNil]
+      val actO = fe(ts3, ga(HNil), newShape)
+      val exp = List2d[Double](List(
+        List(0.00, 0.01, 0.02),
+        List(0.10, 0.11, 0.12),
+      ))
+      assert(actO match {
+        case Some(act) => {
+          println(s"SPECS ${act}")
+          act === exp
+        }
         case None => false
       })
     }
-    scenario("a List2d can be constructed from a 2d array and a list of Ts", FromElemsDTTest) {
-      val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
-      val l2O = dbl2d.empty.fromElems(ts6, 3 :: 2 :: HNil)
-      assert(l2O match {
-        case Some(l2) => l2.flatten.toList === ts6
+    scenario("a List3d can be constructed from a list of Ts", FromElemsDTTest) {
+      val ts3: List[Double] = List(
+        0.000, 0.001, 0.002, 0.010, 0.011, 0.012, 0.100, 0.101, 0.102, 0.100, 0.101, 0.102, 0.110, 0.111, 0.112,
+      )
+      val newShape = 2 :: 2 :: 3 :: HNil
+      val ga = GetArrsAsc[List3d, Double, HNil]
+      val fe = FromElemsDT[Double, ga.Out, Int :: Int :: Int :: HNil]
+      val actO = fe(ts3, ga(HNil), newShape)
+      val exp = List3d[Double](
+        List(
+          List(
+            List(0.000, 0.001, 0.002),
+            List(0.010, 0.011, 0.012),
+          ),
+          List(
+            List(0.100, 0.101, 0.102),
+            List(0.110, 0.111, 0.112),
+      )))
+      assert(actO match {
+        case Some(act) => {
+          println(s"SPECS ${act}")
+          act === exp
+        }
         case None => false
       })
     }
+    //scenario("a List1d can be constructed from a 2d array and a list of Ts", FromElemsDTTest) {
+      //val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
+      //val newShape = 6 :: HNil
+      //val ga = GetArrsAsc[List2d, Double, HNil]
+      //val fe = FromElemsDT[Double, ga.Out, Int :: HNil]
+      //val act = fe(ts6, ga(HNil), newShape)
+      //assert(act match {
+        //case Some(l1) => l1.flatten.toList === ts6
+        //case None => false
+      //})
+    //}
+    //scenario("a List2d can be constructed from a 2d array and a list of Ts", FromElemsDTTest) {
+      //val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
+      //val newShape = 3 :: 2 :: HNil
+      //val ga: GetArrsAsc[List2d, Double, HNil] { type Out = List1d[Double] :: List2d[Double] :: HNil } = 
+        //GetArrsAsc[List2d, Double, HNil]
+      //val fe = FromElemsDT[Double, ga.Out, Int :: Int :: HNil]
+      //val act = fe(ts6, ga(HNil), newShape)
+      //assert(act match {
+        //case Some(l2) => {
+          //l2.flatten.toList === ts6 && l2.shape === newShape
+        //}
+        //case None => false
+      //})
+    //}
   }
 
-  feature("IsArray.map") {
-    import ArrayDefs.IsArraySyntax._
-    import Dummy.Types._
-    import Dummy.Values._
-    import Dummy.IsArrayImplicits._
-    object MapTest extends Tag("MapTest")
-    scenario(".map on a 1d array returns a mapped 1d array", MapTest) {
-      val mapped = dbl1d.map(t => t.toInt)
-      assert(mapped.shape === dbl1d.shape)
-      assert(mapped.flatten === dbl1d.flatten.map(_.toInt))
-    }
-    scenario(".map on a 2d array returns a mapped 2d array", MapTest) {
-      val mapped = dbl2d.map(t => t.toInt)
-      assert(mapped.shape === dbl2d.shape)
-      assert(mapped.flatten === dbl2d.flatten.map(_.toInt))
-    }
-    scenario(".map on a 3d array returns a mapped 3d array", MapTest) {
-      val mapped = dbl3d.map(t => t.toInt)
-      assert(mapped.shape === dbl3d.shape)
-      assert(mapped.flatten === dbl3d.flatten.map(_.toInt))
-    }
-    scenario(".map double => char on a 3d array returns a mapped 3d array", MapTest) {
-      val mapped = dbl3d.map(t => 'c')
-      assert(mapped.shape === dbl3d.shape)
-      assert(mapped.flatten === dbl3d.flatten.map(_ => 'c'))
-    }
-  }
+  //feature("IsArray.map") {
+    //import ArrayDefs.IsArraySyntax._
+    //import Dummy.Types._
+    //import Dummy.Values._
+    //import Dummy.IsArrayImplicits._
+    //object MapTest extends Tag("MapTest")
+    //scenario(".map on a 1d array returns a mapped 1d array", MapTest) {
+      //val mapped = dbl1d.map(t => t.toInt)
+      //assert(mapped.shape === dbl1d.shape)
+      //assert(mapped.flatten === dbl1d.flatten.map(_.toInt))
+    //}
+    //scenario(".map on a 2d array returns a mapped 2d array", MapTest) {
+      //val mapped = dbl2d.map(t => t.toInt)
+      //assert(mapped.shape === dbl2d.shape)
+      //assert(mapped.flatten === dbl2d.flatten.map(_.toInt))
+    //}
+    //scenario(".map on a 3d array returns a mapped 3d array", MapTest) {
+      //val mapped = dbl3d.map(t => t.toInt)
+      //assert(mapped.shape === dbl3d.shape)
+      //assert(mapped.flatten === dbl3d.flatten.map(_.toInt))
+    //}
+    //scenario(".map double => char on a 3d array returns a mapped 3d array", MapTest) {
+      //val mapped = dbl3d.map(t => 'c')
+      //assert(mapped.shape === dbl3d.shape)
+      //assert(mapped.flatten === dbl3d.flatten.map(_ => 'c'))
+    //}
+  //}
 
   feature("The ApplyIndex typeclass") {
     import ArrayDefs.IsArraySyntax._
@@ -812,77 +869,77 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("IsArray.reshapes") {
-    import Dummy.Types._
-    import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
-    import Dummy.IsArrayImplicits._
-    object ReshapesTest extends Tag("ReshapesTest")
+  //feature("IsArray.reshapes") {
+    //import Dummy.Types._
+    //import Dummy.Values._
+    //import ArrayDefs.IsArraySyntax._
+    //import Dummy.IsArrayImplicits._
+    //object ReshapesTest extends Tag("ReshapesTest")
     
-    trait ShapeList[A, D <: HList] {
-      type Out
-      def shapeList(lst: Option[List[A]], dims: D): Out
-    }
-    object ShapeList {
-      implicit def slIfNoDims[A]: ShapeList[A, HNil] { type Out = Option[A] } = new ShapeList[A, HNil] {
-        type Out = Option[A]
-        def shapeList(lst: Option[List[A]], dims: HNil): Out = lst.map(_(0))
-      }
-      implicit def slIfDims[A, D <: HList](implicit 
-        sl: ShapeList[List[A], D]
-      ): ShapeList[A, Int :: D] { type Out = sl.Out } = new ShapeList[A, Int :: D] {
-        type Out = sl.Out
-        def shapeList(lst: Option[List[A]], dims: Int :: D): Out = {
-          val newLvl: Option[List[List[A]]] = addLevel(lst, dims.head, List()) 
-          sl.shapeList(newLvl, dims.tail)
-        }
-      }
-    }
-    def addLevel[A](belowLst: Option[List[A]], length: Int, thisLst: List[List[A]]): Option[List[List[A]]] = 
-      belowLst.flatMap( bLst => 
-        bLst.length match {
-          case 0 => Some(thisLst.reverse)
-          case x if x >= length => {
-            val (ths, rst) = bLst.splitAt(length)
-            addLevel(Some(rst), length, ths :: thisLst)
-          }
-          case _ => None
-        }
-      )
-    def shapeList[A, D <: HList](lst: List[A], dims: D)(implicit ev: ShapeList[A, D]): ev.Out = 
-      ev.shapeList(Some(lst), dims)
+    //trait ShapeList[A, D <: HList] {
+      //type Out
+      //def shapeList(lst: Option[List[A]], dims: D): Out
+    //}
+    //object ShapeList {
+      //implicit def slIfNoDims[A]: ShapeList[A, HNil] { type Out = Option[A] } = new ShapeList[A, HNil] {
+        //type Out = Option[A]
+        //def shapeList(lst: Option[List[A]], dims: HNil): Out = lst.map(_(0))
+      //}
+      //implicit def slIfDims[A, D <: HList](implicit 
+        //sl: ShapeList[List[A], D]
+      //): ShapeList[A, Int :: D] { type Out = sl.Out } = new ShapeList[A, Int :: D] {
+        //type Out = sl.Out
+        //def shapeList(lst: Option[List[A]], dims: Int :: D): Out = {
+          //val newLvl: Option[List[List[A]]] = addLevel(lst, dims.head, List()) 
+          //sl.shapeList(newLvl, dims.tail)
+        //}
+      //}
+    //}
+    //def addLevel[A](belowLst: Option[List[A]], length: Int, thisLst: List[List[A]]): Option[List[List[A]]] = 
+      //belowLst.flatMap( bLst => 
+        //bLst.length match {
+          //case 0 => Some(thisLst.reverse)
+          //case x if x >= length => {
+            //val (ths, rst) = bLst.splitAt(length)
+            //addLevel(Some(rst), length, ths :: thisLst)
+          //}
+          //case _ => None
+        //}
+      //)
+    //def shapeList[A, D <: HList](lst: List[A], dims: D)(implicit ev: ShapeList[A, D]): ev.Out = 
+      //ev.shapeList(Some(lst), dims)
 
-    scenario("dbl1d.reshape(dbl1d.length) returns dbl1d", ReshapesTest) {
-      assert(dbl1d.reshape(dbl1d.data.length :: HNil) == Some(dbl1d))
-    }
-    scenario("dbl2d.reshape(dbl2d.flatten.length) returns a dbl1d", ReshapesTest) {
-      val dbl2dFlat = dbl2d.data.flatten
-      assert(dbl2d.reshape(dbl2dFlat.length :: HNil) == Some(List1d[Double](dbl2dFlat)))
-    }
-    scenario("dbl3d.reshape(dbl3d.flatten.length) returns a dbl1d", ReshapesTest) {
-      val dbl3dFlat = dbl3d.data.flatten.flatten
-      assert(dbl3d.reshape(dbl3dFlat.length :: HNil) == Some(List1d[Double](dbl3dFlat)))
-    }
-    scenario("dbl2d.reshape(2, 8) returns None, because dbl2d has 15 elements", ReshapesTest) {
-      assert(dbl2d.reshape(2 :: 8 :: HNil) === None)
-    }
-    scenario("dbl2d.reshape(5, 3) returns a 5, 3 shaped List2d", ReshapesTest) {
-      val dbl2dFlat = dbl2d.data.flatten
-      val dbl2dReshaped = shapeList(dbl2dFlat, 3 :: 5 :: HNil)
-      assert(dbl2d.reshape(5 :: 3 :: HNil) === dbl2dReshaped.map(List2d[Double](_)))
-    }
-    scenario("dbl3d.reshape(2, 3, 6) returns a correctly shaped List3d", ReshapesTest) {
-      val dbl3dFlat = dbl3d.flatten
-      val dbl3dReshaped = shapeList(dbl3dFlat, 6 :: 3 :: 2 :: HNil)
-      assert(dbl3d.reshape(2 :: 3 :: 6 :: HNil) === dbl3dReshaped.map(List3d[Double](_)))
-    }
-    scenario("dbl3d.reshape(15, 2) returns a correctly shaped List2d", ReshapesTest) {
-      val dbl3dFlat = dbl3d.flatten
-      val dbl3dReshaped = shapeList(dbl3dFlat, 2 :: 15 :: HNil)
-      assert(dbl3d.reshape(15 :: 2 :: HNil) === dbl3dReshaped.map(List2d[Double](_)))
-    }
-    scenario("dbl3d.reshape(1, 1, 1, 1) does not compile", ReshapesTest) {
-      "dbl3d.reshape(1 :: 1 :: 1 :: 1 :: HNil)" shouldNot compile
-    }
-  }
+    //scenario("dbl1d.reshape(dbl1d.length) returns dbl1d", ReshapesTest) {
+      //assert(dbl1d.reshape(dbl1d.data.length :: HNil) == Some(dbl1d))
+    //}
+    //scenario("dbl2d.reshape(dbl2d.flatten.length) returns a dbl1d", ReshapesTest) {
+      //val dbl2dFlat = dbl2d.data.flatten
+      //assert(dbl2d.reshape(dbl2dFlat.length :: HNil) == Some(List1d[Double](dbl2dFlat)))
+    //}
+    //scenario("dbl3d.reshape(dbl3d.flatten.length) returns a dbl1d", ReshapesTest) {
+      //val dbl3dFlat = dbl3d.data.flatten.flatten
+      //assert(dbl3d.reshape(dbl3dFlat.length :: HNil) == Some(List1d[Double](dbl3dFlat)))
+    //}
+    //scenario("dbl2d.reshape(2, 8) returns None, because dbl2d has 15 elements", ReshapesTest) {
+      //assert(dbl2d.reshape(2 :: 8 :: HNil) === None)
+    //}
+    //scenario("dbl2d.reshape(5, 3) returns a 5, 3 shaped List2d", ReshapesTest) {
+      //val dbl2dFlat = dbl2d.data.flatten
+      //val dbl2dReshaped = shapeList(dbl2dFlat, 3 :: 5 :: HNil)
+      //assert(dbl2d.reshape(5 :: 3 :: HNil) === dbl2dReshaped.map(List2d[Double](_)))
+    //}
+    //scenario("dbl3d.reshape(2, 3, 6) returns a correctly shaped List3d", ReshapesTest) {
+      //val dbl3dFlat = dbl3d.flatten
+      //val dbl3dReshaped = shapeList(dbl3dFlat, 6 :: 3 :: 2 :: HNil)
+      //assert(dbl3d.reshape(2 :: 3 :: 6 :: HNil) === dbl3dReshaped.map(List3d[Double](_)))
+    //}
+    //scenario("dbl3d.reshape(15, 2) returns a correctly shaped List2d", ReshapesTest) {
+      //val dbl3dFlat = dbl3d.flatten
+      //val dbl3dReshaped = shapeList(dbl3dFlat, 2 :: 15 :: HNil)
+      //assert(dbl3d.reshape(15 :: 2 :: HNil) === dbl3dReshaped.map(List2d[Double](_)))
+    //}
+    //scenario("dbl3d.reshape(1, 1, 1, 1) does not compile", ReshapesTest) {
+      //"dbl3d.reshape(1 :: 1 :: 1 :: 1 :: HNil)" shouldNot compile
+    //}
+  //}
 }
