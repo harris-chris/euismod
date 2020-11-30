@@ -244,20 +244,22 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The Transpose typeclass") {
+  feature("The TransposeDT typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    object TransposeTest extends Tag("TransposeTest")
-    scenario("Explicitly transposing a 2d array correctly flips the axes", TransposeTest) {
-      val rv = Reverse[Int :: Int :: HNil]
-      val newShape = rv(dbl2d.shape)
-      val act = TransposeDT[List2d[Double], rv.Out].apply(dbl2d, newShape)
-      val exp = List(
-        List(0.0 , 0.01, 0.02, 0.03, 0.04),
-        List(0.1 , 0.11, 0.12, 0.13, 0.14),
-        List(0.2 , 0.21, 0.22, 0.23, 0.24),
+    object TransposeDTTest extends Tag("TransposeDTTest")
+    scenario("Explicitly transposing a 2d array correctly flips the axes", TransposeDTTest) {
+      val act = TransposeDT[List2d[Double], Nat._0, Nat._1].apply(dbl2d)
+      val exp = List2d[Double](
+        List(
+          List(0.0 , 0.1 , 0.2 ),
+          List(0.01, 0.11, 0.21),
+          List(0.02, 0.12, 0.22),
+          List(0.03, 0.13, 0.23),
+          List(0.04, 0.14, 0.24),
+        )
       )
       assert(act === exp)
     }

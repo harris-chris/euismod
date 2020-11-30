@@ -10,7 +10,7 @@ import shapeless.{HList, HNil, Lazy, :: => #:}
 import shapeless.ops.hlist._
 import shapeless._
 import nat._
-import shapeless.ops.nat.{GT, Pred, Diff => NatDiff, ToInt}
+import shapeless.ops.nat.{GT, GTEq, Pred, Diff => NatDiff, ToInt}
 
 object ArrayDefs {
 
@@ -463,35 +463,6 @@ object ArrayDefs {
       (l, arrs, sh) => fe(l, arrs, rv(sh))
     )
 
-    //implicit def ifMultipleElemsRemainingInShape[
-      //T, H0, H1[_], H2p <: HList, SH2p <: HList, NxtO <: Option[_],
-    //] (implicit 
-      //hIsABs: IsArray[H1, T] { type S = H0 },
-      //rsForNxt: FromElemsDT.Aux[H1[T], H2p, Int :: SH2p, Option[NxtO]],   
-    //): Aux[H0, H1[T] :: H2p, Int :: Int :: SH2p, Option[NxtO]] = instance((l, arrs, sh) => {
-      //val thisA: H1[T] = arrs.head
-      //val h1Nil = Nil: List[H1[T]]
-      //val createdArrs: Option[List[H1[T]]] = combineS[H1, T, H0](thisA, h1Nil, l, sh.head)
-      //createdArrs.flatMap(
-        //h1s => rsForNxt(h1s, arrs.tail, sh.tail)
-      //)
-    //})
-    
-    //implicit def ifXIsT[
-      //T, H0[_], H1[_], H2p <: HList, SH <: HList, NxtO,
-    //] (implicit 
-      //h0IsArr: IsArray[H0, T] { type S = T },
-      //h1IsArr: IsArray[H1, T] { type S = H0[T] },
-      //rsForThs: FromElemsDT.Aux[T, H0[T] :: H1[T] :: H2p, Int :: SH2p, Option[NxtO]],   
-    //): Aux[T, H0[T] :: H1[T] :: H2p, Int :: Int :: SH2p, Option[NxtO]] = instance((l, arrs, sh) => {
-      //val thisA: H0[T] = arrs.head
-      //val h1Nil = Nil: List[H0[T]]
-      //val createdArrs: Option[List[H0[T]]] = combineS[H0, T, T](thisA, h1Nil, l, sh.head)
-      //createdArrs.flatMap(
-        //h1s => rsForNxt(h1s, arrs.tail, sh.tail)
-      //)
-    //})
-
     def combineS[A[_], T, _S](
       aEmpty: A[T], as: List[A[T]], l: List[_S], width: Int,
     )(implicit 
@@ -562,29 +533,41 @@ object ArrayDefs {
     )
   }
 
-  trait TransposeDT[A, AX <: HList] {
+  trait TransposeDT[A, XA <: Nat, XB <: Nat] {
     type Out = A
-    def apply(a: A, axes: AX): Out
+    def apply(a: A): Out
   }
   object TransposeDT {
-    type Aux[A, AX <: HList] = TransposeDT[A, AX]
-    def apply[A, AX <: HList](implicit tr: TransposeDT[A, AX]): Aux[A, AX] = tr
-    def instance[A, AX <: HList](f: (A, AX) => A): Aux[A, AX] = new TransposeDT[A, AX] { 
-      def apply(a: A, axes: AX): A = f(a, axes)
+    type Aux[A, XA <: Nat, XB <: Nat] = TransposeDT[A, XA, XB]
+    def apply[A, XA <: Nat, XB <: Nat](implicit 
+      tr: TransposeDT[A, XA, XB],
+    ): Aux[A, XA, XB] = tr
+    def instance[A, XA <: Nat, XB <: Nat](f: A => A): Aux[A, XA, XB] = 
+    new TransposeDT[A, XA, XB] { 
+      def apply(a: A): A = f(a)
     }
 
-    implicit def ifAxesSameLength[A[_], T, AX <: HList, DE <: Nat, LE <: Nat, Arrs <: HList](implicit
-      de: DepthCT.Aux[A[T], DE],
-      le: Length.Aux[AX, LE],
-      ev: DE =:= LE,
-      fl: Flatten[A, T],
-      ga: GetArrsAsc.Aux[A, T, HNil, Arrs],
-      fe: FromElemsDT.Aux[T, Arrs, AX, Nat._0, Option[A[T]]],
-      sh: ShapeRT[A[T], HNil],
-    ): Aux[A[T], AX] = instance((a, axes) => {
-      val out = fe(fl(a), ga(HNil), axes).get
-      out
+    implicit def ifCurrDimIsXA[A[_], B[_], T, BS, XA <: Nat, XB <: Nat](implicit
+      e1: GT[XB, XA],
+      e2: XA =:= Nat._0,
+      aIsArr: IsArray[A, T] { type S = B[T] },
+      bIsArr: IsArray[B, T] { type S = BS },
+    ): Aux[A[T], XA, XB] = instance(a => {
+      val lst2d: List[List[BS]] = aIsArr.toList(a).map(bIsArr.toList(_))
+      val lstB: List[B[T]] = lst2d.transpose.map(lstBs => bIsArr.fromList(lstBs))
+      aIsArr.fromList(lstB)
     })
+
+    implicit def ifCurrDimIsNotXA[A[_], T, _S[_], XA <: Nat, XB <: Nat, _XA <: Nat, _XB <: Nat](implicit
+      e1: GT[XB, XA],
+      e2: GT[XA, Nat._0],
+      _xa: Pred.Aux[XA, _XA],
+      _xb: Pred.Aux[XB, _XB],
+      aIsArr: IsArray[A, T] { type S = _S[T] },
+      trForS: TransposeDT[_S[T], _XA, _XB],
+    ): Aux[A[T], XA, XB] = instance(a => 
+      aIsArr.fromList(aIsArr.toList(a).map(trForS(_)))
+    )
   }
   
   trait ConcatenateCT[A[_], B[_], T, D <: Nat] { self =>
