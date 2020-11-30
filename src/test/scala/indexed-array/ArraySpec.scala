@@ -263,41 +263,82 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       assert(act === exp)
     }
-    //scenario("Explicitly transposing a 3d array correctly flips the axes", TransposeTest) {
-      //val rv = Reverse[Int :: Int :: Int :: HNil]
-      //val newShape = rv(dbl3d.shape)
-      //println(s"NEWSHAPE ${newShape}")
-      //val act = TransposeDT[List3d[Double], rv.Out].apply(dbl3d, newShape)
-      //println(s"ACTUAL SHAPE ${act.shape}")
-      //val exp = List(
-        //List(
-          //List(0.0  , 0.1  ),
-          //List(0.01 , 0.11 ),
-          //List(0.02 , 0.12 ),
-        //),
-        //List(
-          //List(0.001, 0.101),
-          //List(0.011, 0.111),
-          //List(0.021, 0.121),
-        //),
-        //List(
-          //List(0.002, 0.102),
-          //List(0.012, 0.112),
-          //List(0.022, 0.122),
-        //),
-        //List(
-          //List(0.003, 0.103),
-          //List(0.013, 0.113),
-          //List(0.023, 0.123),
-        //),
-        //List(
-          //List(0.004, 0.104),
-          //List(0.014, 0.114),
-          //List(0.024, 0.124)
-        //)
-      //)
-      //assert(act === exp)
-    //}
+    scenario("Transposing a 3d array along axes 0 and 1 produces the correct result", TransposeDTTest) {
+      val exp = List3d[Double](
+        List(
+          List(
+            List(0.0  , 0.001, 0.002, 0.003, 0.004),
+            List(0.1  , 0.101, 0.102, 0.103, 0.104)
+          ),
+          List(
+            List(0.01 , 0.011, 0.012, 0.013, 0.014),
+            List(0.11 , 0.111, 0.112, 0.113, 0.114)
+          ),
+          List(
+            List(0.02 , 0.021, 0.022, 0.023, 0.024),
+            List(0.12 , 0.121, 0.122, 0.123, 0.124)
+          ))
+      )
+      val act = TransposeDT[List3d[Double], Nat._0, Nat._1].apply(dbl3d)
+      assert(act === exp)
+    }
+    scenario("Transposing a 3d array along axes 1 and 2 produces the correct result", TransposeDTTest) {
+      val exp = List3d[Double](
+        List(
+          List(
+            List(0.0  , 0.01 , 0.02 ),
+            List(0.001, 0.011, 0.021),
+            List(0.002, 0.012, 0.022),
+            List(0.003, 0.013, 0.023),
+            List(0.004, 0.014, 0.024)
+          ),
+          List(
+            List(0.1  , 0.11 , 0.12 ),
+            List(0.101, 0.111, 0.121),
+            List(0.102, 0.112, 0.122),
+            List(0.103, 0.113, 0.123),
+            List(0.104, 0.114, 0.124)
+          ))
+      )
+      val act = TransposeDT[List3d[Double], Nat._1, Nat._2].apply(dbl3d)
+      assert(act === exp)
+    }
+    scenario("Explicitly transposing a 3d array correctly flips the axes", TransposeDTTest) {
+      val rv = Reverse[Int :: Int :: Int :: HNil]
+      val newShape = rv(dbl3d.shape)
+      println(s"NEWSHAPE ${newShape}")
+      val t1 = TransposeDT[List3d[Double], Nat._1, Nat._2].apply(dbl3d)
+      val act = TransposeDT[List3d[Double], Nat._0, Nat._1].apply(t1)
+      println(s"ACTUAL SHAPE ${act.shape}")
+      val exp = List(
+        List(
+          List(0.0  , 0.1  ),
+          List(0.01 , 0.11 ),
+          List(0.02 , 0.12 ),
+        ),
+        List(
+          List(0.001, 0.101),
+          List(0.011, 0.111),
+          List(0.021, 0.121),
+        ),
+        List(
+          List(0.002, 0.102),
+          List(0.012, 0.112),
+          List(0.022, 0.122),
+        ),
+        List(
+          List(0.003, 0.103),
+          List(0.013, 0.113),
+          List(0.023, 0.123),
+        ),
+        List(
+          List(0.004, 0.104),
+          List(0.014, 0.114),
+          List(0.024, 0.124)
+        )
+      )
+      assert(act === exp)
+    }
   }
 
   feature("The ConcatenateRT typeclass") {
