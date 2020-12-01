@@ -15,6 +15,10 @@ import scala.util.{Try, Success, Failure}
 
 object ArrayDefs {
 
+  trait Slices
+  trait AllSlice extends Slices
+  case object allSlice extends AllSlice
+
   case class Element[T] (
     get: T
   ) extends IsBase[Element[T]]
@@ -543,8 +547,7 @@ object ArrayDefs {
     def apply[A, XA <: Nat, XB <: Nat](implicit 
       tr: TransAxDT[A, XA, XB],
     ): Aux[A, XA, XB] = tr
-    def instance[A, XA <: Nat, XB <: Nat](f: A => A): Aux[A, XA, XB] = 
-    new TransAxDT[A, XA, XB] { 
+    def instance[A, XA <: Nat, XB <: Nat](f: A => A): Aux[A, XA, XB] = new TransAxDT[A, XA, XB] {
       def apply(a: A): A = f(a)
     }
 
@@ -554,6 +557,7 @@ object ArrayDefs {
       aIsArr: IsArray[A, T] { type S = B[T] },
       bIsArr: IsArray[B, T] { type S = BS },
     ): Aux[A[T], XA, XB] = instance(a => {
+      println("TRANSAX WORKING")
       val lst2d: List[List[BS]] = aIsArr.toList(a).map(bIsArr.toList(_))
       val lstB: List[B[T]] = lst2d.transpose.map(lstBs => bIsArr.fromList(lstBs))
       aIsArr.fromList(lstB)
@@ -573,20 +577,24 @@ object ArrayDefs {
 
   trait TransposeDT[A, IN] {
     type Out = A
-    def apply(a: A, in: IN): Out
+    def apply(a: A): Out
   }
   object TransposeDT {
     type Aux[A, IN] = TransposeDT[A, IN]
     def apply[A, IN](implicit tr: TransposeDT[A, IN]): Aux[A, IN] = tr
-    def instance[A, IN](f: (A, IN) => A): Aux[A, IN] = new TransposeDT[A, IN] { 
-      def apply(a: A, in: IN): A = f(a, in)
+    def instance[A, IN](f: A => A): Aux[A, IN] = new TransposeDT[A, IN] { 
+      def apply(a: A): A = f(a)
     }
 
     implicit def ifNil[A, DE <: Nat, DEm1 <: Nat](implicit
       de: DepthCT.Aux[A, DE],
       e1: Pred.Aux[DE, DEm1],
       tr: TransAllDT[A, Nat._0, DEm1],
-    ): Aux[A, Nothing] = instance((a, in) => tr(a))
+    ): Aux[A, AllSlice] = instance(a => tr(a))
+
+    implicit def ifTupleNat[A, XA <: Nat, XB <: Nat](implicit
+      tr: TransAxDT[A, XA, XB],
+    ): Aux[A, (XA, XB)] = instance(a => tr(a))
   }
   
   trait TransAllDT[A, DM <: Nat, PS <: Nat] {
@@ -600,23 +608,23 @@ object ArrayDefs {
       def apply(a: A): A = f(a)
     }
 
-    implicit def whileDmLessThanPass[
-      A[_], T, DM <: Nat, PS <: Nat
-    ] (implicit
-      aIsArr: IsArray[A, T],
+    implicit def whileDmLessThanPass[A, DM <: Nat, PS <: Nat] (implicit
       e1: GT[PS, DM],
-      ta: TransAllDT[A[T], Succ[DM], DM],
-      nxt: TransAllDT[A[T], Succ[DM], PS]
-    ): Aux[A[T], DM, PS] = instance(a => nxt(ta(a)))
+      ta: TransAxDT[A, DM, Succ[DM]],
+      nxt: TransAllDT[A, Succ[DM], PS],
+    ): Aux[A, DM, PS] = instance(a => {
+      println("DM LESS THAN PASS")
+      nxt(ta(a))
+    })
 
-    implicit def dmEqualsPass[A[_], T, DM <: Nat, PS <: Nat, PSm1 <: Nat] (implicit
-      aIsArr: IsArray[A, T],
-      e1: DM =:= PS,
-      e2: Pred.Aux[PS, PSm1],
-      nxt: TransAllDT[A[T], Nat._0, PSm1],
-    ): Aux[A[T], DM, PS] = instance(a => nxt(a))
+    implicit def dmEqualsPass[A, DM <: Nat, PS <: Nat, PSm1 <: Nat] (implicit
+      e1: GT[PS, Nat._0],
+      e2: DM =:= PS,
+      e3: Pred.Aux[PS, PSm1],
+      nxt: TransAllDT[A, Nat._0, PSm1],
+    ): Aux[A, DM, PS] = instance(a => {println("DM EQUALS PASS"); nxt(a)})
 
-    implicit def psEqualsOne[A[_], T]: Aux[A[T], Nat._0, Nat._1] = instance(a => a)
+    implicit def psEqualsZero[A]: Aux[A, Nat._0, Nat._0] = instance(a => {println("PS EQUALS ZERO"); a})
   }
 
   trait ConcatenateCT[A[_], B[_], T, D <: Nat] { self =>

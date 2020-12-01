@@ -13,6 +13,7 @@ import IndicesObj._
 
 import shapeless._
 import shapeless.{HList, HNil, Lazy, :: => #:}
+import shapeless.ops.nat.{GT, GTEq, Pred, Diff => NatDiff, ToInt}
 //import shapeless.test.{illTyped}
 import shapeless.ops.hlist._
 
@@ -250,8 +251,9 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
     object TransAllDTTest extends Tag("TransAllDTTest")
-    scenario("transposing a 2d array with HNil correctly flips the axes", TransAllDTTest) {
-      val act = TransposeDT[List2d[Double], Nothing].apply(dbl2d, Nil)
+    scenario("transposing a 2d array with AllSlice correctly flips the axes") {
+      val act = TransposeDT[List2d[Double], AllSlice].apply(dbl2d)
+      //val act = TransAllDT[List2d[Double], Nat._0, Nat._1].apply(dbl2d)
       val exp = List2d[Double](
         List(
           List(0.0 , 0.1 , 0.2 ),
@@ -263,6 +265,45 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       assert(act === exp)
     }
+    scenario("transposing a 3d array with AllSlice correctly flips the axes", TransAllDTTest) {
+      //val act = TransAllDT[List3d[Double], Nat._0, Nat._2].apply(dbl3d)
+      val e0 = TransAllDT[List3d[Double], Nat._0, Nat._2]
+      val e00 = implicitly[GT[Nat._2, Nat._0]]
+      val e01 = TransAxDT[List3d[Double], Nat._0, Nat._1]
+      val e02 = TransAllDT[List3d[Double], Nat._1, Nat._2]
+
+      val e1 = TransAllDT[List3d[Double], Nat._1, Nat._2]
+      val e2 = TransAllDT[List3d[Double], Nat._2, Nat._2]
+      //val act = TransposeDT[List3d[Double], AllSlice].apply(dbl3d)
+      //val exp = List(
+        //List(
+          //List(0.0  , 0.1  ),
+          //List(0.01 , 0.11 ),
+          //List(0.02 , 0.12 ),
+        //),
+        //List(
+          //List(0.001, 0.101),
+          //List(0.011, 0.111),
+          //List(0.021, 0.121),
+        //),
+        //List(
+          //List(0.002, 0.102),
+          //List(0.012, 0.112),
+          //List(0.022, 0.122),
+        //),
+        //List(
+          //List(0.003, 0.103),
+          //List(0.013, 0.113),
+          //List(0.023, 0.123),
+        //),
+        //List(
+          //List(0.004, 0.104),
+          //List(0.014, 0.114),
+          //List(0.024, 0.124)
+        //)
+      //)
+      //assert(act === exp)
+    }
   }
 
   feature("The TransposeDT typeclass") {
@@ -271,8 +312,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
     object TransposeDTTest extends Tag("TransposeDTTest")
-    scenario("Explicitly transposing a 2d array correctly flips the axes", TransposeDTTest) {
-      val act = TransposeDT[List2d[Double], Nat._0, Nat._1].apply(dbl2d)
+    scenario("Transposing a 2d array along axes 0 and 1 produces the correct result", TransposeDTTest) {
+      val act = TransposeDT[List2d[Double], (Nat._0, Nat._1)].apply(dbl2d)
       val exp = List2d[Double](
         List(
           List(0.0 , 0.1 , 0.2 ),
@@ -300,7 +341,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
             List(0.12 , 0.121, 0.122, 0.123, 0.124)
           ))
       )
-      val act = TransposeDT[List3d[Double], Nat._0, Nat._1].apply(dbl3d)
+      val act = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(dbl3d)
       assert(act === exp)
     }
     scenario("Transposing a 3d array along axes 1 and 2 produces the correct result", TransposeDTTest) {
@@ -321,12 +362,12 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
             List(0.104, 0.114, 0.124)
           ))
       )
-      val act = TransposeDT[List3d[Double], Nat._1, Nat._2].apply(dbl3d)
+      val act = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(dbl3d)
       assert(act === exp)
     }
     scenario("Explicitly transposing a 3d array correctly flips the axes", TransposeDTTest) {
-      val t1 = TransposeDT[List3d[Double], Nat._1, Nat._2].apply(dbl3d)
-      val act = TransposeDT[List3d[Double], Nat._0, Nat._1].apply(t1)
+      val t1 = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(dbl3d)
+      val act = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(t1)
       val exp = List(
         List(
           List(0.0  , 0.1  ),
