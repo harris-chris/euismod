@@ -244,6 +244,27 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("The TransAllDT typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object TransAllDTTest extends Tag("TransAllDTTest")
+    scenario("transposing a 2d array with HNil correctly flips the axes", TransAllDTTest) {
+      val act = TransposeDT[List2d[Double], Nothing].apply(dbl2d, Nil)
+      val exp = List2d[Double](
+        List(
+          List(0.0 , 0.1 , 0.2 ),
+          List(0.01, 0.11, 0.21),
+          List(0.02, 0.12, 0.22),
+          List(0.03, 0.13, 0.23),
+          List(0.04, 0.14, 0.24),
+        )
+      )
+      assert(act === exp)
+    }
+  }
+
   feature("The TransposeDT typeclass") {
     import Dummy.Types._
     import Dummy.Values._
@@ -304,12 +325,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === exp)
     }
     scenario("Explicitly transposing a 3d array correctly flips the axes", TransposeDTTest) {
-      val rv = Reverse[Int :: Int :: Int :: HNil]
-      val newShape = rv(dbl3d.shape)
-      println(s"NEWSHAPE ${newShape}")
       val t1 = TransposeDT[List3d[Double], Nat._1, Nat._2].apply(dbl3d)
       val act = TransposeDT[List3d[Double], Nat._0, Nat._1].apply(t1)
-      println(s"ACTUAL SHAPE ${act.shape}")
       val exp = List(
         List(
           List(0.0  , 0.1  ),

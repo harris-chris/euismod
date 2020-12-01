@@ -11,6 +11,7 @@ import shapeless.ops.hlist._
 import shapeless._
 import nat._
 import shapeless.ops.nat.{GT, GTEq, Pred, Diff => NatDiff, ToInt}
+import scala.util.{Try, Success, Failure}
 
 object ArrayDefs {
 
@@ -533,17 +534,17 @@ object ArrayDefs {
     )
   }
 
-  trait TransposeDT[A, XA <: Nat, XB <: Nat] {
+  trait TransAxDT[A, XA <: Nat, XB <: Nat] {
     type Out = A
     def apply(a: A): Out
   }
-  object TransposeDT {
-    type Aux[A, XA <: Nat, XB <: Nat] = TransposeDT[A, XA, XB]
+  object TransAxDT {
+    type Aux[A, XA <: Nat, XB <: Nat] = TransAxDT[A, XA, XB]
     def apply[A, XA <: Nat, XB <: Nat](implicit 
-      tr: TransposeDT[A, XA, XB],
+      tr: TransAxDT[A, XA, XB],
     ): Aux[A, XA, XB] = tr
     def instance[A, XA <: Nat, XB <: Nat](f: A => A): Aux[A, XA, XB] = 
-    new TransposeDT[A, XA, XB] { 
+    new TransAxDT[A, XA, XB] { 
       def apply(a: A): A = f(a)
     }
 
@@ -564,12 +565,60 @@ object ArrayDefs {
       _xa: Pred.Aux[XA, _XA],
       _xb: Pred.Aux[XB, _XB],
       aIsArr: IsArray[A, T] { type S = _S[T] },
-      trForS: TransposeDT[_S[T], _XA, _XB],
+      trForS: TransAxDT[_S[T], _XA, _XB],
     ): Aux[A[T], XA, XB] = instance(a => 
       aIsArr.fromList(aIsArr.toList(a).map(trForS(_)))
     )
   }
+
+  trait TransposeDT[A, IN] {
+    type Out = A
+    def apply(a: A, in: IN): Out
+  }
+  object TransposeDT {
+    type Aux[A, IN] = TransposeDT[A, IN]
+    def apply[A, IN](implicit tr: TransposeDT[A, IN]): Aux[A, IN] = tr
+    def instance[A, IN](f: (A, IN) => A): Aux[A, IN] = new TransposeDT[A, IN] { 
+      def apply(a: A, in: IN): A = f(a, in)
+    }
+
+    implicit def ifNil[A, DE <: Nat, DEm1 <: Nat](implicit
+      de: DepthCT.Aux[A, DE],
+      e1: Pred.Aux[DE, DEm1],
+      tr: TransAllDT[A, Nat._0, DEm1],
+    ): Aux[A, Nothing] = instance((a, in) => tr(a))
+  }
   
+  trait TransAllDT[A, DM <: Nat, PS <: Nat] {
+    type Out = A
+    def apply(a: A): Out
+  }
+  object TransAllDT {
+    type Aux[A, DM <: Nat, PS <: Nat] = TransAllDT[A, DM, PS]
+    def apply[A, DM <: Nat, PS <: Nat](implicit tr: TransAllDT[A, DM, PS]): Aux[A, DM, PS] = tr
+    def instance[A, DM <: Nat, PS <: Nat](f: A => A): Aux[A, DM, PS] = new TransAllDT[A, DM, PS] { 
+      def apply(a: A): A = f(a)
+    }
+
+    implicit def whileDmLessThanPass[
+      A[_], T, DM <: Nat, PS <: Nat
+    ] (implicit
+      aIsArr: IsArray[A, T],
+      e1: GT[PS, DM],
+      ta: TransAllDT[A[T], Succ[DM], DM],
+      nxt: TransAllDT[A[T], Succ[DM], PS]
+    ): Aux[A[T], DM, PS] = instance(a => nxt(ta(a)))
+
+    implicit def dmEqualsPass[A[_], T, DM <: Nat, PS <: Nat, PSm1 <: Nat] (implicit
+      aIsArr: IsArray[A, T],
+      e1: DM =:= PS,
+      e2: Pred.Aux[PS, PSm1],
+      nxt: TransAllDT[A[T], Nat._0, PSm1],
+    ): Aux[A[T], DM, PS] = instance(a => nxt(a))
+
+    implicit def psEqualsOne[A[_], T]: Aux[A[T], Nat._0, Nat._1] = instance(a => a)
+  }
+
   trait ConcatenateCT[A[_], B[_], T, D <: Nat] { self =>
     type Out = Option[A[T]]
     def apply(a: A[T], b: B[T]): Out
