@@ -649,6 +649,23 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("Where typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object WhereTest extends Tag("WhereTest")
+    scenario("Where with a 1d arraylike and a masking array returns a correct result", WhereTest) {
+      val mask = MaskFromNumSeqDT[List1d[Boolean], List[Int] :: HNil].apply(
+        List(1, 2) :: HNil, list1d.map(_ => false))
+      val newValues = list1d.map(_ => 3.0)
+      val act = Where[List1d[Double]].apply(mask, newValues)
+      val exp = List1d[Double](list1d.data.updated(1, 3.0).updated(2, 3.0))
+      )
+    }
+  }
+
+
   feature("IsXd typeclass") {
     case class A1[T](data: List[T])
     implicit def a1ev[T] = new IsArray[A1, T] {
