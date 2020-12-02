@@ -4,6 +4,8 @@ import scala.sys.process._
 ThisBuild / scalaVersion     := "2.13.2"
 ThisBuild / version          := "0.1.0"
 
+addCompilerPlugin("io.tryp" % "splain" % "0.5.7" cross CrossVersion.patch)
+
 lazy val sportDate = ProjectRef(
   uri("ssh://git@github.com/chrisharriscjh/sport-date.git#master"), "SportDate"
 )
@@ -12,8 +14,10 @@ lazy val SportArray = (project in file("."))
   .settings(
     libraryDependencies += scalaTest % Test,
     scalacOptions ++= Seq(
-    "-Xlog-implicits", 
-    "-Xplugin:kind-projector_2.10-0.6.0.jar")
+      "-Xplugin:kind-projector_2.10-0.6.0.jar",
+      "-P:splain:all:true",
+      /*"-Xlog-implicits", */
+    )
   )
   .dependsOn(sportDate)
 
@@ -43,4 +47,11 @@ sourceGenerators in Test += Def.task {
 commands ++= Seq(removegit)
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+
+libraryDependencies += {
+  val v =
+    if (scalaVersion.value.replaceFirst(raw"\.(\d)$$",".0$1") <= "2.12.04") "0.4.1"
+    else "0.5.7"
+  ("io.tryp" %% "splain" % v cross CrossVersion.patch).withConfigurations(Some("plugin->default(compile)"))
+}
 

@@ -253,7 +253,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     object TransAllDTTest extends Tag("TransAllDTTest")
     scenario("transposing a 2d array with AllSlice correctly flips the axes") {
       val act = TransposeDT[List2d[Double], AllSlice].apply(dbl2d)
-      //val act = TransAllDT[List2d[Double], Nat._0, Nat._1].apply(dbl2d)
       val exp = List2d[Double](
         List(
           List(0.0 , 0.1 , 0.2 ),
@@ -265,44 +264,116 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       assert(act === exp)
     }
-    scenario("transposing a 3d array with AllSlice correctly flips the axes", TransAllDTTest) {
-      //val act = TransAllDT[List3d[Double], Nat._0, Nat._2].apply(dbl3d)
-      val e0 = TransAllDT[List3d[Double], Nat._0, Nat._2]
-      val e00 = implicitly[GT[Nat._2, Nat._0]]
-      val e01 = TransAxDT[List3d[Double], Nat._0, Nat._1]
-      val e02 = TransAllDT[List3d[Double], Nat._1, Nat._2]
-
-      val e1 = TransAllDT[List3d[Double], Nat._1, Nat._2]
-      val e2 = TransAllDT[List3d[Double], Nat._2, Nat._2]
-      //val act = TransposeDT[List3d[Double], AllSlice].apply(dbl3d)
-      //val exp = List(
-        //List(
-          //List(0.0  , 0.1  ),
-          //List(0.01 , 0.11 ),
-          //List(0.02 , 0.12 ),
-        //),
-        //List(
-          //List(0.001, 0.101),
-          //List(0.011, 0.111),
-          //List(0.021, 0.121),
-        //),
-        //List(
-          //List(0.002, 0.102),
-          //List(0.012, 0.112),
-          //List(0.022, 0.122),
-        //),
-        //List(
-          //List(0.003, 0.103),
-          //List(0.013, 0.113),
-          //List(0.023, 0.123),
-        //),
-        //List(
-          //List(0.004, 0.104),
-          //List(0.014, 0.114),
-          //List(0.024, 0.124)
-        //)
-      //)
-      //assert(act === exp)
+    scenario("transposing a 3d array with AllSlice correctly flips the axes") {
+      val act = TransAllDT[List3d[Double], Nat._0, Nat._2].apply(dbl3d)
+      val exp = List3d[Double](
+        List(
+          List(
+            List(0.0  , 0.1  ),
+            List(0.01 , 0.11 ),
+            List(0.02 , 0.12 ),
+          ),
+          List(
+            List(0.001, 0.101),
+            List(0.011, 0.111),
+            List(0.021, 0.121),
+          ),
+          List(
+            List(0.002, 0.102),
+            List(0.012, 0.112),
+            List(0.022, 0.122),
+          ),
+          List(
+            List(0.003, 0.103),
+            List(0.013, 0.113),
+            List(0.023, 0.123),
+          ),
+          List(
+            List(0.004, 0.104),
+            List(0.014, 0.114),
+            List(0.024, 0.124)
+          )
+        )
+      )
+      assert(act === exp)
+    }
+    scenario("transposing a 4d array with AllSlice correctly flips the axes", TransAllDTTest) {
+      val act = TransAllDT[List4d[Double], Nat._0, Nat._3].apply(dbl4d)
+      val exp = List4d[Double](
+        List(
+          List(
+            List(
+              List(0.000, 1.000),
+              List(1.000, 1.100)
+            ),
+            List(
+              List(1.000, 1.010),
+              List(1.100, 1.110)
+            ),
+            List(
+              List(2.000, 1.020),
+              List(1.200, 1.120)
+            ),
+          ),
+          List(
+            List(
+              List(1.000, 1.001),
+              List(1.010, 1.101)
+            ),
+            List(
+              List(1.100, 1.011),
+              List(1.110, 1.111)
+            ),
+            List(
+              List(2.100, 1.021),
+              List(1.210, 1.121)
+            ),
+          ),
+          List(
+            List(
+              List(2.000, 1.002),
+              List(1.020, 1.102)
+            ),
+            List(
+              List(1.200, 1.012),
+              List(1.120, 1.112)
+            ),
+            List(
+              List(2.200, 1.022),
+              List(1.220, 1.122)
+            )
+          ),
+          List(
+            List(
+              List(3.000, 1.003),
+              List(1.030, 1.103)
+            ),
+            List(
+              List(1.300, 1.013),
+              List(1.130, 1.113)
+            ),
+            List(
+              List(2.300, 1.023),
+              List(1.230, 1.123)
+            )
+          ),
+          List(
+            List(
+              List(4.000, 1.004),
+              List(1.040, 1.104)
+            ),
+            List(
+              List(1.400, 1.014),
+              List(1.140, 1.114)
+            ),
+            List(
+              List(2.400, 1.024), 
+              List(1.240, 1.124)
+            )
+          )
+        )
+      )
+      assert(act === exp)
     }
   }
 
@@ -365,38 +436,124 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val act = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(dbl3d)
       assert(act === exp)
     }
-    scenario("Explicitly transposing a 3d array correctly flips the axes", TransposeDTTest) {
-      val t1 = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(dbl3d)
-      val act = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(t1)
-      val exp = List(
+    scenario("Transposing a 3d array along 1/2 then 0/1 is the same as a full transpose", TransposeDTTest) {
+      val st1 = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(dbl3d)
+      val st2 = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(st1)
+      val act = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(st2)
+      val exp = List3d[Double](
         List(
-          List(0.0  , 0.1  ),
-          List(0.01 , 0.11 ),
-          List(0.02 , 0.12 ),
-        ),
-        List(
-          List(0.001, 0.101),
-          List(0.011, 0.111),
-          List(0.021, 0.121),
-        ),
-        List(
-          List(0.002, 0.102),
-          List(0.012, 0.112),
-          List(0.022, 0.122),
-        ),
-        List(
-          List(0.003, 0.103),
-          List(0.013, 0.113),
-          List(0.023, 0.123),
-        ),
-        List(
-          List(0.004, 0.104),
-          List(0.014, 0.114),
-          List(0.024, 0.124)
+          List(
+            List(0.0  , 0.1  ),
+            List(0.01 , 0.11 ),
+            List(0.02 , 0.12 ),
+          ),
+          List(
+            List(0.001, 0.101),
+            List(0.011, 0.111),
+            List(0.021, 0.121),
+          ),
+          List(
+            List(0.002, 0.102),
+            List(0.012, 0.112),
+            List(0.022, 0.122),
+          ),
+          List(
+            List(0.003, 0.103),
+            List(0.013, 0.113),
+            List(0.023, 0.123),
+          ),
+          List(
+            List(0.004, 0.104),
+            List(0.014, 0.114),
+            List(0.024, 0.124)
+          )
         )
       )
       assert(act === exp)
     }
+    //scenario("Transposing a 4d array 0/1, 1/2, 2/3, 0/1, 1/2, 0/1 is the same as a full transpose", TransposeDTTest) {
+      //val st1 = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(dbl4d)
+      //val st2 = TransposeDT[List4d[Double], (Nat._1, Nat._2)].apply(st1)
+      //val st3 = TransposeDT[List4d[Double], (Nat._2, Nat._3)].apply(st2)
+      //val st4 = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st3)
+      //val st5 = TransposeDT[List4d[Double], (Nat._1, Nat._2)].apply(st4)
+      //val act = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st5)
+      //val exp = List4d[Double](
+        //List(
+          //List(
+            //List(
+              //List(0.000, 1.000),
+              //List(1.000, 1.100)
+            //),
+            //List(
+              //List(1.000, 1.010),
+              //List(1.100, 1.110)
+            //),
+            //List(
+              //List(2.000, 1.020),
+              //List(1.200, 1.120)
+            //),
+          //),
+          //List(
+            //List(
+              //List(1.000, 1.001),
+              //List(1.010, 1.101)
+            //),
+            //List(
+              //List(1.100, 1.011),
+              //List(1.110, 1.111)
+            //),
+            //List(
+              //List(2.100, 1.021),
+              //List(1.210, 1.121)
+            //),
+          //),
+          //List(
+            //List(
+              //List(2.000, 1.002),
+              //List(1.020, 1.102)
+            //),
+            //List(
+              //List(1.200, 1.012),
+              //List(1.120, 1.112)
+            //),
+            //List(
+              //List(2.200, 1.022),
+              //List(1.220, 1.122)
+            //)
+          //),
+          //List(
+            //List(
+              //List(3.000, 1.003),
+              //List(1.030, 1.103)
+            //),
+            //List(
+              //List(1.300, 1.013),
+              //List(1.130, 1.113)
+            //),
+            //List(
+              //List(2.300, 1.023),
+              //List(1.230, 1.123)
+            //)
+          //),
+          //List(
+            //List(
+              //List(4.000, 1.004),
+              //List(1.040, 1.104)
+            //),
+            //List(
+              //List(1.400, 1.014),
+              //List(1.140, 1.114)
+            //),
+            //List(
+              //List(2.400, 1.024), 
+              //List(1.240, 1.124)
+            //)
+          //)
+        //)
+      //)
+      //assert(act === exp)
+    //}
   }
 
   feature("The ConcatenateRT typeclass") {

@@ -611,20 +611,27 @@ object ArrayDefs {
     implicit def whileDmLessThanPass[A, DM <: Nat, PS <: Nat] (implicit
       e1: GT[PS, DM],
       ta: TransAxDT[A, DM, Succ[DM]],
-      nxt: TransAllDT[A, Succ[DM], PS],
+      nxt: Lazy[TransAllDT[A, Succ[DM], PS]],
+      dm: ToInt[DM],
+      ps: ToInt[PS],
     ): Aux[A, DM, PS] = instance(a => {
-      println("DM LESS THAN PASS")
-      nxt(ta(a))
+      println(s"DM ${dm()} LESS THAN PS ${ps()}")
+      nxt.value(ta(a))
     })
 
     implicit def dmEqualsPass[A, DM <: Nat, PS <: Nat, PSm1 <: Nat] (implicit
       e1: GT[PS, Nat._0],
       e2: DM =:= PS,
       e3: Pred.Aux[PS, PSm1],
-      nxt: TransAllDT[A, Nat._0, PSm1],
-    ): Aux[A, DM, PS] = instance(a => {println("DM EQUALS PASS"); nxt(a)})
+      nxt: Lazy[TransAllDT[A, Nat._0, PSm1]],
+      dm: ToInt[DM],
+      ps: ToInt[PS],
+    ): Aux[A, DM, PS] = instance(a => {
+      println(s"DM ${dm()} EQUALS PS ${ps()}")
+      nxt.value(a)
+    })
 
-    implicit def psEqualsZero[A]: Aux[A, Nat._0, Nat._0] = instance(a => {println("PS EQUALS ZERO"); a})
+    implicit def psEqualsZero[A]: Aux[A, Nat._0, Nat._0] = instance(a => a)
   }
 
   trait ConcatenateCT[A[_], B[_], T, D <: Nat] { self =>
