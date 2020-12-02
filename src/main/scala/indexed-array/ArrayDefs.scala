@@ -544,9 +544,7 @@ object ArrayDefs {
   }
   object TransAxDT {
     type Aux[A, XA <: Nat, XB <: Nat] = TransAxDT[A, XA, XB]
-    def apply[A, XA <: Nat, XB <: Nat](implicit 
-      tr: TransAxDT[A, XA, XB],
-    ): Aux[A, XA, XB] = tr
+    def apply[A, XA <: Nat, XB <: Nat](implicit tr: TransAxDT[A, XA, XB]): Aux[A, XA, XB] = tr
     def instance[A, XA <: Nat, XB <: Nat](f: A => A): Aux[A, XA, XB] = new TransAxDT[A, XA, XB] {
       def apply(a: A): A = f(a)
     }
@@ -556,9 +554,11 @@ object ArrayDefs {
       e2: XA =:= Nat._0,
       aIsArr: IsArray[A, T] { type S = B[T] },
       bIsArr: IsArray[B, T] { type S = BS },
+      xa: ToInt[XA],
+      xb: ToInt[XB],
     ): Aux[A[T], XA, XB] = instance(a => {
-      println("TRANSAX WORKING")
       val lst2d: List[List[BS]] = aIsArr.toList(a).map(bIsArr.toList(_))
+      println(s"CORRECT DIM ${xa()} LST2D IS ${lst2d}")
       val lstB: List[B[T]] = lst2d.transpose.map(lstBs => bIsArr.fromList(lstBs))
       aIsArr.fromList(lstB)
     })
@@ -570,9 +570,11 @@ object ArrayDefs {
       _xb: Pred.Aux[XB, _XB],
       aIsArr: IsArray[A, T] { type S = _S[T] },
       trForS: TransAxDT[_S[T], _XA, _XB],
-    ): Aux[A[T], XA, XB] = instance(a => 
+      xa: ToInt[XA],
+    ): Aux[A[T], XA, XB] = instance(a => {
+      println(s"NOT YET XA ${xa()} ARRAY IS ${aIsArr}")
       aIsArr.fromList(aIsArr.toList(a).map(trForS(_)))
-    )
+    })
   }
 
   trait TransposeDT[A, IN] {
@@ -594,7 +596,10 @@ object ArrayDefs {
 
     implicit def ifTupleNat[A, XA <: Nat, XB <: Nat](implicit
       tr: TransAxDT[A, XA, XB],
-    ): Aux[A, (XA, XB)] = instance(a => tr(a))
+    ): Aux[A, (XA, XB)] = instance(a => {
+      println("CALLING FROM TRANSPOSEDT")
+      tr(a)
+    })
   }
   
   trait TransAllDT[A, DM <: Nat, PS <: Nat] {

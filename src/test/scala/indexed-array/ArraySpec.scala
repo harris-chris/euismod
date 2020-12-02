@@ -303,76 +303,77 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         List(
           List(
             List(
-              List(0.000, 1.000),
-              List(1.000, 1.100)
+              List(0.0   , 0.1   ),
+              List(0.01  , 0.11  )
             ),
             List(
-              List(1.000, 1.010),
-              List(1.100, 1.110)
+              List(0.001 , 0.101 ),
+              List(0.011 , 0.111 )
             ),
             List(
-              List(2.000, 1.020),
-              List(1.200, 1.120)
-            ),
-          ),
-          List(
-            List(
-              List(1.000, 1.001),
-              List(1.010, 1.101)
-            ),
-            List(
-              List(1.100, 1.011),
-              List(1.110, 1.111)
-            ),
-            List(
-              List(2.100, 1.021),
-              List(1.210, 1.121)
+              List(0.002 , 0.102 ),
+              List(0.012 , 0.112 )
             ),
           ),
           List(
             List(
-              List(2.000, 1.002),
-              List(1.020, 1.102)
+              List(0.0001, 0.1001),
+              List(0.0101, 0.1101)
             ),
             List(
-              List(1.200, 1.012),
-              List(1.120, 1.112)
+              List(0.0011, 0.1011),
+              List(0.0111, 0.1111)
             ),
             List(
-              List(2.200, 1.022),
-              List(1.220, 1.122)
+              List(0.0021, 0.1021),
+              List(0.0121, 0.1121)
+            ),
+          ),
+          List(
+            List(
+              List(0.0002, 0.1002),
+              List(0.0102, 0.1102)
+            ),
+            List(
+              List(0.0012, 0.1012),
+              List(0.0112, 0.1112)
+            ),
+            List(
+              List(0.0022, 0.1022),
+              List(0.0122, 0.1122)
             )
           ),
           List(
             List(
-              List(3.000, 1.003),
-              List(1.030, 1.103)
+              List(0.0003, 0.1003),
+              List(0.0103, 0.1103)
             ),
             List(
-              List(1.300, 1.013),
-              List(1.130, 1.113)
+              List(0.0013, 0.1013),
+              List(0.0113, 0.1113)
             ),
             List(
-              List(2.300, 1.023),
-              List(1.230, 1.123)
+              List(0.0023, 0.1023),
+              List(0.0123, 0.1123)
             )
           ),
           List(
             List(
-              List(4.000, 1.004),
-              List(1.040, 1.104)
+              List(0.0004, 0.1004),
+              List(0.0104, 0.1104)
             ),
             List(
-              List(1.400, 1.014),
-              List(1.140, 1.114)
+              List(0.0014, 0.1014),
+              List(0.0114, 0.1114)
             ),
             List(
-              List(2.400, 1.024), 
-              List(1.240, 1.124)
+              List(0.0024, 0.1024), 
+              List(0.0124, 0.1124)
             )
           )
         )
       )
+ 
       assert(act === exp)
     }
   }
@@ -436,6 +437,78 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val act = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(dbl3d)
       assert(act === exp)
     }
+    scenario("check") {
+      val act = List4d[Int](
+        List(
+          List(
+            List(
+              List(1 , 2),
+              List(3 , 4),
+              List(5 , 6)
+            ),
+            List(
+              List(7 , 8),
+              List(9 ,10),
+              List(11,12)
+            )
+          ),
+          List(
+            List(
+              List(13,14),
+              List(15,16),
+              List(17,18)
+            ),
+            List(
+              List(19,20),
+              List(21,22),
+              List(23,24)
+            )
+          )
+        )
+      )
+      println(PrettyPrint[List4d, Int].apply(TransAxDT[List4d[Int], Nat._2, Nat._3].apply(act)))
+    }
+    scenario("Transposing a 4d array along 2/3 matches with numpy", TransposeDTTest, Current) {
+      //val act = TransposeDT[List4d[Double], (Nat._2, Nat._3)].apply(dbl4d)
+      val act = TransAxDT[List4d[Double], Nat._2, Nat._3].apply(dbl4d)
+      val exp = List4d[Double](
+        List(
+          List(
+            List(
+              List(0.0   , 0.001 , 0.002 ),
+              List(0.0001, 0.0011, 0.0021),
+              List(0.0002, 0.0012, 0.0022),
+              List(0.0003, 0.0013, 0.0023),
+              List(0.0004, 0.0014, 0.0024),
+            ),
+            List(
+              List(0.01  , 0.011 , 0.012 ),
+              List(0.0101, 0.0111, 0.0121),
+              List(0.0102, 0.0112, 0.0122),
+              List(0.0103, 0.0113, 0.0123),
+              List(0.0104, 0.0114, 0.0124),
+            )
+          ),
+          List(
+            List(
+              List(0.1   , 0.101 , 0.102 ),
+              List(0.1001, 0.1011, 0.1021),
+              List(0.1002, 0.1012, 0.1022),
+              List(0.1003, 0.1013, 0.1023),
+              List(0.1004, 0.1014, 0.1024)
+            ),
+            List(
+              List(0.11  , 0.111 , 0.112 ),
+              List(0.1101, 0.1111, 0.1121),
+              List(0.1102, 0.1112, 0.1122),
+              List(0.1103, 0.1113, 0.1123),
+              List(0.1104, 0.1114, 0.1124)
+            )
+          )
+        )
+      )
+      assert(act === exp)
+    }
     scenario("Transposing a 3d array along 1/2 then 0/1 is the same as a full transpose", TransposeDTTest) {
       val st1 = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(dbl3d)
       val st2 = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(st1)
@@ -471,89 +544,89 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       assert(act === exp)
     }
-    //scenario("Transposing a 4d array 0/1, 1/2, 2/3, 0/1, 1/2, 0/1 is the same as a full transpose", TransposeDTTest) {
-      //val st1 = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(dbl4d)
-      //val st2 = TransposeDT[List4d[Double], (Nat._1, Nat._2)].apply(st1)
-      //val st3 = TransposeDT[List4d[Double], (Nat._2, Nat._3)].apply(st2)
-      //val st4 = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st3)
-      //val st5 = TransposeDT[List4d[Double], (Nat._1, Nat._2)].apply(st4)
-      //val act = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st5)
-      //val exp = List4d[Double](
-        //List(
-          //List(
-            //List(
-              //List(0.000, 1.000),
-              //List(1.000, 1.100)
-            //),
-            //List(
-              //List(1.000, 1.010),
-              //List(1.100, 1.110)
-            //),
-            //List(
-              //List(2.000, 1.020),
-              //List(1.200, 1.120)
-            //),
-          //),
-          //List(
-            //List(
-              //List(1.000, 1.001),
-              //List(1.010, 1.101)
-            //),
-            //List(
-              //List(1.100, 1.011),
-              //List(1.110, 1.111)
-            //),
-            //List(
-              //List(2.100, 1.021),
-              //List(1.210, 1.121)
-            //),
-          //),
-          //List(
-            //List(
-              //List(2.000, 1.002),
-              //List(1.020, 1.102)
-            //),
-            //List(
-              //List(1.200, 1.012),
-              //List(1.120, 1.112)
-            //),
-            //List(
-              //List(2.200, 1.022),
-              //List(1.220, 1.122)
-            //)
-          //),
-          //List(
-            //List(
-              //List(3.000, 1.003),
-              //List(1.030, 1.103)
-            //),
-            //List(
-              //List(1.300, 1.013),
-              //List(1.130, 1.113)
-            //),
-            //List(
-              //List(2.300, 1.023),
-              //List(1.230, 1.123)
-            //)
-          //),
-          //List(
-            //List(
-              //List(4.000, 1.004),
-              //List(1.040, 1.104)
-            //),
-            //List(
-              //List(1.400, 1.014),
-              //List(1.140, 1.114)
-            //),
-            //List(
-              //List(2.400, 1.024), 
-              //List(1.240, 1.124)
-            //)
-          //)
-        //)
-      //)
-      //assert(act === exp)
-    //}
+    scenario("Transposing a 4d array 0/1, 1/2, 2/3, 0/1, 1/2, 0/1 is the same as a full transpose", TransposeDTTest) {
+      val st1 = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(dbl4d)
+      val st2 = TransposeDT[List4d[Double], (Nat._1, Nat._2)].apply(st1)
+      val st3 = TransposeDT[List4d[Double], (Nat._2, Nat._3)].apply(st2)
+      val st4 = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st3)
+      val st5 = TransposeDT[List4d[Double], (Nat._1, Nat._2)].apply(st4)
+      val act = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st5)
+      val exp = List4d[Double](
+        List(
+          List(
+            List(
+              List(0.0   , 0.1   ),
+              List(0.01  , 0.11  )
+            ),
+            List(
+              List(0.001 , 0.101 ),
+              List(0.011 , 0.111 )
+            ),
+            List(
+              List(0.002 , 0.102 ),
+              List(0.012 , 0.112 )
+            ),
+          ),
+          List(
+            List(
+              List(0.0001, 0.1001),
+              List(0.0101, 0.1101)
+            ),
+            List(
+              List(0.0011, 0.1011),
+              List(0.0111, 0.1111)
+            ),
+            List(
+              List(0.0021, 0.1021),
+              List(0.0121, 0.1121)
+            ),
+          ),
+          List(
+            List(
+              List(0.0002, 0.1002),
+              List(0.0102, 0.1102)
+            ),
+            List(
+              List(0.0012, 0.1012),
+              List(0.0112, 0.1112)
+            ),
+            List(
+              List(0.0022, 0.1022),
+              List(0.0122, 0.1122)
+            )
+          ),
+          List(
+            List(
+              List(0.0003, 0.1003),
+              List(0.0103, 0.1103)
+            ),
+            List(
+              List(0.0013, 0.1013),
+              List(0.0113, 0.1113)
+            ),
+            List(
+              List(0.0023, 0.1023),
+              List(0.0123, 0.1123)
+            )
+          ),
+          List(
+            List(
+              List(0.0004, 0.1004),
+              List(0.0104, 0.1104)
+            ),
+            List(
+              List(0.0014, 0.1014),
+              List(0.0114, 0.1114)
+            ),
+            List(
+              List(0.0024, 0.1024), 
+              List(0.0124, 0.1124)
+            )
+          )
+        )
+      )
+      assert(act === exp)
+    }
   }
 
   feature("The ConcatenateRT typeclass") {
@@ -991,7 +1064,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         List1d[Int](List(2, 3))
       ) 
     }
-    scenario("a List[Int] :: HNil is used to return the listed elements from a 1d array", ApplyIndexTest, Current) {
+    scenario("a List[Int] :: HNil is used to return the listed elements from a 1d array", ApplyIndexTest) {
       assert(
         ApplyIndex[List2d[Int], List[Int] :: HNil].apply(mini33, List(1, 2) :: HNil) === 
         List2d[Int](List(List(4, 5, 6), List(7, 8, 9)))
