@@ -373,7 +373,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
           )
         )
       )
- 
       assert(act === exp)
     }
   }
@@ -513,35 +512,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val st1 = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(dbl3d)
       val st2 = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(st1)
       val act = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(st2)
-      val exp = List3d[Double](
-        List(
-          List(
-            List(0.0  , 0.1  ),
-            List(0.01 , 0.11 ),
-            List(0.02 , 0.12 ),
-          ),
-          List(
-            List(0.001, 0.101),
-            List(0.011, 0.111),
-            List(0.021, 0.121),
-          ),
-          List(
-            List(0.002, 0.102),
-            List(0.012, 0.112),
-            List(0.022, 0.122),
-          ),
-          List(
-            List(0.003, 0.103),
-            List(0.013, 0.113),
-            List(0.023, 0.123),
-          ),
-          List(
-            List(0.004, 0.104),
-            List(0.014, 0.114),
-            List(0.024, 0.124)
-          )
-        )
-      )
+      val exp = TransposeDT[List3d[Double], AllSlice].apply(dbl3d)
       assert(act === exp)
     }
     scenario("Transposing a 4d array 0/1, 1/2, 2/3, 0/1, 1/2, 0/1 is the same as a full transpose", TransposeDTTest) {
@@ -551,80 +522,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val st4 = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st3)
       val st5 = TransposeDT[List4d[Double], (Nat._1, Nat._2)].apply(st4)
       val act = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st5)
-      val exp = List4d[Double](
-        List(
-          List(
-            List(
-              List(0.0   , 0.1   ),
-              List(0.01  , 0.11  )
-            ),
-            List(
-              List(0.001 , 0.101 ),
-              List(0.011 , 0.111 )
-            ),
-            List(
-              List(0.002 , 0.102 ),
-              List(0.012 , 0.112 )
-            ),
-          ),
-          List(
-            List(
-              List(0.0001, 0.1001),
-              List(0.0101, 0.1101)
-            ),
-            List(
-              List(0.0011, 0.1011),
-              List(0.0111, 0.1111)
-            ),
-            List(
-              List(0.0021, 0.1021),
-              List(0.0121, 0.1121)
-            ),
-          ),
-          List(
-            List(
-              List(0.0002, 0.1002),
-              List(0.0102, 0.1102)
-            ),
-            List(
-              List(0.0012, 0.1012),
-              List(0.0112, 0.1112)
-            ),
-            List(
-              List(0.0022, 0.1022),
-              List(0.0122, 0.1122)
-            )
-          ),
-          List(
-            List(
-              List(0.0003, 0.1003),
-              List(0.0103, 0.1103)
-            ),
-            List(
-              List(0.0013, 0.1013),
-              List(0.0113, 0.1113)
-            ),
-            List(
-              List(0.0023, 0.1023),
-              List(0.0123, 0.1123)
-            )
-          ),
-          List(
-            List(
-              List(0.0004, 0.1004),
-              List(0.0104, 0.1104)
-            ),
-            List(
-              List(0.0014, 0.1014),
-              List(0.0114, 0.1114)
-            ),
-            List(
-              List(0.0024, 0.1024), 
-              List(0.0124, 0.1124)
-            )
-          )
-        )
-      )
+      val exp = TransposeDT[List4d[Double], AllSlice].apply(dbl4d)
       assert(act === exp)
     }
   }
