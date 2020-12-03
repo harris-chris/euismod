@@ -570,28 +570,6 @@ object ArrayDefs {
     ): Aux[A[T], XA, XB] = instance(a => aIsArr.fromList(aIsArr.toList(a).map(trForS(_))))
   }
 
-  trait TransposeDT[A, IN] {
-    type Out = A
-    def apply(a: A): Out
-  }
-  object TransposeDT {
-    type Aux[A, IN] = TransposeDT[A, IN]
-    def apply[A, IN](implicit tr: TransposeDT[A, IN]): Aux[A, IN] = tr
-    def instance[A, IN](f: A => A): Aux[A, IN] = new TransposeDT[A, IN] { 
-      def apply(a: A): A = f(a)
-    }
-
-    implicit def ifNil[A, DE <: Nat, DEm1 <: Nat](implicit
-      de: DepthCT.Aux[A, DE],
-      e1: Pred.Aux[DE, DEm1],
-      tr: TransAllDT[A, Nat._0, DEm1],
-    ): Aux[A, AllSlice] = instance(a => tr(a))
-
-    implicit def ifTupleNat[A, XA <: Nat, XB <: Nat](implicit
-      tr: TransAxDT[A, XA, XB],
-    ): Aux[A, (XA, XB)] = instance(a => tr(a))
-  }
-  
   trait TransAllDT[A, DM <: Nat, PS <: Nat] {
     type Out = A
     def apply(a: A): Out
@@ -619,6 +597,28 @@ object ArrayDefs {
     implicit def psEqualsZero[A]: Aux[A, Nat._0, Nat._0] = instance(a => a)
   }
 
+  trait TransposeDT[A, IN] {
+    type Out = A
+    def apply(a: A): Out
+  }
+  object TransposeDT {
+    type Aux[A, IN] = TransposeDT[A, IN]
+    def apply[A, IN](implicit tr: TransposeDT[A, IN]): Aux[A, IN] = tr
+    def instance[A, IN](f: A => A): Aux[A, IN] = new TransposeDT[A, IN] { 
+      def apply(a: A): A = f(a)
+    }
+
+    implicit def ifNil[A, DE <: Nat, DEm1 <: Nat](implicit
+      de: DepthCT.Aux[A, DE],
+      e1: Pred.Aux[DE, DEm1],
+      tr: TransAllDT[A, Nat._0, DEm1],
+    ): Aux[A, AllSlice] = instance(a => tr(a))
+
+    implicit def ifTupleNat[A, XA <: Nat, XB <: Nat](implicit
+      tr: TransAxDT[A, XA, XB],
+    ): Aux[A, (XA, XB)] = instance(a => tr(a))
+  }
+  
   trait ConcatenateCT[A[_], B[_], T, D <: Nat] { self =>
     type Out = Option[A[T]]
     def apply(a: A[T], b: B[T]): Out
@@ -683,6 +683,33 @@ object ArrayDefs {
         if(cO.forall(_.isDefined)){Some(aIsArr.fromList(cO.map(_.get)))} else {None}
       }
     )
+  }
+
+  trait Where[A[_], T] {
+    type Out = A[T]
+    def apply(a: A[T], mask: A[Boolean], to: A[T]): Out
+  }
+  object Where {
+    type Aux[A[_], T] = Where[A, T]
+    def instance[A[_], T](f: (A[T], A[Boolean], A[T]) => A[T]): Aux[A,T] = new Where[A, T] {
+      def apply(a: A[T], mask: A[Boolean], to: A[T]): Out = f(a, mask, to)
+    }
+    def apply[A[_], T](implicit wh: Where[A, T]): Aux[A, T] = wh
+
+    implicit def ifArray[A[_], T, Arrs <: HList, SH <: HList](implicit 
+      sh: Shape.Aux[A[T], SH],
+      ga: GetArrsAsc.Aux[A, T, HNil, Arrs],
+      fe: FromElemsDT[T, Arrs, SH, Nat._0] { type Out = Option[A[T]] }, 
+      flA: Flatten[A, T],
+      flB: Flatten[A, Boolean],
+    ): Aux[A, T] = instance((a, mask, to) => {
+      val bs = flB(mask)
+      val ns = flA(to)
+      val upd = for((t, i) <- flA(a).zipWithIndex) yield (
+        if(bs(i)) {ns(i)} else {t}
+      )
+      fe(upd, ga(HNil), sh(a)).get
+    })
   }
 
   abstract class Is1d[A] private {}

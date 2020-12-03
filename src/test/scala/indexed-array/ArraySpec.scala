@@ -649,7 +649,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("Where typeclass") {
+  feature("The Where typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
@@ -657,14 +657,54 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     object WhereTest extends Tag("WhereTest")
     scenario("Where with a 1d arraylike and a masking array returns a correct result", WhereTest) {
       val mask = MaskFromNumSeqDT[List1d[Boolean], List[Int] :: HNil].apply(
-        List(1, 2) :: HNil, list1d.map(_ => false))
-      val newValues = list1d.map(_ => 3.0)
-      val act = Where[List1d[Double]].apply(mask, newValues)
-      val exp = List1d[Double](list1d.data.updated(1, 3.0).updated(2, 3.0))
-      )
+        List(1, 2) :: HNil, dbl1d.map(_ => false))
+      val newValues = dbl1d.map(_ => 3.0)
+      val act = Where[List1d, Double].apply(dbl1d, mask, newValues)
+      val exp = List1d[Double](dbl1d.data.updated(1, 3.0).updated(2, 3.0))
+      assert(act === exp)
+    }
+    scenario("Where with a 2d arraylike and a masking array returns a correct result", WhereTest) {
+      val mask = MaskFromNumSeqDT[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
+        List(1, 2) :: List(0, 1) :: HNil, dbl2d.map(_ => false))
+      val invMask = mask.map(b => if(b == true) {false} else {true})
+      val newValues = dbl2d.map(_ => 3.0)
+      val act = Where[List2d, Double].apply(dbl2d, mask, newValues)
+      val ai = ApplyIndex[List2d[Double], List2d[Boolean]]
+      assert(ai(act, mask).get.forall(_ == 3.0))
+      assert(ai(act, invMask) == ai(dbl2d, invMask))
+    }
+    scenario("Where with a 3d arraylike and a masking array returns a correct result", WhereTest) {
+      val mask = MaskFromNumSeqDT[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
+        List(1, 2) :: List(0, 1) :: List(2) :: HNil, dbl3d.map(_ => false))
+      val invMask = mask.map(b => if(b == true) {false} else {true})
+      val newValues = dbl3d.map(_ => 3.0)
+      val act = Where[List3d, Double].apply(dbl3d, mask, newValues)
+      val ai = ApplyIndex[List3d[Double], List3d[Boolean]]
+      assert(ai(act, mask).get.forall(_ == 3.0))
+      assert(ai(act, invMask) == ai(dbl3d, invMask))
+    }
+    scenario("Where with a 4d arraylike and a masking array returns a correct result", WhereTest) {
+      val mask = MaskFromNumSeqDT[List4d[Boolean], List[Int] :: List[Int] :: List[Int] :: List[Int] :: HNil].apply(
+        List(1, 2) :: List(0, 1) :: List(2) :: List(0, 2) :: HNil, dbl4d.map(_ => false))
+      val invMask = mask.map(b => if(b == true) {false} else {true})
+      val newValues = dbl4d.map(_ => 3.0)
+      val act = Where[List4d, Double].apply(dbl4d, mask, newValues)
+      val ai = ApplyIndex[List4d[Double], List4d[Boolean]]
+      assert(ai(act, mask).get.forall(_ == 3.0))
+      assert(ai(act, invMask) == ai(dbl4d, invMask))
     }
   }
 
+  feature(" The Reduce typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object ReduceTest extends Tag("ReduceTest")
+    scenario("Reducing a 1d arraylike creates a single T", ReduceTest) {
+      ReduceDT[List1d, Double](dbl1d, (lst => lst.foldLeft(0)(_ + _)))
+    }
+  }
 
   feature("IsXd typeclass") {
     case class A1[T](data: List[T])
