@@ -232,10 +232,19 @@ object ArrayDefs {
       rs.map(aIsArr.getAtN(a, _)))
     )
 
-    implicit def ifIdxIsHList[A[_], T, IDX <: HList, Rd <: HList](implicit 
-      rd: GetRdcArrs.Aux[A, T, IDX, Rd],
-      gi: ApplyIndexDT[A[T], IDX, Rd],
-    ): Aux[A[T], IDX, gi.Out] = instance((a, r) => gi(a, r)) 
+    implicit def ifIdxIsHList[
+      A[_], T, AllArrs <: HList, Idx <: HList, IntsIdx <: HList, IntsN <: Nat, AllArrsN <: Nat,
+      TakeN <: Nat, RdArrs <: HList, RevRdArrs <: HList,
+    ](implicit 
+      ga: GetArrsAsc.Aux[A, T, HNil, AllArrs],
+      fl: Filter.Aux[Idx, Int, IntsIdx],
+      lf: Length.Aux[IntsIdx, IntsN],
+      la: Length.Aux[AllArrs, AllArrsN],
+      di: NatDiff.Aux[AllArrsN, IntsN, TakeN],
+      dr: Take.Aux[AllArrs, TakeN, RdArrs],
+      re: Reverse.Aux[RdArrs, RevRdArrs],
+      gi: ApplyIndexDT[A[T], Idx, RevRdArrs],
+    ): Aux[A[T], Idx, gi.Out] = instance((a, r) => gi(a, r)) 
   }
 
   sealed trait PrettyPrint[A[_], T] {
