@@ -235,7 +235,7 @@ object ArrayDefs {
     implicit def ifIdxIsHList[A[_], T, IDX <: HList, Rd <: HList](implicit 
       rd: GetRdcArrs.Aux[A, T, IDX, Rd],
       gi: ApplyIndexDT[A[T], IDX, Rd],
-    ): Aux[A[T], IDX, gi.Out] = instance((a, r) => gi(a, r, rd(a, r))) 
+    ): Aux[A[T], IDX, gi.Out] = instance((a, r) => gi(a, r)) 
   }
 
   sealed trait PrettyPrint[A[_], T] {
@@ -799,33 +799,33 @@ object ArrayDefs {
 
   trait ApplyIndexDT[A, R, Arrs] {
     type Out
-    def apply(a: A, ref: R, arrs: Arrs): Out
+    def apply(a: A, ref: R): Out
   }
   object ApplyIndexDT {
     type Aux[A, R, Arrs, O] = ApplyIndexDT[A, R, Arrs] { type Out = O }
-    def instance[A, R, Arrs, O](f: (A, R, Arrs) => O): Aux[A, R, Arrs, O] = new ApplyIndexDT[A, R, Arrs] { 
+    def instance[A, R, Arrs, O](f: (A, R) => O): Aux[A, R, Arrs, O] = new ApplyIndexDT[A, R, Arrs] { 
       type Out = O
-      def apply(a: A, ref: R, arrs: Arrs): Out = f(a, ref, arrs)
+      def apply(a: A, ref: R): Out = f(a, ref)
     }
     def apply[A, R, Arrs](implicit ai: ApplyIndexDT[A, R, Arrs]): Aux[A, R, Arrs, ai.Out] = ai
 
     implicit def ifHeadIsInt[A[_], T, _S, R1p <: HList, Arrs <: HList, O](implicit
       aIsArr: IsArray[A, T] { type S = _S },
       iLocS: ApplyIndexDT[_S, R1p, Arrs], 
-    ): Aux[A[T], Int :: R1p, Arrs, iLocS.Out] = instance((a, r, arrs) => 
-      iLocS(aIsArr.getAtN(a, r.head), r.tail, arrs)
+    ): Aux[A[T], Int :: R1p, Arrs, iLocS.Out] = instance((a, r) => 
+      iLocS(aIsArr.getAtN(a, r.head), r.tail)
     )
     implicit def ifHeadIsListInt[A[_], T, _S, R1p <: HList, A0[_], A1p <: HList, SO](implicit
       aIsArr: IsArray[A, T] { type S = _S },
       iLocS: ApplyIndexDT[_S, R1p, A1p] { type Out = SO }, 
       outIsArr: IsArray[A0, T] { type S = SO }
-    ): Aux[A[T], List[Int] :: R1p, A0[T] :: A1p, A0[T]] = instance((a, r, arrs) => {
+    ): Aux[A[T], List[Int] :: R1p, A0[T] :: A1p, A0[T]] = instance((a, r) => {
       val origS: List[_S] = r.head.map(aIsArr.getAtN(a, _))
-      val locedS: List[SO] = origS.map(iLocS(_, r.tail, arrs.tail))
+      val locedS: List[SO] = origS.map(iLocS(_, r.tail))
       outIsArr.fromList(locedS)
     })
 
-    implicit def ifRefIsHNil[A, Arrs <: HList]: Aux[A, HNil, Arrs, A] = instance((a, r, arrs) => a)
+    implicit def ifRefIsHNil[A, Arrs <: HList]: Aux[A, HNil, Arrs, A] = instance((a, r) => a)
   }
 
   abstract class GetLoc[A[_], T, R] {
