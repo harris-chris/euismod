@@ -140,6 +140,35 @@ object ArrayDefs {
     }
   }
 
+  trait ReduceDT[A, _S, DM <: Nat] {
+    type Out
+    def apply(a: A, combine: List[_S] => _S): Out
+  }
+  object ReduceDT {
+    type Aux[A, _S, DM <: Nat, O] = ReduceDT[A, _S, DM] { type Out = O }
+    def instance[A, _S, DM <: Nat, O](f: (A, List[_S] => _S) => O): Aux[A, _S, DM, O] = 
+    new ReduceDT[A, _S, DM] {
+      type Out = O
+      def apply(a: A, combine: List[_S] => _S): O = f(a, combine)
+    }
+    def apply[A, _S, DM <: Nat, O](implicit se: Aux[A, _S, DM, O]): Aux[A, _S, DM, O] = se
+
+    //implicit def ifDMIs0[A[_], T, _S](implicit 
+      //aIsArr: IsArray[A, T] { type S = _S },
+    //): Aux[A[T], _S, Nat._0, _S] = instance((a, cmb) => 
+      //cmb(aIsArr.toList(a))
+    //)
+
+    //implicit def ifDMGt0[A[_], T, _S, _S0, DM <: Nat, DMm1 <: Nat](implicit 
+      //aIsArr: IsArray[A, T] { type S = _S0 },
+      //e1: GT[DM, Nat._0],
+      //pr: Pred.Aux[DM, DMm1],
+      //rd: ReduceDT[_S0, _S, DMm1],
+    //): Aux[A[T], _S, DM, A[T]] = instance((a, cmb) => 
+      //aIsArr.fromList(aIsArr.toList(a).map(rd(_, cmb)))
+    //)
+  }
+
   sealed trait SetElem[A[_], T, R <: HList] {
     type Out = A[T]
     def apply(a: A[T], ref: R, elem: T): Out

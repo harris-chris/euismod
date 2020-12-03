@@ -702,7 +702,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     object ReduceTest extends Tag("ReduceTest")
     scenario("Reducing a 1d arraylike creates a single T", ReduceTest) {
-      ReduceDT[List1d, Double](dbl1d, (lst => lst.foldLeft(0)(_ + _)))
+      //ReduceDT[List1d, Double](dbl1d, (lst => lst.foldLeft(0)(_ + _)))
     }
   }
 
