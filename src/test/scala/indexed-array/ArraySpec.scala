@@ -1130,17 +1130,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("IsArray.setAtN") {
-    import Dummy.Types._
-    import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
-    import Dummy.IsArrayImplicits._
-    object SetAtNTest extends Tag("SetAtNTest")
-    scenario("dbl1d.setAtN returns the correct List[T]", SetAtNTest) {
-      assert(dbl1d.setAtN(1, 0.01) === List1d(dbl1d.data.updated(1, 0.01)))
-    }
-  }
-
   feature("The SetElem typeclass") {
     import Dummy.Types._
     import Dummy.Values._

@@ -33,14 +33,12 @@ object ArrayDefs {
   @implicitNotFound(f"Cannot find IsArray implicit")
   abstract class IsArray[A[_], T] extends IsArrBase[A[T], T] { self =>
     type S
-    //implicit val sIsBase: IsBase[S]
 
     def getEmpty[_T]: A[_T] 
     def getAtN(a: A[T], n: Int): S
     def length(a: A[T]): Int
     def cons(a: A[T], sub: S): A[T]
 
-    def setAtN(a: A[T], n: Int, elem: S): A[T] = fromList(toList(a).updated(n, elem))
     def apply[R](a: A[T], r: R)(implicit ai: ApplyIndex[A[T], R]): ai.Out = ai(a, r)
     def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
@@ -102,7 +100,6 @@ object ArrayDefs {
       def getEmpty[_T] = tc.getEmpty[_T]
       def empty = tc.getEmpty[T]
       def getAtN(n: Int): _S = tc.getAtN(a, n)
-      def setAtN(n: Int, elem: _S) = tc.setAtN(a, n, elem)
       def apply[R](r: R)(implicit ai: ApplyIndex[A[T], R]) = tc.apply(a, r)
       def ::(other: _S) = tc.cons(a, other)
       def ++[B[_]](b: B[T])(implicit cn: ConcatenateCT[A, B, T, Nat._0]) = tc.++(a, b)
@@ -176,26 +173,6 @@ object ArrayDefs {
       val arrO = fe(lst, shape)
       arrO.get
     })
-
-    //implicit def ifDeLt3[
-      //A[_], T, DE <: Nat, DM <: Nat, FSH <: HList, FLF <: HList, LF <: HList, RG <: HList, AR <: HList
-    //] (implicit 
-      //aIsArr: IsArray[A, T],
-      //de: DepthCT.Aux[A[T], DE],
-      //e0: GT[Nat._3, DE],
-      //rd: ReduceToListDT[A, T, DM],
-      //sh: Shape.Aux[A[T], FSH],
-      //e1: At
-      //ga: GetArrsAsc.Aux[A, T, HNil, AR],
-      //fe: FromElemsDT[T, AR, LF :: RG, Nat._0], 
-      //dm: ToInt[DM],
-    //): Aux[A, T, DM, fe.Out] = instance((a, cmb) => {
-      //val lst: List[T] = rd(a, cmb)
-      //val dim = dm()
-      //val (lf, rg) = sp(sh(a))
-      //val shape: LF :: RG = dr(lf) :: rg
-      //fe(lst, shape)
-    //})
   }
 
   trait ReduceToListDT[A[_], T, DM <: Nat] {
@@ -249,7 +226,7 @@ object ArrayDefs {
     implicit def ifHListIntIsBase[A[_], T](implicit
       ia: IsArray[A, T] { type S = T },
     ): Aux[A, T, Int :: HNil] = instance(
-      (a, ref, elem) => ia.setAtN(a, ref.head, elem)
+      (a, ref, elem) => ia.fromList(ia.toList(a).updated(ref.head, elem))
     )
 
     implicit def ifHListIntIsArr[A[_], T, _S[_], R1p <: HList](implicit
@@ -257,7 +234,7 @@ object ArrayDefs {
       iaS: SetElem[_S, T, R1p],
     ): Aux[A, T, Int :: R1p] = instance((a, ref, elem) => {
       val newS = iaS.apply(ia.getAtN(a, ref.head), ref.tail, elem)
-      ia.setAtN(a, ref.head, newS)
+      ia.fromList(ia.toList(a).updated(ref.head, newS))
     })
   }
 
