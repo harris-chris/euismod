@@ -32,26 +32,11 @@ object Dummy {
   ):Equality[A[Double]] = addEquality[A[Double]]((a, b) => b match {
     case p: A[Double] => {
       implicit val doubleEquality = TolerantNumerics.tolerantDoubleEquality(0.1)
-      println("CHECKING")
-      val flatA = fl(a)
-      val flatP = fl(p)
-      println(s"COMPARE ${flatA.last} TO ${flatP.last} RES ${flatA === flatP}")
       sh(a, HNil) == sh(p, HNil) &&
       fl(a).zip(fl(p)).forall{ case(aE, pE) => aE === pE }
     }
     case _ => false
   })
-  //implicit def arrayEquality[A[_], T]( implicit
-    //aIsArr: ArrayDefs.IsArray[A, T],
-    //fl: ArrayDefs.Flatten[A, T],
-    //sh: ArrayDefs.ShapeRT[A[T], HNil],
-  //): Equality[A[T]] = new Equality[A[T]] {
-    //def areEqual(a: A[T], b: Any): Boolean = b match {
-      //case p: A[T] => {
-      //}
-      //case _ => false
-    //}
-  //}
   
   object Types {
     case class List1d[T] (
@@ -766,6 +751,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         )
       )
       assert(act.shape === dbl3d.shape.at(Nat._0) :: dbl3d.shape.at(Nat._2) :: HNil)
+      assert(act === exp)
+    }
+    scenario("Reducing a 3d arraylike across dim2 returns a correct 2d arraylike", ReduceTest, Current) {
+      val act = ReduceDT[List3d, Double, Nat._2].apply(
+        dbl3d, lst => lst.foldLeft(0.0: Double)(_ + _)
+      )
+      val exp = List2d[Double](
+        dbl3d.data.map(_.map(lst => lst.foldLeft(0.0)(_ + _)))
+      )
+      assert(act.shape === dbl3d.shape.at(Nat._0) :: dbl3d.shape.at(Nat._1) :: HNil)
       assert(act === exp)
     }
   }
