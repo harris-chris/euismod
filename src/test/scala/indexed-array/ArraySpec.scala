@@ -701,8 +701,20 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
     object ReduceTest extends Tag("ReduceTest")
-    scenario("Reducing a 1d arraylike creates a single T", ReduceTest) {
-      //ReduceDT[List1d, Double](dbl1d, (lst => lst.foldLeft(0)(_ + _)))
+    scenario("Using ReduceDT on a 1d arraylike does not compile", ReduceTest) {
+      "ReduceToListDT[List1d, Double, Nat._0].apply(dbl1d, lst => lst.foldLeft(0)(_ + _))" shouldNot compile
+    }
+    scenario("Reducing a 2d arraylike across dim0 returns a correct 1d arraylike", ReduceTest) {
+      val act = ReduceDT[List2d, Double, Nat._0].apply(dbl2d, lst => lst.foldLeft(0.0)(_ + _))
+      val exp = dbl2d.data.transpose.map(_.foldLeft(0.0)(_ + _)) 
+      assert(act.length === dbl2d.length)
+      assert(act === exp)
+    }
+    scenario("Reducing a 2d arraylike across dim1 returns a correct 1d arraylike", ReduceTest) {
+      val act = ReduceDT[List2d, Double, Nat._1].apply(dbl2d, lst => lst.foldLeft(0.0)(_ + _))
+      val exp = dbl2d.data.map(_.foldLeft(0.0)(_ + _)) 
+      assert(act.length === dbl2d.getAtN(0).length)
+      assert(act === exp)
     }
   }
 
@@ -856,6 +868,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         }
         case None => false
       })
+      println(act.length)
     }
     scenario("a List2d can be constructed from a list of Ts", FromElemsDTTest) {
       val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)

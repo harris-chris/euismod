@@ -148,25 +148,51 @@ object ArrayDefs {
       type Out = O
       def apply(a: A[T], combine: List[T] => T): Out = f(a, combine)
     }
-    def apply[A[_], T, DM <: Nat, O](implicit se: Aux[A, T, DM, O]): Aux[A, T, DM, O] = se
+    def apply[A[_], T, DM <: Nat](implicit se: ReduceDT[A, T, DM]): ReduceDT[A, T, DM] = se
 
-    implicit def ifArray[
-      A[_], T, DM <: Nat, FSH <: HList, FLF <: HList, LF <: HList, RG <: HList, AR <: HList](implicit 
+    implicit def ifDeGt2[
+      A[_], T, DE <: Nat, DM <: Nat, FSH <: HList, FLF <: HList, LF <: HList, RG <: HList, 
+      AR <: HList, SH <: HList, Out
+    ] (implicit 
       aIsArr: IsArray[A, T],
+      de: DepthCT.Aux[A[T], DE],
+      e0: GT[DE, Nat._1],
       rd: ReduceToListDT[A, T, DM],
       sh: Shape.Aux[A[T], FSH],
-      sp: Split.Aux[FSH, DM, FLF, RG],
+      sp: Split.Aux[FSH, Succ[DM], FLF, RG],
       dr: Drop.Aux[FLF, Nat._1, LF],
       ga: GetArrsAsc.Aux[A, T, HNil, AR],
-      fe: FromElemsDT[T, AR, LF :: RG, Nat._0], 
+      pr: Prepend.Aux[LF, RG, SH],
+      fe: FromElemsDT.Aux[T, AR, SH, Nat._0, Option[Out]], 
       dm: ToInt[DM],
-    ): Aux[A, T, DM, fe.Out] = instance((a, cmb) => {
+    ): Aux[A, T, DM, Out] = instance((a, cmb) => {
       val lst: List[T] = rd(a, cmb)
       val dim = dm()
       val (lf, rg) = sp(sh(a))
-      val shape: LF :: RG = dr(lf) :: rg
-      fe(lst, shape)
+      val shape: SH = dr(lf) ++ rg
+      val arrO = fe(lst, shape)
+      arrO.get
     })
+
+    //implicit def ifDeLt3[
+      //A[_], T, DE <: Nat, DM <: Nat, FSH <: HList, FLF <: HList, LF <: HList, RG <: HList, AR <: HList
+    //] (implicit 
+      //aIsArr: IsArray[A, T],
+      //de: DepthCT.Aux[A[T], DE],
+      //e0: GT[Nat._3, DE],
+      //rd: ReduceToListDT[A, T, DM],
+      //sh: Shape.Aux[A[T], FSH],
+      //e1: At
+      //ga: GetArrsAsc.Aux[A, T, HNil, AR],
+      //fe: FromElemsDT[T, AR, LF :: RG, Nat._0], 
+      //dm: ToInt[DM],
+    //): Aux[A, T, DM, fe.Out] = instance((a, cmb) => {
+      //val lst: List[T] = rd(a, cmb)
+      //val dim = dm()
+      //val (lf, rg) = sp(sh(a))
+      //val shape: LF :: RG = dr(lf) :: rg
+      //fe(lst, shape)
+    //})
   }
 
   trait ReduceToListDT[A[_], T, DM <: Nat] {
@@ -517,12 +543,12 @@ object ArrayDefs {
     def combineS[A[_], T, _S](
       aEmpty: A[T], as: List[A[T]], l: List[_S], width: Int,
     )(implicit 
-      aIsABs: IsArray[A, T] { type S = _S },
+      aIsArr: IsArray[A, T] { type S = _S },
     ): Option[List[A[T]]] = l.length match {
       case 0 => Some(as.reverse)
       case x if x >= width => {
         val (ths, rst) = l.splitAt(width)
-        val thsA: A[T] = ths.reverse.foldLeft(aEmpty)((s, o) => aIsABs.cons(s, o))
+        val thsA: A[T] = ths.reverse.foldLeft(aEmpty)((s, o) => aIsArr.cons(s, o))
         combineS[A, T, _S](aEmpty, thsA :: as, rst, width)
       }
       case _ => None
