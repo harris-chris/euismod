@@ -14,10 +14,45 @@ import IndicesObj._
 import shapeless._
 import shapeless.{HList, HNil, Lazy, :: => #:}
 import shapeless.ops.nat.{GT, GTEq, Pred, Diff => NatDiff, ToInt}
-//import shapeless.test.{illTyped}
 import shapeless.ops.hlist._
+import org.scalactic._
+import TripleEquals._
+import org.scalactic.TolerantNumerics
 
 object Dummy {
+
+  def addEquality[A](f: (A, Any) => Boolean): Equality[A] = new Equality[A] {
+    def areEqual(a: A, b: Any): Boolean = f(a, b)
+  }
+
+  implicit def arrDoubleEquality[A[_]]( implicit 
+    aIsArr: ArrayDefs.IsArray[A, Double],
+    fl: ArrayDefs.Flatten[A, Double],
+    sh: ArrayDefs.ShapeRT[A[Double], HNil],
+  ):Equality[A[Double]] = addEquality[A[Double]]((a, b) => b match {
+    case p: A[Double] => {
+      implicit val doubleEquality = TolerantNumerics.tolerantDoubleEquality(0.1)
+      println("CHECKING")
+      val flatA = fl(a)
+      val flatP = fl(p)
+      println(s"COMPARE ${flatA.last} TO ${flatP.last} RES ${flatA === flatP}")
+      sh(a, HNil) == sh(p, HNil) &&
+      fl(a).zip(fl(p)).forall{ case(aE, pE) => aE === pE }
+    }
+    case _ => false
+  })
+  //implicit def arrayEquality[A[_], T]( implicit
+    //aIsArr: ArrayDefs.IsArray[A, T],
+    //fl: ArrayDefs.Flatten[A, T],
+    //sh: ArrayDefs.ShapeRT[A[T], HNil],
+  //): Equality[A[T]] = new Equality[A[T]] {
+    //def areEqual(a: A[T], b: Any): Boolean = b match {
+      //case p: A[T] => {
+      //}
+      //case _ => false
+    //}
+  //}
+  
   object Types {
     case class List1d[T] (
       data: List[T],
@@ -713,12 +748,24 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === exp)
     }
     scenario("Reducing a 2d arraylike across dim1 returns a correct 1d arraylike", ReduceTest, Current) {
-      println(s"SHAPE OF DBL2D ${dbl2d.shape}")
       val act: List1d[Double] = ReduceDT[List2d, Double, Nat._1].apply(
         dbl2d, lst => lst.foldLeft(0.0: Double)(_ + _)
       )
-      val exp = dbl2d.data.map(_.foldLeft(0.0)(_ + _)) 
+      val exp = List1d(dbl2d.data.map(_.foldLeft(0.0)(_ + _)))
       assert(act.length === dbl2d.length)
+      assert(act === exp)
+    }
+    scenario("Reducing a 3d arraylike across dim1 returns a correct 2d arraylike", ReduceTest, Current) {
+      val act = ReduceDT[List3d, Double, Nat._1].apply(
+        dbl3d, lst => lst.foldLeft(0.0: Double)(_ + _)
+      )
+      val exp = List2d[Double](
+        List(
+          List(0.030, 0.033, 0.036, 0.039, 0.042),
+          List(0.330, 0.333, 0.336, 0.339, 0.342),
+        )
+      )
+      assert(act.shape === dbl3d.shape.at(Nat._0) :: dbl3d.shape.at(Nat._2) :: HNil)
       assert(act === exp)
     }
   }

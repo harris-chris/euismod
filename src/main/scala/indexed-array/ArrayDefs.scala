@@ -160,7 +160,7 @@ object ArrayDefs {
       rd: ReduceToListDT[A, T, DM],
       sh: Shape.Aux[A[T], FSH],
       sp: Split.Aux[FSH, Succ[DM], FLF, RG],
-      dr: Drop.Aux[FLF, Nat._1, LF],
+      in: Init.Aux[FLF, LF],
       ga: GetArrsAsc.Aux[A, T, HNil, AR],
       pr: Prepend.Aux[LF, RG, SH],
       fe: FromElemsDT.Aux[T, AR, SH, Nat._0, Option[Out]], 
@@ -170,7 +170,8 @@ object ArrayDefs {
       println(s"LIST ${lst}")
       val dim = dm()
       val (lf, rg) = sp(sh(a))
-      val shape: SH = dr(lf) ++ rg
+      println(s"LEFT ${lf} RIGHT ${rg}")
+      val shape: SH = in(lf) ++ rg
       println(s"SHAPE ${shape}")
       val arrO = fe(lst, shape)
       arrO.get
