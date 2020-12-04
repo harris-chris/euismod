@@ -87,9 +87,6 @@ object ArrayDefs {
       val arrs: GAOut = ga(HNil)
       fr(list_t, arrs, shape).get 
     }
-    def getReducedArraysForApply[R, O](a: A[T], r: R)(implicit
-      gr: GetRdcArrs[A, T, R] { type Out = O }
-    ): O = gr(a, r)
   }
 
   object IsArray {
@@ -140,33 +137,64 @@ object ArrayDefs {
     }
   }
 
-  trait ReduceDT[A, _S, DM <: Nat] {
+  trait ReduceDT[A[_], T, DM <: Nat] {
     type Out
-    def apply(a: A, combine: List[_S] => _S): Out
+    def apply(a: A[T], combine: List[T] => T): Out
   }
   object ReduceDT {
-    type Aux[A, _S, DM <: Nat, O] = ReduceDT[A, _S, DM] { type Out = O }
-    def instance[A, _S, DM <: Nat, O](f: (A, List[_S] => _S) => O): Aux[A, _S, DM, O] = 
-    new ReduceDT[A, _S, DM] {
+    type Aux[A[_], T, DM <: Nat, O] = ReduceDT[A, T, DM] { type Out = O }
+    def instance[A[_], T, DM <: Nat, O](f: (A[T], List[T] => T) => O): Aux[A, T, DM, O] = 
+    new ReduceDT[A, T, DM] {
       type Out = O
-      def apply(a: A, combine: List[_S] => _S): O = f(a, combine)
+      def apply(a: A[T], combine: List[T] => T): Out = f(a, combine)
     }
-    def apply[A, _S, DM <: Nat, O](implicit se: Aux[A, _S, DM, O]): Aux[A, _S, DM, O] = se
+    def apply[A[_], T, DM <: Nat, O](implicit se: Aux[A, T, DM, O]): Aux[A, T, DM, O] = se
 
-    //implicit def ifDMIs0[A[_], T, _S](implicit 
-      //aIsArr: IsArray[A, T] { type S = _S },
-    //): Aux[A[T], _S, Nat._0, _S] = instance((a, cmb) => 
-      //cmb(aIsArr.toList(a))
-    //)
+    //implicit def ifArray[
+      //A[_], T, DM <: Nat, FSH <: HList, FLF <: HList, LF <: HList, RG <: HList, AR <: HList](implicit 
+      //aIsArr: IsArray[A, T],
+      //rd: ReduceToListDT[A, T, DM],
+      //sh: Shape.Aux[A[T], FSH],
+      //e0: Split.Aux[FSH, DM, FLF, RG],
+      //e1: Drop.Aux[FLF, Nat._1, LF],
+      //ga: GetArrsAsc.Aux[A, T, HNil, AR],
+      //fe: FromElemsDT[T, AR, LF :: RG, Nat._0], 
+    //): Aux[A, T, DM, fe.Out] = instance((a, cmb) => {
+      //// drop DM from shape
+      //val lst: List[T] = rd(a, cmb)
+      //fe(lst, sh(a))
+    //})
+  }
 
-    //implicit def ifDMGt0[A[_], T, _S, _S0, DM <: Nat, DMm1 <: Nat](implicit 
-      //aIsArr: IsArray[A, T] { type S = _S0 },
-      //e1: GT[DM, Nat._0],
-      //pr: Pred.Aux[DM, DMm1],
-      //rd: ReduceDT[_S0, _S, DMm1],
-    //): Aux[A[T], _S, DM, A[T]] = instance((a, cmb) => 
-      //aIsArr.fromList(aIsArr.toList(a).map(rd(_, cmb)))
-    //)
+  trait ReduceToListDT[A[_], T, DM <: Nat] {
+    type Out = List[T]
+    def apply(a: A[T], combine: List[T] => T): Out
+  }
+  object ReduceToListDT {
+    type Aux[A[_], T, DM <: Nat] = ReduceToListDT[A, T, DM]
+    def instance[A[_], T, DM <: Nat](f: (A[T], List[T] => T) => List[T]): Aux[A, T, DM] = 
+    new ReduceToListDT[A, T, DM] {
+      def apply(a: A[T], combine: List[T] => T): Out = f(a, combine)
+    }
+    def apply[A[_], T, DM <: Nat](implicit se: Aux[A, T, DM]): Aux[A, T, DM] = se
+
+    implicit def ifDMIs0[A[_], T, _S[_]] (implicit 
+      aIsArr: IsArray[A, T] { type S = _S[T] },
+      fl: Flatten[_S, T],
+    ): Aux[A, T, Nat._0] = instance((a, cmb) => {
+      val lst2d: List[List[T]] = aIsArr.toList(a).map(fl(_))
+      lst2d.transpose.map(cmb(_))
+    })
+
+    implicit def ifDMGt0[A[_], T, _S[_], DM <: Nat, DMm1 <: Nat](implicit 
+      aIsArr: IsArray[A, T] { type S = _S[T] },
+      e1: GT[DM, Nat._0],
+      pr: Pred.Aux[DM, DMm1],
+      rd: ReduceToListDT[_S, T, DMm1],
+    ): Aux[A, T, DM] = instance((a, cmb) => {
+      val lst: List[List[T]] = aIsArr.toList(a).map(rd(_, cmb))
+      lst.foldLeft(Nil: List[T])(_ ++ _)
+    })
   }
 
   sealed trait SetElem[A[_], T, R <: HList] {
@@ -326,29 +354,6 @@ object ArrayDefs {
       }
     )
     implicit val ifHNil: CombineShapesRT[HNil] = instance((a, b, isHead) => Some(HNil))
-  }
-
-  sealed trait GetRdcArrs[A[_], T, I] {self =>
-    type Out <: HList
-    def apply(a: A[T], i: I): Out
-  }
-  object GetRdcArrs {
-    type Aux[A[_], T, I <: HList, O <: HList] = GetRdcArrs[A, T, I] { type Out = O }
-    def instance[A[_], T, I <: HList, O <: HList](f: (A[T], I) => O): Aux[A, T, I, O] = new GetRdcArrs[A, T, I] { 
-      type Out = O
-      def apply(a: A[T], i: I): Out = f(a, i)
-    }
-    implicit def ifIIsHList[
-      A[_], T, Inp <: HList, Arrs <: HList, Filt <: HList, IntsN <: Nat, ArrsN <: Nat, TakeN <: Nat, RdArrs <: HList,
-    ] (implicit 
-      ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
-      fl: Filter[Inp, Int] { type Out = Filt },
-      lf: Length[Filt] { type Out = IntsN },
-      la: Length[Arrs] { type Out = ArrsN },
-      di: NatDiff[ArrsN, IntsN] { type Out = TakeN },
-      dr: Take[Arrs, TakeN] { type Out = RdArrs },
-      re: Reverse[RdArrs],
-    ): Aux[A, T, Inp, re.Out] = instance((a: A[T], inp: Inp) => re(dr(ga(HNil))))
   }
 
   sealed trait GetArrsDesc[A[_], T, L <: HList] {self =>
