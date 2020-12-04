@@ -148,7 +148,7 @@ object ArrayDefs {
       type Out = O
       def apply(a: A[T], combine: List[T] => T): Out = f(a, combine)
     }
-    def apply[A[_], T, DM <: Nat](implicit se: ReduceDT[A, T, DM]): ReduceDT[A, T, DM] = se
+    def apply[A[_], T, DM <: Nat](implicit se: ReduceDT[A, T, DM]): Aux[A, T, DM, se.Out] = se
 
     implicit def ifDeGt2[
       A[_], T, DE <: Nat, DM <: Nat, FSH <: HList, FLF <: HList, LF <: HList, RG <: HList, 
@@ -167,9 +167,11 @@ object ArrayDefs {
       dm: ToInt[DM],
     ): Aux[A, T, DM, Out] = instance((a, cmb) => {
       val lst: List[T] = rd(a, cmb)
+      println(s"LIST ${lst}")
       val dim = dm()
       val (lf, rg) = sp(sh(a))
       val shape: SH = dr(lf) ++ rg
+      println(s"SHAPE ${shape}")
       val arrO = fe(lst, shape)
       arrO.get
     })
@@ -207,12 +209,18 @@ object ArrayDefs {
     }
     def apply[A[_], T, DM <: Nat](implicit se: Aux[A, T, DM]): Aux[A, T, DM] = se
 
-    implicit def ifDMIs0[A[_], T, _S[_]] (implicit 
+    implicit def ifDMIs0AndSIs2dPlus[A[_], T, _S[_]] (implicit 
       aIsArr: IsArray[A, T] { type S = _S[T] },
       fl: Flatten[_S, T],
     ): Aux[A, T, Nat._0] = instance((a, cmb) => {
       val lst2d: List[List[T]] = aIsArr.toList(a).map(fl(_))
       lst2d.transpose.map(cmb(_))
+    })
+    
+    implicit def ifDMIs0AndSIs1d[A[_], T] (implicit 
+      aIsArr: IsArray[A, T] { type S = T },
+    ): Aux[A, T, Nat._0] = instance((a, cmb) => {
+      List(cmb(aIsArr.toList(a)))
     })
 
     implicit def ifDMGt0[A[_], T, _S[_], DM <: Nat, DMm1 <: Nat](implicit 

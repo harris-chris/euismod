@@ -428,7 +428,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val act = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(dbl3d)
       assert(act === exp)
     }
-    scenario("Transposing a 4d array along axes 2/3 matches with numpy", TransposeDTTest, Current) {
+    scenario("Transposing a 4d array along axes 2/3 matches with numpy", TransposeDTTest) {
       //val act = TransposeDT[List4d[Double], (Nat._2, Nat._3)].apply(dbl4d)
       val act = TransAxDT[List4d[Double], Nat._2, Nat._3].apply(dbl4d)
       val exp = List4d[Double](
@@ -695,25 +695,30 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature(" The Reduce typeclass") {
+  feature("The Reduce typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
     object ReduceTest extends Tag("ReduceTest")
     scenario("Using ReduceDT on a 1d arraylike does not compile", ReduceTest) {
-      "ReduceToListDT[List1d, Double, Nat._0].apply(dbl1d, lst => lst.foldLeft(0)(_ + _))" shouldNot compile
+      "ReduceDT[List1d, Double, Nat._0].apply(dbl1d, lst => lst.foldLeft(0.0)(_ + _))" shouldNot compile
     }
     scenario("Reducing a 2d arraylike across dim0 returns a correct 1d arraylike", ReduceTest) {
-      val act = ReduceDT[List2d, Double, Nat._0].apply(dbl2d, lst => lst.foldLeft(0.0)(_ + _))
-      val exp = dbl2d.data.transpose.map(_.foldLeft(0.0)(_ + _)) 
-      assert(act.length === dbl2d.length)
+      val act: List1d[Double] = ReduceDT[List2d, Double, Nat._0].apply(
+        dbl2d, lst => lst.foldLeft(0.0: Double)(_ + _)
+      )
+      val exp = List1d[Double](dbl2d.data.transpose.map(_.foldLeft(0.0)((a, b) => a + b)))
+      assert(act.length === dbl2d.getAtN(0).length)
       assert(act === exp)
     }
-    scenario("Reducing a 2d arraylike across dim1 returns a correct 1d arraylike", ReduceTest) {
-      val act = ReduceDT[List2d, Double, Nat._1].apply(dbl2d, lst => lst.foldLeft(0.0)(_ + _))
+    scenario("Reducing a 2d arraylike across dim1 returns a correct 1d arraylike", ReduceTest, Current) {
+      println(s"SHAPE OF DBL2D ${dbl2d.shape}")
+      val act: List1d[Double] = ReduceDT[List2d, Double, Nat._1].apply(
+        dbl2d, lst => lst.foldLeft(0.0: Double)(_ + _)
+      )
       val exp = dbl2d.data.map(_.foldLeft(0.0)(_ + _)) 
-      assert(act.length === dbl2d.getAtN(0).length)
+      assert(act.length === dbl2d.length)
       assert(act === exp)
     }
   }
@@ -868,7 +873,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         }
         case None => false
       })
-      println(act.length)
     }
     scenario("a List2d can be constructed from a list of Ts", FromElemsDTTest) {
       val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)
