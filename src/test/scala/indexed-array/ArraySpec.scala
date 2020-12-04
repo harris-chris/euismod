@@ -849,7 +849,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val newShape = 3 :: HNil
       val ga = GetArrsAsc[List1d, Double, HNil]
       val fe = FromElemsDT[Double, ga.Out, Int :: HNil, Nat._0]
-      val act = fe(ts3, ga(HNil), newShape)
+      val act = fe(ts3, newShape)
       assert(act match {
         case Some(l1) => {
           l1.flatten.toList === ts3
@@ -862,7 +862,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val newShape = 2 :: 3 :: HNil
       val ga = GetArrsAsc[List2d, Double, HNil]
       val fe = FromElemsDT[Double, ga.Out, Int :: Int :: HNil, Nat._0]
-      val actO = fe(ts3, ga(HNil), newShape)
+      val actO = fe(ts3, newShape)
       val exp = List2d[Double](List(
         List(0.00, 0.01, 0.02),
         List(0.10, 0.11, 0.12),
@@ -881,7 +881,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val newShape = 2 :: 2 :: 3 :: HNil
       val ga = GetArrsAsc[List3d, Double, HNil]
       val fe = FromElemsDT[Double, ga.Out, Int :: Int :: Int :: HNil, Nat._0]
-      val actO = fe(ts3, ga(HNil), newShape)
+      val actO = fe(ts3, newShape)
       val exp = List3d[Double](
         List(
           List(
@@ -904,7 +904,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val newShape = 6 :: HNil
       val ga = GetArrsAsc[List2d, Double, HNil]
       val fe = FromElemsDT[Double, ga.Out, Int :: HNil, Nat._0]
-      val act = fe(ts6, ga(HNil), newShape)
+      val act = fe(ts6, newShape)
       assert(act match {
         case Some(l1) => l1.flatten.toList === ts6
         case None => false
@@ -916,7 +916,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val ga: GetArrsAsc[List2d, Double, HNil] { type Out = List1d[Double] :: List2d[Double] :: HNil } = 
         GetArrsAsc[List2d, Double, HNil]
       val fe = FromElemsDT[Double, ga.Out, Int :: Int :: HNil, Nat._0]
-      val act = fe(ts6, ga(HNil), newShape)
+      val act = fe(ts6, newShape)
       assert(act match {
         case Some(l2) => {
           l2.flatten.toList === ts6 && l2.shape === newShape

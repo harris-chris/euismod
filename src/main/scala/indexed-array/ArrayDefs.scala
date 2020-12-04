@@ -61,12 +61,12 @@ object ArrayDefs {
     def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
       fe: FromElems[T, GAOut, SH], 
-    ): fe.Out = fe(listT, ga(HNil), shape)
+    ): fe.Out = fe(listT, shape)
     def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T])(implicit 
       sh: Shape[A[T]] { type Out = SH },
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
       fe: FromElems[T, GAOut, SH], 
-    ): fe.Out = fe(listT, ga(HNil), sh(a))
+    ): fe.Out = fe(listT, sh(a))
     def reshape[GAOut <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
@@ -85,7 +85,7 @@ object ArrayDefs {
       val list_t: List[_T] = flatten(a).map(f)
       val empty_t: A[_T] = getEmpty[_T]
       val arrs: GAOut = ga(HNil)
-      fr(list_t, arrs, shape).get 
+      fr(list_t, shape).get 
     }
   }
 
@@ -150,20 +150,23 @@ object ArrayDefs {
     }
     def apply[A[_], T, DM <: Nat, O](implicit se: Aux[A, T, DM, O]): Aux[A, T, DM, O] = se
 
-    //implicit def ifArray[
-      //A[_], T, DM <: Nat, FSH <: HList, FLF <: HList, LF <: HList, RG <: HList, AR <: HList](implicit 
-      //aIsArr: IsArray[A, T],
-      //rd: ReduceToListDT[A, T, DM],
-      //sh: Shape.Aux[A[T], FSH],
-      //e0: Split.Aux[FSH, DM, FLF, RG],
-      //e1: Drop.Aux[FLF, Nat._1, LF],
-      //ga: GetArrsAsc.Aux[A, T, HNil, AR],
-      //fe: FromElemsDT[T, AR, LF :: RG, Nat._0], 
-    //): Aux[A, T, DM, fe.Out] = instance((a, cmb) => {
-      //// drop DM from shape
-      //val lst: List[T] = rd(a, cmb)
-      //fe(lst, sh(a))
-    //})
+    implicit def ifArray[
+      A[_], T, DM <: Nat, FSH <: HList, FLF <: HList, LF <: HList, RG <: HList, AR <: HList](implicit 
+      aIsArr: IsArray[A, T],
+      rd: ReduceToListDT[A, T, DM],
+      sh: Shape.Aux[A[T], FSH],
+      sp: Split.Aux[FSH, DM, FLF, RG],
+      dr: Drop.Aux[FLF, Nat._1, LF],
+      ga: GetArrsAsc.Aux[A, T, HNil, AR],
+      fe: FromElemsDT[T, AR, LF :: RG, Nat._0], 
+      dm: ToInt[DM],
+    ): Aux[A, T, DM, fe.Out] = instance((a, cmb) => {
+      val lst: List[T] = rd(a, cmb)
+      val dim = dm()
+      val (lf, rg) = sp(sh(a))
+      val shape: LF :: RG = dr(lf) :: rg
+      fe(lst, shape)
+    })
   }
 
   trait ReduceToListDT[A[_], T, DM <: Nat] {
@@ -451,40 +454,40 @@ object ArrayDefs {
 
   trait FromElems[T, Arrs <: HList, SH <: HList] {
     type Out
-    def apply(l: List[T], arrs: Arrs, sh: SH): Out
+    def apply(l: List[T], sh: SH): Out
   }
   object FromElems {
     type Aux[T, Arrs <: HList, SH <: HList, O] = FromElems[T, Arrs, SH] { type Out = O }
-    def instance[T, Arrs <: HList, SH <: HList, O](f: (List[T], Arrs, SH) => O): Aux[T, Arrs, SH, O] = 
+    def instance[T, Arrs <: HList, SH <: HList, O](f: (List[T], SH) => O): Aux[T, Arrs, SH, O] = 
     new FromElems[T, Arrs, SH] {
       type Out = O
-      def apply(l: List[T], arrs: Arrs, sh: SH): Out = f(l, arrs, sh)
+      def apply(l: List[T], sh: SH): Out = f(l, sh)
     }
     def apply[T, Arrs <: HList, SH <: HList](implicit fe: FromElems[T, Arrs, SH]): Aux[T, Arrs, SH, fe.Out] = fe
     implicit def ifListT[T, Arrs <: HList, SH <: HList, RSH <: HList, O]( implicit 
       fr: FromElemsDT[T, Arrs, SH, Nat._0],
-    ): Aux[T, Arrs, SH, fr.Out] = instance((l, arrs, sh) => fr(l, arrs, sh))
+    ): Aux[T, Arrs, SH, fr.Out] = instance((l, sh) => fr(l, sh))
   }
 
   trait FromElemsDT[X, Arrs <: HList, SH <: HList, INIT <: Nat] {
     type Out <: Option[Any]
-    def apply(l: List[X], arrs: Arrs, sh: SH): Out
+    def apply(l: List[X], sh: SH): Out
   }
   object FromElemsDT {
     type Aux[X, Arrs <: HList, SH <: HList, INIT <: Nat, O <: Option[_]] = 
       FromElemsDT[X, Arrs, SH, INIT] { type Out = O }
     def instance[T, Arrs <: HList, SH <: HList, INIT <: Nat, O <: Option[_]](
-      f: (List[T], Arrs, SH) => O
+      f: (List[T], SH) => O
     ): Aux[T, Arrs, SH, INIT, O] = new FromElemsDT[T, Arrs, SH, INIT] {
       type Out = O
-      def apply(l: List[T], arrs: Arrs, sh: SH): Out = f(l, arrs, sh)
+      def apply(l: List[T], sh: SH): Out = f(l, sh)
     }
     def apply[T, Arrs <: HList, SH <: HList, INIT <: Nat](
       implicit fe: FromElemsDT[T, Arrs, SH, INIT],
     ): FromElemsDT.Aux[T, Arrs, SH, INIT, fe.Out] = fe
 
     implicit def ifShapeIsHNil[X, Arrs <: HList, INIT <: Nat]: Aux[X, Arrs, HNil, INIT, Option[X]] = instance(
-      (l, arrs, sh) => {
+      (l, sh) => {
         if(l.length == 1){Some(l(0))} else {None}
       }
     )
@@ -493,12 +496,12 @@ object ArrayDefs {
       a0IsArr: IsArray[A0, T] { type S = _S },
       feForA1: FromElemsDT.Aux[A0[T], A1p, SH1p, Nat._1, Option[NxtO]],
     ): Aux[_S, A0[T] :: A1p, Int :: SH1p, Nat._1, Option[NxtO]] = instance(
-      (l, arrs, sh) => {
-        val thisA: A0[T] = arrs.head
+      (l, sh) => {
+        val thisA: A0[T] = a0IsArr.getEmpty
         val h1Nil = Nil: List[A0[T]]
         val combinedS: Option[List[A0[T]]] = combineS[A0, T, _S](thisA, h1Nil, l, sh.head)
         combinedS.flatMap(
-          a1s => feForA1(a1s, arrs.tail, sh.tail)
+          a1s => feForA1(a1s, sh.tail)
         )
       }
     )
@@ -508,7 +511,7 @@ object ArrayDefs {
       rv: Reverse.Aux[SH, RSH],
       fe: FromElemsDT.Aux[T, A0[T] :: A1p, RSH, Nat._1, Option[NxtO]],
     ): Aux[T, A0[T] :: A1p, SH, Nat._0, Option[NxtO]] = instance(
-      (l, arrs, sh) => fe(l, arrs, rv(sh))
+      (l, sh) => fe(l, rv(sh))
     )
 
     def combineS[A[_], T, _S](
@@ -577,7 +580,7 @@ object ArrayDefs {
       cs: CombineShapes.Aux[SA, SB, Option[SH]],
       fe: FromElems.Aux[T, Arrs, SH, Option[A[T]]],
     ): Aux[A, B, T] = instance((a, b) => 
-      cs(aSh(a), bSh(b), 0).flatMap(sh => fe(flA(a) ++ flB(b), ga(HNil), sh))
+      cs(aSh(a), bSh(b), 0).flatMap(sh => fe(flA(a) ++ flB(b), sh))
     )
   }
 
@@ -751,7 +754,7 @@ object ArrayDefs {
       val upd = for((t, i) <- flA(a).zipWithIndex) yield (
         if(bs(i)) {ns(i)} else {t}
       )
-      fe(upd, ga(HNil), sh(a)).get
+      fe(upd, sh(a)).get
     })
   }
 
