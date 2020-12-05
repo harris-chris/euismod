@@ -953,33 +953,33 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  //feature("IsArray.map") {
-    //import ArrayDefs.IsArraySyntax._
-    //import Dummy.Types._
-    //import Dummy.Values._
-    //import Dummy.IsArrayImplicits._
-    //object MapTest extends Tag("MapTest")
-    //scenario(".map on a 1d array returns a mapped 1d array", MapTest) {
-      //val mapped = dbl1d.map(t => t.toInt)
-      //assert(mapped.shape === dbl1d.shape)
-      //assert(mapped.flatten === dbl1d.flatten.map(_.toInt))
-    //}
-    //scenario(".map on a 2d array returns a mapped 2d array", MapTest) {
-      //val mapped = dbl2d.map(t => t.toInt)
-      //assert(mapped.shape === dbl2d.shape)
-      //assert(mapped.flatten === dbl2d.flatten.map(_.toInt))
-    //}
-    //scenario(".map on a 3d array returns a mapped 3d array", MapTest) {
-      //val mapped = dbl3d.map(t => t.toInt)
-      //assert(mapped.shape === dbl3d.shape)
-      //assert(mapped.flatten === dbl3d.flatten.map(_.toInt))
-    //}
-    //scenario(".map double => char on a 3d array returns a mapped 3d array", MapTest) {
-      //val mapped = dbl3d.map(t => 'c')
-      //assert(mapped.shape === dbl3d.shape)
-      //assert(mapped.flatten === dbl3d.flatten.map(_ => 'c'))
-    //}
-  //}
+  feature("IsArray.map") {
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    object MapTest extends Tag("MapTest")
+    scenario(".map on a 1d array returns a mapped 1d array", MapTest) {
+      val mapped = dbl1d.map(t => t.toInt)
+      assert(mapped.shape === dbl1d.shape)
+      assert(mapped.flatten === dbl1d.flatten.map(_.toInt))
+    }
+    scenario(".map on a 2d array returns a mapped 2d array", MapTest) {
+      val mapped = dbl2d.map(t => t.toInt)
+      assert(mapped.shape === dbl2d.shape)
+      assert(mapped.flatten === dbl2d.flatten.map(_.toInt))
+    }
+    scenario(".map on a 3d array returns a mapped 3d array", MapTest) {
+      val mapped = dbl3d.map(t => t.toInt)
+      assert(mapped.shape === dbl3d.shape)
+      assert(mapped.flatten === dbl3d.flatten.map(_.toInt))
+    }
+    scenario(".map double => char on a 3d array returns a mapped 3d array", MapTest) {
+      val mapped = dbl3d.map(t => 'c')
+      assert(mapped.shape === dbl3d.shape)
+      assert(mapped.flatten === dbl3d.flatten.map(_ => 'c'))
+    }
+  }
 
   feature("The ApplyIndex typeclass") {
     import ArrayDefs.IsArraySyntax._
