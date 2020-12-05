@@ -23,15 +23,8 @@ object ArrayDefs {
     get: T
   ) extends IsBase[Element[T]]
 
-  abstract class IsArrBase[A, T] extends IsBase[A] { 
-    type S 
-    def getAtN(self: A, n: Int): S
-    def length(self: A): Int
-    def cons(self: A, other: S): A
-  }
-
   @implicitNotFound(f"Cannot find IsArray implicit")
-  abstract class IsArray[A[_], T] extends IsArrBase[A[T], T] { self =>
+  abstract class IsArray[A[_], T] extends IsBase[A[T]] { self =>
     type S
 
     def getEmpty[_T]: A[_T] 
@@ -454,9 +447,9 @@ object ArrayDefs {
       }
 
       implicit def gsIfSIsEle[A[_], T, _S, L <: HList, O <: HList](implicit 
-        aIsABs: IsArrBase[A[T], T] { type S = T },
+        ai: IsArray[A, T] { type S = T },
         rv: Reverse[Int :: L] { type Out = O },
-      ): RecurAux[A[T], L, O] = recur((a, l) => rv(aIsABs.length(a) :: l))
+      ): RecurAux[A[T], L, O] = recur((a, l) => rv(ai.length(a) :: l))
 
       implicit def gsIfSIsArr[A[_], T, S0[_], L <: HList](implicit 
         ai: IsArray[A, T] { type S = S0[T] },
@@ -771,27 +764,6 @@ object ArrayDefs {
       )
       fe(upd, sh(a)).get
     })
-  }
-
-  abstract class Is1d[A] private {}
-  object Is1d {
-    def apply[A[_], T](implicit aIsArr: IsArrBase[A[T], T] { type S = T }): Is1d[A[T]] = new Is1d[A[T]] {}
-  }
-
-  abstract class Is2d[A] private {}
-  object Is2d {
-    def apply[A[_], T, _S]( implicit 
-      aIsArray: IsArrBase[A[T], T] { type S = _S },
-      sIs1d: Is1d[_S],
-    ): Is2d[A[T]] = new Is2d[A[T]] {}
-  }
-
-  abstract class Is3d[A] private {}
-  object Is3d {
-    def apply[A[_], T, _S]( implicit 
-      aIsArray: IsArrBase[A[T], T] { type S = _S },
-      sIs2d: Is2d[_S],
-    ): Is3d[A[T]] = new Is3d[A[T]] {}
   }
 
   trait MaskFromNumSeqDT[A, R <: HList] {

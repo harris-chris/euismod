@@ -19,7 +19,6 @@ object ListOfListsObj {
     def length(a: List1d[T]) = a.data.length
     def cons(a: List1d[T], other: S) = List1d(other :: a.data)
   }
-  implicit def list1dIs1d[T] = Is1d[List1d, T]
 
   case class List2d[T] ( 
     data: List[List[T]],
@@ -31,7 +30,6 @@ object ListOfListsObj {
     def length(a: List2d[T]): Int = a.data.length
     def cons(a: List2d[T], sub: S): List2d[T] = List2d(sub.data :: a.data)
   }
-  implicit def list2dIs2d[T] = Is2d[List2d, T, List1d[T]]
 
   case class List3d[T] ( 
     data: List[List[List[T]]],
@@ -43,6 +41,5 @@ object ListOfListsObj {
     def length(a: List3d[T]) = a.data.length
     def cons(a: List3d[T], sub: S): List3d[T] = List3d(sub.data :: a.data)
   }
-  implicit def list3dIs3d[T] = Is3d[List3d, T, List2d[T]]
 }
 

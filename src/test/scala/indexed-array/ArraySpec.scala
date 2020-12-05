@@ -765,36 +765,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("IsXd typeclass") {
-    case class A1[T](data: List[T])
-    implicit def a1ev[T] = new IsArray[A1, T] {
-      type S = T
-      def getEmpty[_T] = A1[_T](Nil: List[_T])
-      def getAtN(a: A1[T], n: Int) = a.data(n)
-      def length(a: A1[T]) = a.data.length
-      def cons(a: A1[T], sub: S) = A1[T](sub :: a.data)
-    }
-    case class A1OfA1[T](data: List[A1[T]])
-    implicit def a1ofa1ev[T] = new IsArray[A1OfA1, T] {
-      type S = A1[T]
-      def getEmpty[_T] = A1OfA1[_T](Nil: List[A1[_T]])
-      def getAtN(a: A1OfA1[T], n: Int) = a.data(n)
-      def length(a: A1OfA1[T]) = a.data.length
-      def cons(a: A1OfA1[T], sub: S) = A1OfA1[T](sub :: a.data)
-    }
-    scenario("An Is2d arraylike returns a value") {
-      Given("An 2-d arraylike which returns a 1-d arraylike")
-      When("Implementation of Is2d is attempted without Is1d implemented for the 1-d array")
-      Then("It should fail to compile")
-      "implicit def a1Of1Is2d[T] = Is2d[A1OfA1, T, A1[T]]" shouldNot typeCheck
-      
-      When("Implementation of Is2d is attempted with Is1d implemented for the 1-d array")
-      Then("It should compile")
-      implicit def a1Is1d[T] = Is1d[A1, T] 
-      "implicit def a1Of1Is2d[T] = Is2d[A1OfA1, T, A1[T]]" should compile
-    }
-  }
-
   feature("Multi-dimensional arrays") {
     import Dummy._
     case class A1[T](data: List[T])
@@ -813,8 +783,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       def length(a: A1OfA1[T]) = a.data.length
       def cons(a: A1OfA1[T], sub: S) = A1OfA1[T](sub :: a.data)
     }
-    implicit def a1Is1d[T] = Is1d[A1, T] 
-    implicit def a1Of1Is2d[T] = Is2d[A1OfA1, T, A1[T]]
     scenario("A value is returned from a 2d-dimensional array using getAtN") {
       Given("A 1-dimensional arraylike, and a 2d list of 1d arraylike 2d array implementation")
       When("getAtN is called on a concrete instance of the 2d arraylike")
