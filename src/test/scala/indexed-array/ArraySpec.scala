@@ -28,11 +28,11 @@ object Dummy {
   implicit def arrDoubleEquality[A[_]]( implicit 
     aIsArr: ArrayDefs.IsArray[A, Double],
     fl: ArrayDefs.Flatten[A, Double],
-    sh: ArrayDefs.ShapeRT[A[Double], HNil],
+    sh: ArrayDefs.Shape[A[Double]],
   ):Equality[A[Double]] = addEquality[A[Double]]((a, b) => b match {
     case p: A[Double] => {
       implicit val doubleEquality = TolerantNumerics.tolerantDoubleEquality(0.1)
-      sh(a, HNil) == sh(p, HNil) &&
+      sh(a) == sh(p) &&
       fl(a).zip(fl(p)).forall{ case(aE, pE) => aE === pE }
     }
     case _ => false

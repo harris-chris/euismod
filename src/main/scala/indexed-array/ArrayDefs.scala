@@ -253,12 +253,12 @@ object ArrayDefs {
     def apply[A, IDX](implicit ai: ApplyIndex[A, IDX]): Aux[A, IDX, ai.Out] = ai
 
     implicit def ifIdxIsBooleanArray[A[_], T](implicit
-      aSh: ShapeRT[A[T], HNil],
-      mSh: ShapeRT[A[Boolean], HNil],
+      aSh: Shape[A[T]],
+      mSh: Shape[A[Boolean]],
       aFl: Flatten[A, T] { type Out = List[T] },
       mFl: Flatten[A, Boolean] { type Out = List[Boolean] },
     ): Aux[A[T], A[Boolean], Option[List[T]]] = instance((a, r) =>
-      if(aSh(a, HNil) == mSh(r, HNil)) { 
+      if(aSh(a) == mSh(r)) { 
         val lstT: List[T] = aFl(a)
         val lstBl: List[Boolean] = mFl(r)
         Some(lstT.zip(lstBl).flatMap{ case(t, bl) => Option.when(bl)(t) })
@@ -424,45 +424,48 @@ object ArrayDefs {
     ): Aux[A[T], O] = new DepthCT[A[T]] { type Out = O }
   }
 
-  sealed trait Shape[A] { self =>
-    type Out
+  trait Shape[A] { self =>
+    type Out <: HList
     def apply(a: A): Out
+    def toList(a: A)(implicit tl: ToList[Out, Int]): List[Int] = tl(apply(a))
   }
   object Shape {
     type Aux[A, O] = Shape[A] { type Out = O }
-    def instance[A, O](f: A => O): Aux[A, O] = new Shape[A] {
+    def instance[A, O <: HList](f: A => O): Aux[A, O] = new Shape[A] {
       type Out = O
       def apply(a: A): Out = f(a)
     }
     def apply[A](implicit sh: Shape[A]): Aux[A, sh.Out] = sh
-    //implicit def ifFullyTyped[A[_], T](implicit ft: FullyTyped[A[T]]) = ???
-    implicit def ifShapeRT[A](implicit sh: ShapeRT[A, HNil]): Aux[A, sh.Out] = 
-      instance(a => sh(a, HNil))
-  }
-
-  sealed trait ShapeRT[A, L <: HList] {self =>
-    type Out <: HList
-    def apply(a: A, l: L): Out
-  }
-  object ShapeRT {
-    type Aux[A, L <: HList, O <: HList] = ShapeRT[A, L] { type Out = O }
-    def instance[A, L <: HList, O <: HList](f: (A, L) => O): Aux[A, L, O] = 
-    new ShapeRT[A, L] { 
-      type Out = O 
-      def apply(a: A, l: L): Out = f(a, l)
+    
+    implicit def ifHList[A, L <: HList](implicit 
+      sr: ShapeRecur[A, HNil],
+    ): Aux[A, sr.Out] = instance(a => sr(a, HNil))
+    
+    trait ShapeRecur[A, L <: HList] {self =>
+      type Out <: HList
+      def apply(a: A, l: L): Out
     }
-    def apply[A, L <: HList](implicit sh: ShapeRT[A, L]): Aux[A, L, sh.Out] = sh
-    implicit def gsIfSIsEle[A[_], T, _S, L <: HList, O <: HList](implicit 
-      aIsABs: IsArrBase[A[T], T] { type S = T },
-      rv: Reverse[Int :: L] { type Out = O },
-    ): Aux[A[T], L, O] = instance((a, l) => rv(aIsABs.length(a) :: l))
-    implicit def gsIfSIsArr[A[_], T, S0[_], L <: HList](implicit 
-      aIsABs: IsArrBase[A[T], T] { type S = S0[T] },
-      gsForS: ShapeRT[S0[T], Int :: L],
-      ): Aux[A[T], L, gsForS.Out] = instance((a, l) => 
-        gsForS(aIsABs.getAtN(a, 0), aIsABs.length(a) :: l)
+    object ShapeRecur {
+      type RecurAux[A, L <: HList, O <: HList] = ShapeRecur[A, L] { type Out = O }
+      def recur[A, L <: HList, O <: HList](f: (A, L) => O): RecurAux[A, L, O] = 
+      new ShapeRecur[A, L] { 
+        type Out = O 
+        def apply(a: A, l: L): Out = f(a, l)
+      }
+
+      implicit def gsIfSIsEle[A[_], T, _S, L <: HList, O <: HList](implicit 
+        aIsABs: IsArrBase[A[T], T] { type S = T },
+        rv: Reverse[Int :: L] { type Out = O },
+      ): RecurAux[A[T], L, O] = recur((a, l) => rv(aIsABs.length(a) :: l))
+
+      implicit def gsIfSIsArr[A[_], T, S0[_], L <: HList](implicit 
+        ai: IsArray[A, T] { type S = S0[T] },
+        gsForS: ShapeRecur[S0[T], Int :: L],
+      ): RecurAux[A[T], L, gsForS.Out] = recur((a, l) => 
+        gsForS.apply(ai.getAtN(a, 0), ai.length(a) :: l)
       )
-  }
+    }
+ }
 
   trait FromElems[T, Arrs <: HList, SH <: HList] {
     type Out
@@ -577,11 +580,11 @@ object ArrayDefs {
     }
     implicit def ifSameType[A[_], T, SA <: HList, SB <: HList, SH <: HList](implicit 
       isArr: IsArray[A, T],
-      aSh: ShapeRT.Aux[A[T], HNil, SA],
-      bSh: ShapeRT.Aux[A[T], HNil, SB],
+      aSh: Shape.Aux[A[T], SA],
+      bSh: Shape.Aux[A[T], SB],
       cs: CombineShapes.Aux[SA, SB, Option[SH]]
     ): Aux[A, A, T] = instance((a, b) => 
-      cs(aSh(a, HNil), bSh(b, HNil), 0).map(_ => isArr.fromList(isArr.toList(a) ++ isArr.toList(b)))
+      cs(aSh(a), bSh(b), 0).map(_ => isArr.fromList(isArr.toList(a) ++ isArr.toList(b)))
     )
     implicit def ifDiffType[A[_], B[_], T, Arrs <: HList, SA <: HList, SB <: HList, SH <: HList](implicit
       flA: Flatten[A, T],
