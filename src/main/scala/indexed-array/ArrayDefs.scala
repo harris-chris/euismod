@@ -148,7 +148,7 @@ object ArrayDefs {
       aIsArr: IsArray[A, T],
       de: DepthCT.Aux[A[T], DE],
       e0: GT[DE, Nat._1],
-      rd: ReduceToListDT[A, T, DM],
+      rd: ReduceToList[A, T, DM],
       sh: Shape.Aux[A[T], FSH],
       sp: Split.Aux[FSH, Succ[DM], FLF, RG],
       in: Init.Aux[FLF, LF],
@@ -169,14 +169,14 @@ object ArrayDefs {
     })
   }
 
-  trait ReduceToListDT[A[_], T, DM <: Nat] {
+  trait ReduceToList[A[_], T, DM <: Nat] {
     type Out = List[T]
     def apply(a: A[T], combine: List[T] => T): Out
   }
-  object ReduceToListDT {
-    type Aux[A[_], T, DM <: Nat] = ReduceToListDT[A, T, DM]
+  object ReduceToList {
+    type Aux[A[_], T, DM <: Nat] = ReduceToList[A, T, DM]
     def instance[A[_], T, DM <: Nat](f: (A[T], List[T] => T) => List[T]): Aux[A, T, DM] = 
-    new ReduceToListDT[A, T, DM] {
+    new ReduceToList[A, T, DM] {
       def apply(a: A[T], combine: List[T] => T): Out = f(a, combine)
     }
     def apply[A[_], T, DM <: Nat](implicit se: Aux[A, T, DM]): Aux[A, T, DM] = se
@@ -199,7 +199,7 @@ object ArrayDefs {
       aIsArr: IsArray[A, T] { type S = _S[T] },
       e1: GT[DM, Nat._0],
       pr: Pred.Aux[DM, DMm1],
-      rd: ReduceToListDT[_S, T, DMm1],
+      rd: ReduceToList[_S, T, DMm1],
     ): Aux[A, T, DM] = instance((a, cmb) => {
       val lst: List[List[T]] = aIsArr.toList(a).map(rd(_, cmb))
       lst.foldLeft(Nil: List[T])(_ ++ _)
@@ -325,36 +325,20 @@ object ArrayDefs {
       "[" ++ pp(ls.head, Some(nextInd)) ++ lineB ++ ls.tail.map(pp(_, Some(nextInd))).mkString(lineB) ++ "]"
     })
   }
-
-  sealed trait CombineShapes[A, B] {
-    type Out
-    def apply(a: A, b: B, dim: Int): Out
-  }
-  object CombineShapes {
-    type Aux[A, B, O] = CombineShapes[A, B] { type Out = O }
-    def instance[A, B, O](f: (A, B, Int) => O): Aux[A, B, O] = new CombineShapes[A, B] {
-      type Out = O
-      def apply(a: A, b: B, dim: Int): Out = f(a, b, dim)
-    }
-    def apply[A, B](implicit cs: CombineShapes[A, B]): Aux[A, B, cs.Out] = cs
-    implicit def ifMatchingHLists[SH <: HList](implicit 
-      csrt: CombineShapesRT[SH]
-    ): Aux[SH, SH, Option[SH]] = instance(
-      (a, b, dim) => csrt(a, b, dim)
-    )
-  }
   
-  sealed trait CombineShapesRT[SH <: HList] {
+  sealed trait CombineShapesOpt[SH <: HList] {
     type Out = Option[SH]
-    def apply(a: SH, b: SH, dim: Int): Out
+    def apply(a: SH, b: SH, dim: Int = 0): Out
   }
-  object CombineShapesRT {
-    def instance[SH <: HList](f: (SH, SH, Int) => Option[SH]): CombineShapesRT[SH] = new CombineShapesRT[SH] {
+  object CombineShapesOpt {
+    type Aux[SH <: HList] = CombineShapesOpt[SH] { type Out = Option[SH] }
+    def instance[SH <: HList](f: (SH, SH, Int) => Option[SH]): CombineShapesOpt[SH] = 
+    new CombineShapesOpt[SH] {
       def apply(a: SH, b: SH, dim: Int): Out = f(a, b, dim)
     }
     implicit def ifHeadIsInt[Tl <: HList](implicit 
-      cb: CombineShapesRT[Tl],
-    ): CombineShapesRT[Int :: Tl] = instance((a, b, dim) => 
+      cb: CombineShapesOpt[Tl],
+    ): CombineShapesOpt[Int :: Tl] = instance((a, b, dim) => 
       if(dim == 0){
         val t1: Option[HList] = cb(a.tail, b.tail, dim - 1)
         cb(a.tail, b.tail, dim - 1).map(tl => (a.head + b.head) :: tl)
@@ -362,7 +346,7 @@ object ArrayDefs {
         if(a.head == b.head) {cb(a.tail, b.tail, dim - 1).map(tl => a.head :: tl)} else { None }
       }
     )
-    implicit val ifHNil: CombineShapesRT[HNil] = instance((a, b, isHead) => Some(HNil))
+    implicit val ifHNil: CombineShapesOpt[HNil] = instance((a, b, isHead) => Some(HNil))
   }
 
   sealed trait GetArrsDesc[A[_], T, L <: HList] {self =>
@@ -572,21 +556,20 @@ object ArrayDefs {
     new AddRT[A, B, T] { 
       def apply(a: A[T], b: B[T]): Option[A[T]] = f(a, b)
     }
-    implicit def ifSameType[A[_], T, SA <: HList, SB <: HList, SH <: HList](implicit 
+    implicit def ifSameType[A[_], T, SH <: HList](implicit 
       isArr: IsArray[A, T],
-      aSh: Shape.Aux[A[T], SA],
-      bSh: Shape.Aux[A[T], SB],
-      cs: CombineShapes.Aux[SA, SB, Option[SH]]
+      sh: Shape.Aux[A[T], SH],
+      cs: CombineShapesOpt[SH],
     ): Aux[A, A, T] = instance((a, b) => 
-      cs(aSh(a), bSh(b), 0).map(_ => isArr.fromList(isArr.toList(a) ++ isArr.toList(b)))
+      cs(sh(a), sh(b), 0).map(_ => isArr.fromList(isArr.toList(a) ++ isArr.toList(b)))
     )
-    implicit def ifDiffType[A[_], B[_], T, Arrs <: HList, SA <: HList, SB <: HList, SH <: HList](implicit
+    implicit def ifDiffType[A[_], B[_], T, Arrs <: HList, SH <: HList](implicit
       flA: Flatten[A, T],
       flB: Flatten[B, T],
       ga: GetArrsAsc.Aux[A, T, HNil, Arrs],
-      aSh: Shape.Aux[A[T], SA],
-      bSh: Shape.Aux[B[T], SB],
-      cs: CombineShapes.Aux[SA, SB, Option[SH]],
+      aSh: Shape.Aux[A[T], SH],
+      bSh: Shape.Aux[B[T], SH],
+      cs: CombineShapesOpt[SH],
       fe: FromElems.Aux[T, Arrs, SH, Option[A[T]]],
     ): Aux[A, B, T] = instance((a, b) => 
       cs(aSh(a), bSh(b), 0).flatMap(sh => fe(flA(a) ++ flB(b), sh))
