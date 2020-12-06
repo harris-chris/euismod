@@ -26,6 +26,7 @@ object ArrayDefs {
   @implicitNotFound(f"Cannot find IsArray implicit")
   abstract class IsArray[A[_], T] extends IsBase[A[T]] { self =>
     type S
+    type Elem = T
 
     def getEmpty[_T]: A[_T] 
     def getAtN(a: A[T], n: Int): S
@@ -127,18 +128,18 @@ object ArrayDefs {
     }
   }
 
-  trait ReduceDT[A[_], T, DM <: Nat] {
+  trait Reduce[A[_], T, DM <: Nat] {
     type Out
     def apply(a: A[T], combine: List[T] => T): Out
   }
-  object ReduceDT {
-    type Aux[A[_], T, DM <: Nat, O] = ReduceDT[A, T, DM] { type Out = O }
+  object Reduce {
+    type Aux[A[_], T, DM <: Nat, O] = Reduce[A, T, DM] { type Out = O }
     def instance[A[_], T, DM <: Nat, O](f: (A[T], List[T] => T) => O): Aux[A, T, DM, O] = 
-    new ReduceDT[A, T, DM] {
+    new Reduce[A, T, DM] {
       type Out = O
       def apply(a: A[T], combine: List[T] => T): Out = f(a, combine)
     }
-    def apply[A[_], T, DM <: Nat](implicit se: ReduceDT[A, T, DM]): Aux[A, T, DM, se.Out] = se
+    def apply[A[_], T, DM <: Nat](implicit se: Reduce[A, T, DM]): Aux[A, T, DM, se.Out] = se
 
     implicit def ifDeGt2[
       A[_], T, DE <: Nat, DM <: Nat, FSH <: HList, FLF <: HList, LF <: HList, RG <: HList, 
@@ -283,17 +284,17 @@ object ArrayDefs {
     ): Aux[A[T], Idx, gi.Out] = instance((a, r) => gi(a, r)) 
   }
 
-  sealed trait PrettyPrint[A[_], T] {
+  sealed trait PrettyPrint[A] {
     type Out = String
-    def apply(a: A[T], indO: Option[String] = None): Out
+    def apply(a: A, indO: Option[String] = None): Out
   }
   object PrettyPrint {
-    def instance[A[_], T](
-      f: (A[T], Option[String]) => String,
-    ): PrettyPrint[A, T] = new PrettyPrint[A, T] {
-      def apply(a: A[T], indO: Option[String]): String = f(a, indO)
+    def instance[A](
+      f: (A, Option[String]) => String,
+    ): PrettyPrint[A] = new PrettyPrint[A] {
+      def apply(a: A, indO: Option[String]): String = f(a, indO)
     }
-    def apply[A[_], T](implicit pp: PrettyPrint[A, T]): PrettyPrint[A, T] = pp
+    def apply[A](implicit pp: PrettyPrint[A]): PrettyPrint[A] = pp
 
     def maxWidth[A[_], T](a: A[T])(implicit 
       aIsArr: IsArray[A, T],
@@ -305,7 +306,7 @@ object ArrayDefs {
       aIsArr: IsArray[A, T],
       de: DepthCT.Aux[A[T], Nat._1],
       fl: Flatten[A, T],
-    ): PrettyPrint[A, T] = instance((a, indO) => {
+    ): PrettyPrint[A[T]] = instance((a, indO) => {
       val mW = maxWidth(a)
       "[" ++ aIsArr.toList(a).map(_.toString.padTo(mW, ' ')).mkString(", ") ++ "]"
     })
@@ -315,8 +316,8 @@ object ArrayDefs {
       deIsGt2: GT[DE, Nat._1],
       toInt: ToInt[DE],
       fl: Flatten[A, T],
-      pp: PrettyPrint[_S, T],
-    ): PrettyPrint[A, T] = instance((a, indO) => {
+      pp: PrettyPrint[_S[T]],
+    ): PrettyPrint[A[T]] = instance((a, indO) => {
       val ind = indO.getOrElse(" ")
       val nextInd = ind ++ " "
       val lineB = "," ++ "\n" * (toInt()-1) ++ ind

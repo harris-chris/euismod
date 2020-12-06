@@ -252,16 +252,16 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     object PrettyPrintTest extends Tag("PrettyPrintTest")
     scenario("Pretty printing a 1d array produces numpy-like output", PrettyPrintTest) {
-      val pp = PrettyPrint[List1d, Double].apply(dbl1d)
+      val pp = PrettyPrint[List1d[Double]].apply(dbl1d)
     }
     scenario("Pretty printing a 2d array produces numpy-like output", PrettyPrintTest) {
-      val pp = PrettyPrint[List2d, Double].apply(dbl2d)
+      val pp = PrettyPrint[List2d[Double]].apply(dbl2d)
     }
     scenario("Pretty printing a 3d array produces numpy-like output", PrettyPrintTest) {
-      val pp = PrettyPrint[List3d, Double].apply(dbl3d)
+      val pp = PrettyPrint[List3d[Double]].apply(dbl3d)
     }
     scenario("Pretty printing a 4d array produces numpy-like output", PrettyPrintTest) {
-      val pp = PrettyPrint[List4d, Double].apply(dbl4d)
+      val pp = PrettyPrint[List4d[Double]].apply(dbl4d)
     }
   }
 
@@ -721,11 +721,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
     object ReduceTest extends Tag("ReduceTest")
-    scenario("Using ReduceDT on a 1d arraylike does not compile", ReduceTest) {
-      "ReduceDT[List1d, Double, Nat._0].apply(dbl1d, lst => lst.foldLeft(0.0)(_ + _))" shouldNot compile
+    scenario("Using Reduce on a 1d arraylike does not compile", ReduceTest) {
+      "Reduce[List1d, Double, Nat._0].apply(dbl1d, lst => lst.foldLeft(0.0)(_ + _))" shouldNot compile
     }
     scenario("Reducing a 2d arraylike across dim0 returns a correct 1d arraylike", ReduceTest) {
-      val act: List1d[Double] = ReduceDT[List2d, Double, Nat._0].apply(
+      val act: List1d[Double] = Reduce[List2d, Double, Nat._0].apply(
         dbl2d, lst => lst.foldLeft(0.0: Double)(_ + _)
       )
       val exp = List1d[Double](dbl2d.data.transpose.map(_.foldLeft(0.0)((a, b) => a + b)))
@@ -733,7 +733,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === exp)
     }
     scenario("Reducing a 2d arraylike across dim1 returns a correct 1d arraylike", ReduceTest, Current) {
-      val act: List1d[Double] = ReduceDT[List2d, Double, Nat._1].apply(
+      val act: List1d[Double] = Reduce[List2d, Double, Nat._1].apply(
         dbl2d, lst => lst.foldLeft(0.0: Double)(_ + _)
       )
       val exp = List1d(dbl2d.data.map(_.foldLeft(0.0)(_ + _)))
@@ -741,7 +741,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === exp)
     }
     scenario("Reducing a 3d arraylike across dim1 returns a correct 2d arraylike", ReduceTest, Current) {
-      val act = ReduceDT[List3d, Double, Nat._1].apply(
+      val act = Reduce[List3d, Double, Nat._1].apply(
         dbl3d, lst => lst.foldLeft(0.0: Double)(_ + _)
       )
       val exp = List2d[Double](
@@ -754,7 +754,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === exp)
     }
     scenario("Reducing a 3d arraylike across dim2 returns a correct 2d arraylike", ReduceTest, Current) {
-      val act = ReduceDT[List3d, Double, Nat._2].apply(
+      val act = Reduce[List3d, Double, Nat._2].apply(
         dbl3d, lst => lst.foldLeft(0.0: Double)(_ + _)
       )
       val exp = List2d[Double](
@@ -1140,77 +1140,4 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  //feature("IsArray.reshapes") {
-    //import Dummy.Types._
-    //import Dummy.Values._
-    //import ArrayDefs.IsArraySyntax._
-    //import Dummy.IsArrayImplicits._
-    //object ReshapesTest extends Tag("ReshapesTest")
-    
-    //trait ShapeList[A, D <: HList] {
-      //type Out
-      //def shapeList(lst: Option[List[A]], dims: D): Out
-    //}
-    //object ShapeList {
-      //implicit def slIfNoDims[A]: ShapeList[A, HNil] { type Out = Option[A] } = new ShapeList[A, HNil] {
-        //type Out = Option[A]
-        //def shapeList(lst: Option[List[A]], dims: HNil): Out = lst.map(_(0))
-      //}
-      //implicit def slIfDims[A, D <: HList](implicit 
-        //sl: ShapeList[List[A], D]
-      //): ShapeList[A, Int :: D] { type Out = sl.Out } = new ShapeList[A, Int :: D] {
-        //type Out = sl.Out
-        //def shapeList(lst: Option[List[A]], dims: Int :: D): Out = {
-          //val newLvl: Option[List[List[A]]] = addLevel(lst, dims.head, List()) 
-          //sl.shapeList(newLvl, dims.tail)
-        //}
-      //}
-    //}
-    //def addLevel[A](belowLst: Option[List[A]], length: Int, thisLst: List[List[A]]): Option[List[List[A]]] = 
-      //belowLst.flatMap( bLst => 
-        //bLst.length match {
-          //case 0 => Some(thisLst.reverse)
-          //case x if x >= length => {
-            //val (ths, rst) = bLst.splitAt(length)
-            //addLevel(Some(rst), length, ths :: thisLst)
-          //}
-          //case _ => None
-        //}
-      //)
-    //def shapeList[A, D <: HList](lst: List[A], dims: D)(implicit ev: ShapeList[A, D]): ev.Out = 
-      //ev.shapeList(Some(lst), dims)
-
-    //scenario("dbl1d.reshape(dbl1d.length) returns dbl1d", ReshapesTest) {
-      //assert(dbl1d.reshape(dbl1d.data.length :: HNil) == Some(dbl1d))
-    //}
-    //scenario("dbl2d.reshape(dbl2d.flatten.length) returns a dbl1d", ReshapesTest) {
-      //val dbl2dFlat = dbl2d.data.flatten
-      //assert(dbl2d.reshape(dbl2dFlat.length :: HNil) == Some(List1d[Double](dbl2dFlat)))
-    //}
-    //scenario("dbl3d.reshape(dbl3d.flatten.length) returns a dbl1d", ReshapesTest) {
-      //val dbl3dFlat = dbl3d.data.flatten.flatten
-      //assert(dbl3d.reshape(dbl3dFlat.length :: HNil) == Some(List1d[Double](dbl3dFlat)))
-    //}
-    //scenario("dbl2d.reshape(2, 8) returns None, because dbl2d has 15 elements", ReshapesTest) {
-      //assert(dbl2d.reshape(2 :: 8 :: HNil) === None)
-    //}
-    //scenario("dbl2d.reshape(5, 3) returns a 5, 3 shaped List2d", ReshapesTest) {
-      //val dbl2dFlat = dbl2d.data.flatten
-      //val dbl2dReshaped = shapeList(dbl2dFlat, 3 :: 5 :: HNil)
-      //assert(dbl2d.reshape(5 :: 3 :: HNil) === dbl2dReshaped.map(List2d[Double](_)))
-    //}
-    //scenario("dbl3d.reshape(2, 3, 6) returns a correctly shaped List3d", ReshapesTest) {
-      //val dbl3dFlat = dbl3d.flatten
-      //val dbl3dReshaped = shapeList(dbl3dFlat, 6 :: 3 :: 2 :: HNil)
-      //assert(dbl3d.reshape(2 :: 3 :: 6 :: HNil) === dbl3dReshaped.map(List3d[Double](_)))
-    //}
-    //scenario("dbl3d.reshape(15, 2) returns a correctly shaped List2d", ReshapesTest) {
-      //val dbl3dFlat = dbl3d.flatten
-      //val dbl3dReshaped = shapeList(dbl3dFlat, 2 :: 15 :: HNil)
-      //assert(dbl3d.reshape(15 :: 2 :: HNil) === dbl3dReshaped.map(List2d[Double](_)))
-    //}
-    //scenario("dbl3d.reshape(1, 1, 1, 1) does not compile", ReshapesTest) {
-      //"dbl3d.reshape(1 :: 1 :: 1 :: 1 :: HNil)" shouldNot compile
-    //}
-  //}
 }
