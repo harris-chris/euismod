@@ -48,32 +48,28 @@ object ArrayDefs {
     ): Int = shape(a).toList[Int].length
     def shape(a: A[T])(implicit sh: Shape[A[T]]): sh.Out = sh(a)
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl(a)
-    def fromElems[ARD <: HList, ARA <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
-      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
-      rv: Reverse.Aux[ARD, ARA],
-      fe: FromElemsOpt[T, ARA, SH], 
+    def fromElems[AR <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
+      ga: GetArrsDesc.Aux[A, T, HNil, AR],
+      fe: FromElemsOpt[T, AR, SH], 
     ): fe.Out = fe(listT, shape)
-    def fromElems[ARD <: HList, ARA <: HList, SH <: HList](a: A[T], listT: List[T])(implicit 
+    def fromElems[AR <: HList, SH <: HList](a: A[T], listT: List[T])(implicit 
       sh: Shape.Aux[A[T], SH],
-      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
-      rv: Reverse.Aux[ARD, ARA],
-      fe: FromElemsOpt[T, ARA, SH], 
+      ga: GetArrsDesc.Aux[A, T, HNil, AR],
+      fe: FromElemsOpt[T, AR, SH], 
     ): fe.Out = fe(listT, sh(a))
-    def reshape[ARD <: HList, ARA <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
+    def reshape[AR <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
-      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
-      rv: Reverse.Aux[ARD, ARA],
-      fe: FromElemsOpt[T, ARA, SH],
+      ga: GetArrsDesc.Aux[A, T, HNil, AR],
+      fe: FromElemsOpt[T, AR, SH],
     ): fe.Out = {
       fromElems(a, fl(a), shape)
     }
-    def map[_T, ARD <: HList, ARA <: HList, SH <: HList](a: A[T], f: (T) => _T)(implicit
+    def map[_T, AR <: HList, SH <: HList](a: A[T], f: (T) => _T)(implicit
       fl: Flatten[A, T],
       a_tIsArr: IsArray[A, _T],
       sh: Shape[A[T]] { type Out = SH }, 
-      ga: GetArrsDesc.Aux[A, _T, HNil, ARD],
-      rv: Reverse.Aux[ARD, ARA],
-      fr: FromElemsOpt[_T, ARA, SH] { type Out = Option[A[_T]] },
+      ga: GetArrsDesc.Aux[A, _T, HNil, AR],
+      fr: FromElemsOpt[_T, AR, SH] { type Out = Option[A[_T]] },
     ): A[_T] = {
       val shape: SH = sh(a)
       val list_t: List[_T] = flatten(a).map(f)
@@ -103,30 +99,26 @@ object ArrayDefs {
       def fromList(listS: List[_S]): A[T] = tc.fromList(listS)
       def shape(implicit sh: Shape[A[T]]): sh.Out = tc.shape(a)
       def flatten(implicit fl: Flatten[A, T]): List[T] = fl(a)
-      def fromElems[ARD <: HList, ARA <: HList, SH <: HList](listT: List[T], shape: SH)(implicit 
-        ga: GetArrsDesc.Aux[A, T, HNil, ARD],
-        rv: Reverse.Aux[ARD, ARA],
-        fr: FromElemsOpt[T, ARA, SH],
+      def fromElems[AR <: HList, SH <: HList](listT: List[T], shape: SH)(implicit 
+        ga: GetArrsDesc.Aux[A, T, HNil, AR],
+        fr: FromElemsOpt[T, AR, SH],
       ): fr.Out = tc.fromElems(a, listT, shape)
-      def fromElems[ARD <: HList, ARA <: HList, SH <: HList](listT: List[T])(implicit 
+      def fromElems[AR <: HList, SH <: HList](listT: List[T])(implicit 
         sh: Shape[A[T]] { type Out = SH },
-        ga: GetArrsDesc.Aux[A, T, HNil, ARD],
-        rv: Reverse.Aux[ARD, ARA],
-        fr: FromElemsOpt[T, ARA, SH], 
+        ga: GetArrsDesc.Aux[A, T, HNil, AR],
+        fr: FromElemsOpt[T, AR, SH], 
       ): fr.Out = tc.fromElems(a, listT)
-      def reshape[ARD <: HList, ARA <: HList, SH <: HList](shape: SH)(implicit 
+      def reshape[AR <: HList, SH <: HList](shape: SH)(implicit 
         fl: Flatten[A, T],
-        ga: GetArrsDesc.Aux[A, T, HNil, ARD],
-        rv: Reverse.Aux[ARD, ARA],
-        rs: FromElemsOpt[T, ARA, SH],
+        ga: GetArrsDesc.Aux[A, T, HNil, AR],
+        rs: FromElemsOpt[T, AR, SH],
       ) = tc.reshape(a, shape)
-      def map[_T, ARD <: HList, ARA <: HList, SH <: HList](f: T => _T)(implicit
+      def map[_T, AR <: HList, SH <: HList](f: T => _T)(implicit
         ai: IsArray[A, _T],
         fl: Flatten[A, T],
         sh: Shape.Aux[A[T], SH], 
-        ga: GetArrsDesc.Aux[A, _T, HNil, ARD],
-        rv: Reverse.Aux[ARD, ARA],
-        fr: FromElemsOpt.Aux[_T, ARA, SH, Option[A[_T]]],
+        ga: GetArrsDesc.Aux[A, _T, HNil, AR],
+        fr: FromElemsOpt.Aux[_T, AR, SH, Option[A[_T]]],
       ): A[_T] = tc.map(a, f)
     }
   }
