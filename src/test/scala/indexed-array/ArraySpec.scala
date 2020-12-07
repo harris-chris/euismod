@@ -732,7 +732,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act.length === dbl2d.getAtN(0).length)
       assert(act === exp)
     }
-    scenario("Reducing a 2d arraylike across dim1 returns a correct 1d arraylike", ReduceTest, Current) {
+    scenario("Reducing a 2d arraylike across dim1 returns a correct 1d arraylike", ReduceTest) {
       val act: List1d[Double] = Reduce[List2d, Double, Nat._1].apply(
         dbl2d, lst => lst.foldLeft(0.0: Double)(_ + _)
       )
@@ -740,7 +740,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act.length === dbl2d.length)
       assert(act === exp)
     }
-    scenario("Reducing a 3d arraylike across dim1 returns a correct 2d arraylike", ReduceTest, Current) {
+    scenario("Reducing a 3d arraylike across dim1 returns a correct 2d arraylike", ReduceTest) {
       val act = Reduce[List3d, Double, Nat._1].apply(
         dbl3d, lst => lst.foldLeft(0.0: Double)(_ + _)
       )
@@ -753,7 +753,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act.shape === dbl3d.shape.at(Nat._0) :: dbl3d.shape.at(Nat._2) :: HNil)
       assert(act === exp)
     }
-    scenario("Reducing a 3d arraylike across dim2 returns a correct 2d arraylike", ReduceTest, Current) {
+    scenario("Reducing a 3d arraylike across dim2 returns a correct 2d arraylike", ReduceTest) {
       val act = Reduce[List3d, Double, Nat._2].apply(
         dbl3d, lst => lst.foldLeft(0.0: Double)(_ + _)
       )
@@ -843,39 +843,58 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("IsArray.getArrays") {
+  //feature("IsArray.getArrays") {
+    //import ArrayDefs.IsArraySyntax._
+    //import Dummy.Types._
+    //import Dummy.Values._
+    //import Dummy.IsArrayImplicits._
+    //scenario(".getArrays is called on a 1d array to return an empty version of itself") {
+      //When(".getArrays is called on a 1d array")
+      //Then("It should return an empty version of itself")
+      //val l1Arrs0: List1d[Double] :: HNil = dbl1d.getArraysAsc
+      //val l1Arrs1: List1d[Double] :: HNil = dbl1d.getArraysDesc
+      //assert(l1Arrs0 == dbl1d.getEmpty :: HNil)
+      //When(".getArrays is called on a 2d array")
+      //Then("It should return an empty 1d and 2d array")
+      //val l2Arrs: List2d[Double] :: List1d[Double] :: HNil = dbl2d.getArraysDesc
+      //assert(l2Arrs == dbl2d.getEmpty :: dbl1d.getEmpty :: HNil)
+      //When(".getArrays is called on a 3d array")
+      //Then("It should return an empty 1d, 2d and 3d array")
+      //val l3Arrs: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = dbl3d.getArraysAsc
+      //assert(l3Arrs == dbl1d.getEmpty :: dbl2d.getEmpty :: dbl3d.getEmpty :: HNil)
+    //}
+  //}
+
+  feature("The ArraysDescending typeclass") {
     import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    scenario(".getArrays is called") {
-      When(".getArrays is called on a 1d array")
-      Then("It should return an empty version of itself")
-      val l1Arrs0: List1d[Double] :: HNil = dbl1d.getArraysAsc
-      val l1Arrs1: List1d[Double] :: HNil = dbl1d.getArraysDesc
-      assert(l1Arrs0 == dbl1d.getEmpty :: HNil)
-      When(".getArrays is called on a 2d array")
-      Then("It should return an empty 1d and 2d array")
-      val l2Arrs: List2d[Double] :: List1d[Double] :: HNil = dbl2d.getArraysDesc
-      assert(l2Arrs == dbl2d.getEmpty :: dbl1d.getEmpty :: HNil)
-      When(".getArrays is called on a 3d array")
-      Then("It should return an empty 1d, 2d and 3d array")
-      val l3Arrs: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = dbl3d.getArraysAsc
-      assert(l3Arrs == dbl1d.getEmpty :: dbl2d.getEmpty :: dbl3d.getEmpty :: HNil)
+    scenario("Should witness a descending list of arrays") {
+      type AR = List3d[Int] :: List2d[Int] :: List1d[Int] :: HNil
+      "implicit val ev = ArraysDescending[AR]" should compile
+    }
+    scenario("Should not witness an ascending list of arrays") {
+      type AR = List1d[Int] :: List2d[Int] :: List3d[Int] :: HNil
+      "implicit val ev = ArraysDescending[AR]" shouldNot compile
+    }
+    scenario("Should not witness an disordered list of arrays") {
+      type AR = List1d[Int] :: List3d[Int] :: List2d[Int] :: HNil
+      "implicit val ev = ArraysDescending[AR]" shouldNot compile
     }
   }
 
-  feature("The FromElemsDT typeclass") {
+  feature("The FromElemsOpt typeclass") {
     import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    object FromElemsDTTest extends Tag("FromElemsDTTest")
-    scenario("a List1d can be constructed from a list of Ts", FromElemsDTTest) {
+    object FromElemsOptTest extends Tag("FromElemsOptTest")
+    scenario("a List1d can be constructed from a list of Ts", FromElemsOptTest) {
       val ts3: List[Double] = List(1.5, 2.5, 3.5)
       val newShape = 3 :: HNil
       val ga = GetArrsAsc[List1d, Double, HNil]
-      val fe = FromElemsDT[Double, ga.Out, Int :: HNil, Nat._0]
+      val fe = FromElemsOpt[Double, ga.Out, Int :: HNil]
       val act = fe(ts3, newShape)
       assert(act match {
         case Some(l1) => {
@@ -884,11 +903,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case None => false
       })
     }
-    scenario("a List2d can be constructed from a list of Ts", FromElemsDTTest) {
+    scenario("a List2d can be constructed from a list of Ts", FromElemsOptTest, Current) {
       val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)
       val newShape = 2 :: 3 :: HNil
-      val ga = GetArrsAsc[List2d, Double, HNil]
-      val fe = FromElemsDT[Double, ga.Out, Int :: Int :: HNil, Nat._0]
+      val ga = GetArrsDesc[List2d, Double, HNil]
+      val fe = FromElemsOpt[Double, ga.Out, Int :: Int :: HNil]
       val actO = fe(ts3, newShape)
       val exp = List2d[Double](List(
         List(0.00, 0.01, 0.02),
@@ -901,13 +920,13 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case None => false
       })
     }
-    scenario("a List3d can be constructed from a list of Ts", FromElemsDTTest) {
+    scenario("a List3d can be constructed from a list of Ts", FromElemsOptTest) {
       val ts3: List[Double] = List(
         0.000, 0.001, 0.002, 0.010, 0.011, 0.012, 0.100, 0.101, 0.102, 0.110, 0.111, 0.112,
       )
       val newShape = 2 :: 2 :: 3 :: HNil
       val ga = GetArrsAsc[List3d, Double, HNil]
-      val fe = FromElemsDT[Double, ga.Out, Int :: Int :: Int :: HNil, Nat._0]
+      val fe = FromElemsOpt[Double, ga.Out, Int :: Int :: Int :: HNil]
       val actO = fe(ts3, newShape)
       val exp = List3d[Double](
         List(
@@ -926,23 +945,23 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case None => false
       })
     }
-    scenario("a List1d can be constructed from a 2d array and a list of Ts", FromElemsDTTest) {
+    scenario("a List1d can be constructed from a 2d array and a list of Ts", FromElemsOptTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val newShape = 6 :: HNil
       val ga = GetArrsAsc[List2d, Double, HNil]
-      val fe = FromElemsDT[Double, ga.Out, Int :: HNil, Nat._0]
+      val fe = FromElemsOpt[Double, ga.Out, Int :: HNil]
       val act = fe(ts6, newShape)
       assert(act match {
         case Some(l1) => l1.flatten.toList === ts6
         case None => false
       })
     }
-    scenario("a List2d can be constructed from a 2d array and a list of Ts", FromElemsDTTest) {
+    scenario("a List2d can be constructed from a 2d array and a list of Ts", FromElemsOptTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val newShape = 3 :: 2 :: HNil
       val ga: GetArrsAsc[List2d, Double, HNil] { type Out = List1d[Double] :: List2d[Double] :: HNil } = 
         GetArrsAsc[List2d, Double, HNil]
-      val fe = FromElemsDT[Double, ga.Out, Int :: Int :: HNil, Nat._0]
+      val fe = FromElemsOpt[Double, ga.Out, Int :: Int :: HNil]
       val act = fe(ts6, newShape)
       assert(act match {
         case Some(l2) => {

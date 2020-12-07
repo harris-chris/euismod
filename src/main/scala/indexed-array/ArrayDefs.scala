@@ -47,36 +47,37 @@ object ArrayDefs {
       tl: ToList[SH, Int],
     ): Int = shape(a).toList[Int].length
     def shape(a: A[T])(implicit sh: Shape[A[T]]): sh.Out = sh(a)
-    def getArraysAsc(a: A[T])(implicit ga: GetArrsAsc[A, T, HNil]): ga.Out = ga(HNil)
-    def getArraysDesc(a: A[T])(implicit ga: GetArrsDesc[A, T, HNil]): ga.Out = ga(HNil)
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl(a)
-    def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
-      ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
-      fe: FromElemsOpt[T, GAOut, SH], 
+    def fromElems[ARD <: HList, ARA <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
+      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
+      rv: Reverse.Aux[ARD, ARA],
+      fe: FromElemsOpt[T, ARA, SH], 
     ): fe.Out = fe(listT, shape)
-    def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T])(implicit 
-      sh: Shape[A[T]] { type Out = SH },
-      ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
-      fe: FromElemsOpt[T, GAOut, SH], 
+    def fromElems[ARD <: HList, ARA <: HList, SH <: HList](a: A[T], listT: List[T])(implicit 
+      sh: Shape.Aux[A[T], SH],
+      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
+      rv: Reverse.Aux[ARD, ARA],
+      fe: FromElemsOpt[T, ARA, SH], 
     ): fe.Out = fe(listT, sh(a))
-    def reshape[GAOut <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
+    def reshape[ARD <: HList, ARA <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
-      ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
-      fe: FromElemsOpt[T, GAOut, SH],
+      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
+      rv: Reverse.Aux[ARD, ARA],
+      fe: FromElemsOpt[T, ARA, SH],
     ): fe.Out = {
       fromElems(a, fl(a), shape)
     }
-    def map[_T, GAOut <: HList, SH <: HList](a: A[T], f: (T) => _T)(implicit
+    def map[_T, ARD <: HList, ARA <: HList, SH <: HList](a: A[T], f: (T) => _T)(implicit
       fl: Flatten[A, T],
       a_tIsArr: IsArray[A, _T],
       sh: Shape[A[T]] { type Out = SH }, 
-      ga: GetArrsDesc[A, _T, HNil] { type Out = GAOut },
-      fr: FromElemsOpt[_T, GAOut, SH] { type Out = Option[A[_T]] },
+      ga: GetArrsDesc.Aux[A, _T, HNil, ARD],
+      rv: Reverse.Aux[ARD, ARA],
+      fr: FromElemsOpt[_T, ARA, SH] { type Out = Option[A[_T]] },
     ): A[_T] = {
       val shape: SH = sh(a)
       val list_t: List[_T] = flatten(a).map(f)
       val empty_t: A[_T] = getEmpty[_T]
-      val arrs: GAOut = ga(HNil)
       fr(list_t, shape).get 
     }
   }
@@ -100,53 +101,90 @@ object ArrayDefs {
       def length: Int = tc.length(a)
       def toList: List[_S] = tc.toList(a)
       def fromList(listS: List[_S]): A[T] = tc.fromList(listS)
-      def getArraysAsc(implicit ga: GetArrsAsc[A, T, HNil]): ga.Out = tc.getArraysAsc(a)
-      def getArraysDesc(implicit ga: GetArrsDesc[A, T, HNil]): ga.Out = tc.getArraysDesc(a)
       def shape(implicit sh: Shape[A[T]]): sh.Out = tc.shape(a)
       def flatten(implicit fl: Flatten[A, T]): List[T] = fl(a)
-      def fromElems[Arrs <: HList, SH <: HList](listT: List[T], shape: SH)(implicit 
-        ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
-        fr: FromElemsOpt[T, Arrs, SH],
+      def fromElems[ARD <: HList, ARA <: HList, SH <: HList](listT: List[T], shape: SH)(implicit 
+        ga: GetArrsDesc.Aux[A, T, HNil, ARD],
+        rv: Reverse.Aux[ARD, ARA],
+        fr: FromElemsOpt[T, ARA, SH],
       ): fr.Out = tc.fromElems(a, listT, shape)
-      def fromElems[Arrs <: HList, SH <: HList](listT: List[T])(implicit 
+      def fromElems[ARD <: HList, ARA <: HList, SH <: HList](listT: List[T])(implicit 
         sh: Shape[A[T]] { type Out = SH },
-        ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
-        fr: FromElemsOpt[T, Arrs, SH], 
+        ga: GetArrsDesc.Aux[A, T, HNil, ARD],
+        rv: Reverse.Aux[ARD, ARA],
+        fr: FromElemsOpt[T, ARA, SH], 
       ): fr.Out = tc.fromElems(a, listT)
-      def reshape[GAOut <: HList, SH <: HList](shape: SH)(implicit 
+      def reshape[ARD <: HList, ARA <: HList, SH <: HList](shape: SH)(implicit 
         fl: Flatten[A, T],
-        ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
-        rs: FromElemsOpt[T, GAOut, SH],
+        ga: GetArrsDesc.Aux[A, T, HNil, ARD],
+        rv: Reverse.Aux[ARD, ARA],
+        rs: FromElemsOpt[T, ARA, SH],
       ) = tc.reshape(a, shape)
-      def map[_T, GAOut <: HList, SH <: HList](f: T => _T)(implicit
-        a_tIsArr: IsArray[A, _T],
+      def map[_T, ARD <: HList, ARA <: HList, SH <: HList](f: T => _T)(implicit
+        ai: IsArray[A, _T],
         fl: Flatten[A, T],
-        sh: Shape[A[T]] { type Out = SH }, 
-        ga: GetArrsDesc[A, _T, HNil] { type Out = GAOut },
-        fr: FromElemsOpt[_T, GAOut, SH] { type Out = Option[A[_T]] },
+        sh: Shape.Aux[A[T], SH], 
+        ga: GetArrsDesc.Aux[A, _T, HNil, ARD],
+        rv: Reverse.Aux[ARD, ARA],
+        fr: FromElemsOpt.Aux[_T, ARA, SH, Option[A[_T]]],
       ): A[_T] = tc.map(a, f)
     }
   }
 
   trait Is1d[A] {}
   object Is1d {
+    def apply[A](implicit i1: Is1d[A]): Is1d[A] = i1
     implicit def is1dArray[A[_], T] (implicit
       ai: IsArray[A, T] { type S = T }
     ): Is1d[A[T]] = new Is1d[A[T]] {}
   }
 
-  trait ArraysDescending[AR <: HList] {}
-  object ArraysDescending {
-    implicit def ifTwoPlusElemsDescending[A0[_], A1[_], T, A2p <: HList, DE0 <: Nat, DE1 <: Nat] (implicit
+  type ArraySortedBy
+  type Ascending <: ArraySortedBy
+  type Descending <: ArraySortedBy
+
+  trait ArraySort[AR <: HList] {
+    type Out <: ArraySortedBy
+  }
+  object ArraySort {
+    type Aux[AR <: HList, O <: ArraySortedBy] = ArraySort[AR] { type Out = O }
+    def apply[AR <: HList, O <: ArraySortedBy](
+      implicit dc: ArraySort[AR] { type Out = O }
+    ): Aux[AR, O] = dc
+
+    implicit def ifTwoPlusElemsRemainingDesc[A0[_], A1[_], T, A2p <: HList, DE0 <: Nat, DE1 <: Nat] (implicit
+      d0: DepthCT.Aux[A0[T], DE0],
+      d1: DepthCT.Aux[A1[T], DE1],
+      gt: GT[DE0, DE1],
+      nx: ArraySort.Aux[A1[T] :: A2p, Descending],
+    ): Aux[A0[T] :: A1[T] :: A2p, Descending] = 
+      new ArraySort[A0[T] :: A1[T] :: A2p] { type Out = Descending }
+
+    implicit def ifTwoElemsRemainingDesc[A0[_], A1[_], T, DE0 <: Nat, DE1 <: Nat] (implicit
+      d0: DepthCT.Aux[A0[T], DE0],
+      d1: DepthCT.Aux[A1[T], DE1],
+      gt: GT[DE0, DE1],
+    ): Aux[A0[T] :: A1[T] :: HNil, Descending] = 
+      new ArraySort[A0[T] :: A1[T] :: HNil] { type Out = Descending }
+
+    implicit def ifTwoPlusElemsRemainingAsc[A0[_], A1[_], T, A2p <: HList, DE0 <: Nat, DE1 <: Nat] (implicit
       d0: DepthCT.Aux[A0[T], DE0],
       d1: DepthCT.Aux[A1[T], DE1],
       gt: GT[DE1, DE0],
-      nx: ArraysDescending[A1[T] :: A2p],
-    ): ArraysDescending[A0[T] :: A1[T] :: A2p] = new ArraysDescending[A0[T] :: A1[T] :: A2p] {}
+      nx: ArraySort.Aux[A1[T] :: A2p, Ascending],
+    ): Aux[A0[T] :: A1[T] :: A2p, Ascending] = 
+      new ArraySort[A0[T] :: A1[T] :: A2p] { type Out = Ascending }
+
+    implicit def ifTwoElemsRemainingAsc[A0[_], A1[_], T, DE0 <: Nat, DE1 <: Nat] (implicit
+      d0: DepthCT.Aux[A0[T], DE0],
+      d1: DepthCT.Aux[A1[T], DE1],
+      gt: GT[DE1, DE0],
+    ): Aux[A0[T] :: A1[T] :: HNil, Ascending] = 
+      new ArraySort[A0[T] :: A1[T] :: HNil] { type Out = Ascending }
+
+    implicit def ifSingleElemList[A0[_], T, O <: ArraySortedBy]: Aux[A0[T] :: HNil, O] = 
+      new ArraySort[A0[T] :: HNil] { type Out = O }
     
-    implicit def ifSingleElem[A0[_], T] (implicit
-      ia: IsArray[A0, T] { type S = T }
-    ): ArraysDescending[A0[T] :: HNil] = new ArraysDescending[A0[T] :: HNil] {}
   }
 
   trait Reduce[A[_], T, DM <: Nat] {
@@ -173,7 +211,7 @@ object ArrayDefs {
       sh: Shape.Aux[A[T], FSH],
       sp: Split.Aux[FSH, Succ[DM], FLF, RG],
       in: Init.Aux[FLF, LF],
-      ga: GetArrsAsc.Aux[A, T, HNil, AR],
+      ga: GetArrsDesc.Aux[A, T, HNil, AR],
       pr: Prepend.Aux[LF, RG, SH],
       fe: FromElemsOpt.Aux[T, AR, SH, Option[Out]], 
       dm: ToInt[DM],
@@ -507,21 +545,22 @@ object ArrayDefs {
     )
 
     implicit def ifShapeIsNotHNil[_S, A0[_], T, A1p <: HList, SH1p <: HList, NxtO](implicit 
-      a0IsArr: IsArray[A0, T] { type S = _S },
-      feForA1: FromElemsOpt.Aux[A0[T], A1p, SH1p, Option[NxtO]],
+      dc: ArraySort.Aux[A0[T] :: A1p, Ascending],
+      ai: IsArray[A0, T] { type S = _S },
+      fe: FromElemsOpt.Aux[A0[T], A1p, SH1p, Option[NxtO]],
     ): Aux[_S, A0[T] :: A1p, Int :: SH1p, Option[NxtO]] = instance(
       (l, sh) => {
-        val thisA: A0[T] = a0IsArr.getEmpty
+        val thisA: A0[T] = ai.getEmpty
         val h1Nil = Nil: List[A0[T]]
         val combinedS: Option[List[A0[T]]] = combineS[A0, T, _S](thisA, h1Nil, l, sh.head)
         combinedS.flatMap(
-          a1s => feForA1(a1s, sh.tail)
+          a1s => fe(a1s, sh.tail)
         )
       }
     )
 
     implicit def ifArraysDescending[AR <: HList, T, SH <: HList, RSH <: HList, RAR <: HList, NxtO](implicit 
-      ds: ArraysDescending[AR],
+      ds: ArraySort.Aux[AR, Descending],
       r0: Reverse.Aux[SH, RSH],
       r1: Reverse.Aux[AR, RAR],
       fe: FromElemsOpt.Aux[T, RAR, RSH, Option[NxtO]],
@@ -585,14 +624,15 @@ object ArrayDefs {
     ): Aux[A, A, T] = instance((a, b) => 
       cs(sh(a), sh(b), 0).map(_ => isArr.fromList(isArr.toList(a) ++ isArr.toList(b)))
     )
-    implicit def ifDiffType[A[_], B[_], T, Arrs <: HList, SH <: HList](implicit
+    implicit def ifDiffType[A[_], B[_], T, ARD <: HList, ARA <: HList, SH <: HList](implicit
       flA: Flatten[A, T],
       flB: Flatten[B, T],
-      ga: GetArrsAsc.Aux[A, T, HNil, Arrs],
+      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
+      rv: Reverse.Aux[ARD, ARA],
       aSh: Shape.Aux[A[T], SH],
       bSh: Shape.Aux[B[T], SH],
       cs: CombineShapesOpt[SH],
-      fe: FromElemsOpt.Aux[T, Arrs, SH, Option[A[T]]],
+      fe: FromElemsOpt.Aux[T, ARA, SH, Option[A[T]]],
     ): Aux[A, B, T] = instance((a, b) => 
       cs(aSh(a), bSh(b), 0).flatMap(sh => fe(flA(a) ++ flB(b), sh))
     )
@@ -756,10 +796,11 @@ object ArrayDefs {
     }
     def apply[A[_], T](implicit wh: Where[A, T]): Aux[A, T] = wh
 
-    implicit def ifArray[A[_], T, Arrs <: HList, SH <: HList](implicit 
+    implicit def ifArray[A[_], T, ARD <: HList, ARA <: HList, SH <: HList](implicit 
       sh: Shape.Aux[A[T], SH],
-      ga: GetArrsAsc.Aux[A, T, HNil, Arrs],
-      fe: FromElemsOpt.Aux[T, Arrs, SH, Option[A[T]]], 
+      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
+      rv: Reverse.Aux[ARD, ARA],
+      fe: FromElemsOpt.Aux[T, ARA, SH, Option[A[T]]], 
       flA: Flatten[A, T],
       flB: Flatten[A, Boolean],
     ): Aux[A, T] = instance((a, mask, to) => {
