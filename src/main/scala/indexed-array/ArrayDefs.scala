@@ -321,10 +321,11 @@ object ArrayDefs {
     )
 
     implicit def ifIdxIsHList[
-      A[_], T, AllArrs <: HList, Idx <: HList, IntsIdx <: HList, IntsN <: Nat, AllArrsN <: Nat,
+      A[_], T, ARD <: HList, AllArrs <: HList, Idx <: HList, IntsIdx <: HList, IntsN <: Nat, AllArrsN <: Nat,
       TakeN <: Nat, RdArrs <: HList, RevRdArrs <: HList,
     ](implicit 
-      ga: GetArrsAsc.Aux[A, T, HNil, AllArrs],
+      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
+      r0: Reverse.Aux[ARD, AllArrs],
       fl: Filter.Aux[Idx, Int, IntsIdx],
       lf: Length.Aux[IntsIdx, IntsN],
       la: Length.Aux[AllArrs, AllArrsN],
@@ -422,23 +423,6 @@ object ArrayDefs {
     ): Aux[A, T, L, gaForS.Out] = instance( l => 
       gaForS( aIsABs.getEmpty[T] :: l)
     )
-  }
-
-  sealed trait GetArrsAsc[A[_], T, L <: HList] {self =>
-    type Out <: HList
-    def apply(l: L): Out
-  }
-  object GetArrsAsc {
-    type Aux[A[_], T, L <: HList, O <: HList] = GetArrsAsc[A, T, L] { type Out = O }
-    def instance[A[_], T, L <: HList, O <: HList](f: L => O): Aux[A, T, L, O] = new GetArrsAsc[A, T, L] { 
-      type Out = O
-      def apply(l: L): Out = f(l)
-    }
-    def apply[A[_], T, L <: HList](implicit ga: GetArrsAsc[A, T, L]): Aux[A, T, L, ga.Out] = ga
-    implicit def ifLIsHList[A[_], T, L <: HList, Asc <: HList]( implicit 
-      ga: GetArrsDesc[A, T, L] { type Out = Asc },
-      rv: Reverse[Asc],
-    ): Aux[A, T, L, rv.Out] = instance(l => rv(ga(l)))
   }
 
   sealed trait DepthCT[A] { self =>
