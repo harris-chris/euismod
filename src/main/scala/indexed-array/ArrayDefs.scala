@@ -128,6 +128,27 @@ object ArrayDefs {
     }
   }
 
+  trait Is1d[A] {}
+  object Is1d {
+    implicit def is1dArray[A[_], T] (implicit
+      ai: IsArray[A, T] { type S = T }
+    ): Is1d[A[T]] = new Is1d[A[T]] {}
+  }
+
+  trait ArraysDescending[AR <: HList] {}
+  object ArraysDescending {
+    implicit def ifTwoPlusElemsDescending[A0[_], A1[_], T, A2p <: HList, DE0 <: Nat, DE1 <: Nat] (implicit
+      d0: DepthCT.Aux[A0[T], DE0],
+      d1: DepthCT.Aux[A1[T], DE1],
+      gt: GT[DE1, DE0],
+      nx: ArraysDescending[A1[T] :: A2p],
+    ): ArraysDescending[A0[T] :: A1[T] :: A2p] = new ArraysDescending[A0[T] :: A1[T] :: A2p] {}
+    
+    implicit def ifSingleElem[A0[_], T] (implicit
+      ia: IsArray[A0, T] { type S = T }
+    ): ArraysDescending[A0[T] :: HNil] = new ArraysDescending[A0[T] :: HNil] {}
+  }
+
   trait Reduce[A[_], T, DM <: Nat] {
     type Out
     def apply(a: A[T], combine: List[T] => T): Out
