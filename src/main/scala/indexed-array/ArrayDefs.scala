@@ -52,17 +52,17 @@ object ArrayDefs {
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl(a)
     def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
-      fe: FromElems[T, GAOut, SH], 
+      fe: FromElemsOpt[T, GAOut, SH], 
     ): fe.Out = fe(listT, shape)
     def fromElems[GAOut <: HList, SH <: HList](a: A[T], listT: List[T])(implicit 
       sh: Shape[A[T]] { type Out = SH },
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
-      fe: FromElems[T, GAOut, SH], 
+      fe: FromElemsOpt[T, GAOut, SH], 
     ): fe.Out = fe(listT, sh(a))
     def reshape[GAOut <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
       ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
-      fe: FromElems[T, GAOut, SH],
+      fe: FromElemsOpt[T, GAOut, SH],
     ): fe.Out = {
       fromElems(a, fl(a), shape)
     }
@@ -70,8 +70,8 @@ object ArrayDefs {
       fl: Flatten[A, T],
       a_tIsArr: IsArray[A, _T],
       sh: Shape[A[T]] { type Out = SH }, 
-      ga: GetArrsAsc[A, _T, HNil] { type Out = GAOut },
-      fr: FromElems[_T, GAOut, SH] { type Out = Option[A[_T]] },
+      ga: GetArrsDesc[A, _T, HNil] { type Out = GAOut },
+      fr: FromElemsOpt[_T, GAOut, SH] { type Out = Option[A[_T]] },
     ): A[_T] = {
       val shape: SH = sh(a)
       val list_t: List[_T] = flatten(a).map(f)
@@ -106,24 +106,24 @@ object ArrayDefs {
       def flatten(implicit fl: Flatten[A, T]): List[T] = fl(a)
       def fromElems[Arrs <: HList, SH <: HList](listT: List[T], shape: SH)(implicit 
         ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
-        fr: FromElems[T, Arrs, SH],
+        fr: FromElemsOpt[T, Arrs, SH],
       ): fr.Out = tc.fromElems(a, listT, shape)
       def fromElems[Arrs <: HList, SH <: HList](listT: List[T])(implicit 
         sh: Shape[A[T]] { type Out = SH },
         ga: GetArrsAsc[A, T, HNil] { type Out = Arrs },
-        fr: FromElems[T, Arrs, SH], 
+        fr: FromElemsOpt[T, Arrs, SH], 
       ): fr.Out = tc.fromElems(a, listT)
       def reshape[GAOut <: HList, SH <: HList](shape: SH)(implicit 
         fl: Flatten[A, T],
         ga: GetArrsAsc[A, T, HNil] { type Out = GAOut },
-        rs: FromElems[T, GAOut, SH],
+        rs: FromElemsOpt[T, GAOut, SH],
       ) = tc.reshape(a, shape)
       def map[_T, GAOut <: HList, SH <: HList](f: T => _T)(implicit
         a_tIsArr: IsArray[A, _T],
         fl: Flatten[A, T],
         sh: Shape[A[T]] { type Out = SH }, 
-        ga: GetArrsAsc[A, _T, HNil] { type Out = GAOut },
-        fr: FromElems[_T, GAOut, SH] { type Out = Option[A[_T]] },
+        ga: GetArrsDesc[A, _T, HNil] { type Out = GAOut },
+        fr: FromElemsOpt[_T, GAOut, SH] { type Out = Option[A[_T]] },
       ): A[_T] = tc.map(a, f)
     }
   }
@@ -175,7 +175,7 @@ object ArrayDefs {
       in: Init.Aux[FLF, LF],
       ga: GetArrsAsc.Aux[A, T, HNil, AR],
       pr: Prepend.Aux[LF, RG, SH],
-      fe: FromElemsDT.Aux[T, AR, SH, Nat._0, Option[Out]], 
+      fe: FromElemsOpt.Aux[T, AR, SH, Option[Out]], 
       dm: ToInt[DM],
     ): Aux[A, T, DM, Out] = instance((a, cmb) => {
       val lst: List[T] = rd(a, cmb)
@@ -466,41 +466,41 @@ object ArrayDefs {
     }
  }
 
-  trait FromElems[T, Arrs <: HList, SH <: HList] {
-    type Out
-    def apply(l: List[T], sh: SH): Out
-  }
-  object FromElems {
-    type Aux[T, Arrs <: HList, SH <: HList, O] = FromElems[T, Arrs, SH] { type Out = O }
-    def instance[T, Arrs <: HList, SH <: HList, O](f: (List[T], SH) => O): Aux[T, Arrs, SH, O] = 
-    new FromElems[T, Arrs, SH] {
-      type Out = O
-      def apply(l: List[T], sh: SH): Out = f(l, sh)
-    }
-    def apply[T, Arrs <: HList, SH <: HList](implicit fe: FromElems[T, Arrs, SH]): Aux[T, Arrs, SH, fe.Out] = fe
-    implicit def ifListT[T, Arrs <: HList, SH <: HList, RSH <: HList, O]( implicit 
-      fr: FromElemsDT[T, Arrs, SH, Nat._0],
-    ): Aux[T, Arrs, SH, fr.Out] = instance((l, sh) => fr(l, sh))
-  }
+  //trait FromElems[T, Arrs <: HList, SH <: HList] {
+    //type Out
+    //def apply(l: List[T], sh: SH): Out
+  //}
+  //object FromElems {
+    //type Aux[T, Arrs <: HList, SH <: HList, O] = FromElems[T, Arrs, SH] { type Out = O }
+    //def instance[T, Arrs <: HList, SH <: HList, O](f: (List[T], SH) => O): Aux[T, Arrs, SH, O] = 
+    //new FromElems[T, Arrs, SH] {
+      //type Out = O
+      //def apply(l: List[T], sh: SH): Out = f(l, sh)
+    //}
+    //def apply[T, Arrs <: HList, SH <: HList](implicit fe: FromElems[T, Arrs, SH]): Aux[T, Arrs, SH, fe.Out] = fe
+    //implicit def ifListT[T, Arrs <: HList, SH <: HList, RSH <: HList, O]( implicit 
+      //fr: FromElemsDT[T, Arrs, SH, Nat._0],
+    //): Aux[T, Arrs, SH, fr.Out] = instance((l, sh) => fr(l, sh))
+  //}
 
-  trait FromElemsDT[X, Arrs <: HList, SH <: HList, INIT <: Nat] {
+  trait FromElemsOpt[X, Arrs <: HList, SH <: HList] {
     type Out <: Option[Any]
     def apply(l: List[X], sh: SH): Out
   }
-  object FromElemsDT {
-    type Aux[X, Arrs <: HList, SH <: HList, INIT <: Nat, O <: Option[_]] = 
-      FromElemsDT[X, Arrs, SH, INIT] { type Out = O }
+  object FromElemsOpt {
+    type Aux[X, Arrs <: HList, SH <: HList, O <: Option[_]] = 
+      FromElemsOpt[X, Arrs, SH] { type Out = O }
     def instance[T, Arrs <: HList, SH <: HList, INIT <: Nat, O <: Option[_]](
       f: (List[T], SH) => O
-    ): Aux[T, Arrs, SH, INIT, O] = new FromElemsDT[T, Arrs, SH, INIT] {
+    ): Aux[T, Arrs, SH, O] = new FromElemsOpt[T, Arrs, SH] {
       type Out = O
       def apply(l: List[T], sh: SH): Out = f(l, sh)
     }
-    def apply[T, Arrs <: HList, SH <: HList, INIT <: Nat](
-      implicit fe: FromElemsDT[T, Arrs, SH, INIT],
-    ): FromElemsDT.Aux[T, Arrs, SH, INIT, fe.Out] = fe
+    def apply[T, Arrs <: HList, SH <: HList](
+      implicit fe: FromElemsOpt[T, Arrs, SH],
+    ): FromElemsOpt.Aux[T, Arrs, SH, fe.Out] = fe
 
-    implicit def ifShapeIsHNil[X, Arrs <: HList, INIT <: Nat]: Aux[X, Arrs, HNil, INIT, Option[X]] = instance(
+    implicit def ifShapeIsHNil[X, Arrs <: HList]: Aux[X, Arrs, HNil, Option[X]] = instance(
       (l, sh) => {
         if(l.length == 1){Some(l(0))} else {None}
       }
@@ -508,8 +508,8 @@ object ArrayDefs {
 
     implicit def ifShapeIsNotHNil[_S, A0[_], T, A1p <: HList, SH1p <: HList, NxtO](implicit 
       a0IsArr: IsArray[A0, T] { type S = _S },
-      feForA1: FromElemsDT.Aux[A0[T], A1p, SH1p, Nat._1, Option[NxtO]],
-    ): Aux[_S, A0[T] :: A1p, Int :: SH1p, Nat._1, Option[NxtO]] = instance(
+      feForA1: FromElemsOpt.Aux[A0[T], A1p, SH1p, Option[NxtO]],
+    ): Aux[_S, A0[T] :: A1p, Int :: SH1p, Option[NxtO]] = instance(
       (l, sh) => {
         val thisA: A0[T] = a0IsArr.getEmpty
         val h1Nil = Nil: List[A0[T]]
@@ -520,12 +520,13 @@ object ArrayDefs {
       }
     )
 
-    implicit def ifInitial[A0[_], T, A1p <: HList, SH <: HList, RSH <: HList, NxtO](implicit 
-      a0IsArr: IsArray[A0, T] { type S = T },
-      rv: Reverse.Aux[SH, RSH],
-      fe: FromElemsDT.Aux[T, A0[T] :: A1p, RSH, Nat._1, Option[NxtO]],
-    ): Aux[T, A0[T] :: A1p, SH, Nat._0, Option[NxtO]] = instance(
-      (l, sh) => fe(l, rv(sh))
+    implicit def ifArraysDescending[AR <: HList, T, SH <: HList, RSH <: HList, RAR <: HList, NxtO](implicit 
+      ds: ArraysDescending[AR],
+      r0: Reverse.Aux[SH, RSH],
+      r1: Reverse.Aux[AR, RAR],
+      fe: FromElemsOpt.Aux[T, RAR, RSH, Option[NxtO]],
+    ): Aux[T, AR, SH, Option[NxtO]] = instance(
+      (l, sh) => fe(l, r0(sh))
     )
 
     def combineS[A[_], T, _S](
@@ -591,7 +592,7 @@ object ArrayDefs {
       aSh: Shape.Aux[A[T], SH],
       bSh: Shape.Aux[B[T], SH],
       cs: CombineShapesOpt[SH],
-      fe: FromElems.Aux[T, Arrs, SH, Option[A[T]]],
+      fe: FromElemsOpt.Aux[T, Arrs, SH, Option[A[T]]],
     ): Aux[A, B, T] = instance((a, b) => 
       cs(aSh(a), bSh(b), 0).flatMap(sh => fe(flA(a) ++ flB(b), sh))
     )
@@ -758,7 +759,7 @@ object ArrayDefs {
     implicit def ifArray[A[_], T, Arrs <: HList, SH <: HList](implicit 
       sh: Shape.Aux[A[T], SH],
       ga: GetArrsAsc.Aux[A, T, HNil, Arrs],
-      fe: FromElemsDT[T, Arrs, SH, Nat._0] { type Out = Option[A[T]] }, 
+      fe: FromElemsOpt.Aux[T, Arrs, SH, Option[A[T]]], 
       flA: Flatten[A, T],
       flB: Flatten[A, Boolean],
     ): Aux[A, T] = instance((a, mask, to) => {
