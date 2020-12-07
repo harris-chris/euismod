@@ -616,15 +616,14 @@ object ArrayDefs {
     ): Aux[A, A, T] = instance((a, b) => 
       cs(sh(a), sh(b), 0).map(_ => isArr.fromList(isArr.toList(a) ++ isArr.toList(b)))
     )
-    implicit def ifDiffType[A[_], B[_], T, ARD <: HList, ARA <: HList, SH <: HList](implicit
+    implicit def ifDiffType[A[_], B[_], T, AR <: HList, SH <: HList](implicit
       flA: Flatten[A, T],
       flB: Flatten[B, T],
-      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
-      rv: Reverse.Aux[ARD, ARA],
+      ga: GetArrsDesc.Aux[A, T, HNil, AR],
       aSh: Shape.Aux[A[T], SH],
       bSh: Shape.Aux[B[T], SH],
       cs: CombineShapesOpt[SH],
-      fe: FromElemsOpt.Aux[T, ARA, SH, Option[A[T]]],
+      fe: FromElemsOpt.Aux[T, AR, SH, Option[A[T]]],
     ): Aux[A, B, T] = instance((a, b) => 
       cs(aSh(a), bSh(b), 0).flatMap(sh => fe(flA(a) ++ flB(b), sh))
     )
@@ -788,11 +787,10 @@ object ArrayDefs {
     }
     def apply[A[_], T](implicit wh: Where[A, T]): Aux[A, T] = wh
 
-    implicit def ifArray[A[_], T, ARD <: HList, ARA <: HList, SH <: HList](implicit 
+    implicit def ifArray[A[_], T, AR <: HList, SH <: HList](implicit 
       sh: Shape.Aux[A[T], SH],
-      ga: GetArrsDesc.Aux[A, T, HNil, ARD],
-      rv: Reverse.Aux[ARD, ARA],
-      fe: FromElemsOpt.Aux[T, ARA, SH, Option[A[T]]], 
+      ga: GetArrsDesc.Aux[A, T, HNil, AR],
+      fe: FromElemsOpt.Aux[T, AR, SH, Option[A[T]]], 
       flA: Flatten[A, T],
       flB: Flatten[A, Boolean],
     ): Aux[A, T] = instance((a, mask, to) => {
