@@ -1,3 +1,0 @@
-
-ê,src/test/scala/indexed-array/ArraySpec.scala:\
-   Nabstract type pattern A[Double] is unchecked since it is eliminated by erasureP

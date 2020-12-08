@@ -318,7 +318,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === exp)
     }
     scenario("transposing a 4d array with AllSlice correctly flips the axes", TransposeTest) {
-      val act = TransAllDT[List4d[Double], Nat._0, Nat._3].apply(dbl4d)
+      val act = Transpose[List4d[Double], AllSlice].apply(dbl4d)
       val exp = List4d[Double](
         List(
           List(
@@ -450,7 +450,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
     scenario("Transposing a 4d array along axes 2/3 matches with numpy", TransposeTest) {
       //val act = Transpose[List4d[Double], (Nat._2, Nat._3)].apply(dbl4d)
-      val act = TransAxDT[List4d[Double], Nat._2, Nat._3].apply(dbl4d)
+      val act = Transpose[List4d[Double], (Nat._2, Nat._3)].apply(dbl4d)
       val exp = List4d[Double](
         List(
           List(
