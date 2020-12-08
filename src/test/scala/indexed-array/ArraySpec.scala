@@ -397,7 +397,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
     scenario("Transposing a 2d array along axes 0/1 matches with numpy", TransposeTest) {
       val act = Transpose[List2d[Double], (Nat._0, Nat._1)].apply(dbl2d)
-      val exp = List2d[Double](
+      val exp = List2d[Double] (
         List(
           List(0.0 , 0.1 , 0.2 ),
           List(0.01, 0.11, 0.21),
@@ -409,7 +409,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === exp)
     }
     scenario("Transposing a 3d array along axes 0/1 matches with numpy", TransposeTest) {
-      val exp = List3d[Double](
+      val exp = List3d[Double] (
         List(
           List(
             List(0.0  , 0.001, 0.002, 0.003, 0.004),
@@ -428,7 +428,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === exp)
     }
     scenario("Transposing a 3d array along axes 1/2 matches with numpy", TransposeTest) {
-      val exp = List3d[Double](
+      val exp = List3d[Double] (
         List(
           List(
             List(0.0  , 0.01 , 0.02 ),
@@ -451,7 +451,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("Transposing a 4d array along axes 2/3 matches with numpy", TransposeTest) {
       //val act = Transpose[List4d[Double], (Nat._2, Nat._3)].apply(dbl4d)
       val act = Transpose[List4d[Double], (Nat._2, Nat._3)].apply(dbl4d)
-      val exp = List4d[Double](
+      val exp = List4d[Double] (
         List(
           List(
             List(
@@ -843,27 +843,27 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  //feature("IsArray.getArrays") {
-    //import ArrayDefs.IsArraySyntax._
-    //import Dummy.Types._
-    //import Dummy.Values._
-    //import Dummy.IsArrayImplicits._
-    //scenario(".getArrays is called on a 1d array to return an empty version of itself") {
-      //When(".getArrays is called on a 1d array")
-      //Then("It should return an empty version of itself")
-      //val l1Arrs0: List1d[Double] :: HNil = dbl1d.getArraysAsc
-      //val l1Arrs1: List1d[Double] :: HNil = dbl1d.getArraysDesc
-      //assert(l1Arrs0 == dbl1d.getEmpty :: HNil)
-      //When(".getArrays is called on a 2d array")
-      //Then("It should return an empty 1d and 2d array")
-      //val l2Arrs: List2d[Double] :: List1d[Double] :: HNil = dbl2d.getArraysDesc
-      //assert(l2Arrs == dbl2d.getEmpty :: dbl1d.getEmpty :: HNil)
-      //When(".getArrays is called on a 3d array")
-      //Then("It should return an empty 1d, 2d and 3d array")
-      //val l3Arrs: List1d[Double] :: List2d[Double] :: List3d[Double] :: HNil = dbl3d.getArraysAsc
-      //assert(l3Arrs == dbl1d.getEmpty :: dbl2d.getEmpty :: dbl3d.getEmpty :: HNil)
-    //}
-  //}
+  feature("The SubArrays typeclass") {
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    scenario("SubArrays.Out of a 1d array is an Hlist containing a 1d array") {
+      val sa: SubArrays[List1d[Double]] { 
+        type Out = List1d[Double] :: HNil 
+      } = SubArrays[List1d[Double]]
+    }
+    scenario("SubArrays.Out of a 2d array is an Hlist containing a 2d and a 1d array") {
+      val sa: SubArrays[List2d[Double]] { 
+        type Out = List2d[Double] :: List1d[Double] :: HNil 
+      } = SubArrays[List2d[Double]]
+    }
+    scenario("SubArrays.Out of a 3d array is an Hlist containing a 3d, 2d and 1d array") {
+      val sa: SubArrays[List3d[Double]] { 
+        type Out = List3d[Double] :: List2d[Double] :: List1d[Double] :: HNil 
+      } = SubArrays[List3d[Double]]
+    }
+  }
 
   feature("The ArraysSort typeclass") {
     import ArrayDefs.IsArraySyntax._

@@ -66,10 +66,9 @@ object ArrayDefs {
     }
     def map[_T, AR <: HList, SH <: HList](a: A[T], f: (T) => _T)(implicit
       fl: Flatten[A, T],
-      a_tIsArr: IsArray[A, _T],
-      sh: Shape[A[T]] { type Out = SH }, 
+      sh: Shape.Aux[A[T], SH], 
       sa: SubArrays.Aux[A[_T], AR],
-      fr: FromElemsOpt[_T, AR, SH] { type Out = Option[A[_T]] },
+      fr: FromElemsOpt.Aux[_T, AR, SH, Option[A[_T]]],
     ): A[_T] = {
       val shape: SH = sh(a)
       val list_t: List[_T] = flatten(a).map(f)
