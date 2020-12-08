@@ -952,8 +952,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("a List1d can be constructed from a 2d array and a list of Ts", FromElemsOptTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val newShape = 6 :: HNil
-      val ga = SubArrays[List2d[Double]]
-      val fe = FromElemsOpt[Double, ga.Out, Int :: HNil]
+      val sa = SubArrays[List2d[Double]]
+      val fe = FromElemsOpt[Double, sa.Out, Int :: HNil]
       val act = fe(ts6, newShape)
       assert(act match {
         case Some(l1) => l1.flatten.toList === ts6
@@ -963,8 +963,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("a List2d can be constructed from a 2d array and a list of Ts", FromElemsOptTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val newShape = 3 :: 2 :: HNil
-      val ga = GetArrsDesc[List2d[Double], HNil]
-      val fe = FromElemsOpt[Double, ga.Out, Int :: Int :: HNil]
+      val sa = SubArrays[List2d[Double]]
+      val fe = FromElemsOpt[Double, sa.Out, Int :: Int :: HNil]
       val act = fe(ts6, newShape)
       assert(act match {
         case Some(l2) => {

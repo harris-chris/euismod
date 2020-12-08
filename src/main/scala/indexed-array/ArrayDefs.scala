@@ -610,7 +610,7 @@ object ArrayDefs {
     implicit def ifDiffType[A[_], B[_], T, AR <: HList, SH <: HList](implicit
       flA: Flatten[A, T],
       flB: Flatten[B, T],
-      ga: GetArrsDesc.Aux[A[T], HNil, AR],
+      sa: SubArrays.Aux[A[T], AR],
       aSh: Shape.Aux[A[T], SH],
       bSh: Shape.Aux[B[T], SH],
       cs: CombineShapesOpt[SH],
