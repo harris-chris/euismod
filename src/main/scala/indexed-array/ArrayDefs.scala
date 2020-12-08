@@ -122,6 +122,51 @@ object ArrayDefs {
     }
   }
 
+  trait OperateOpt[A[_], B[_], AT, BT] {
+    type Out = Option[A[AT]]
+    def apply(a: A[AT], b: B[BT], op: (AT, BT) => AT): Out 
+  }
+  object OperateOpt {
+    type Aux[A[_], B[_], AT, BT] = OperateOpt[A, B, AT, BT]
+    def instance[A[_], B[_], AT, BT] (
+      f: (A[AT], B[BT], (AT, BT) => AT) => Option[A[AT]],
+    ): Aux[A, B, AT, BT] = new OperateOpt[A, B, AT, BT] {
+      def apply(a: A[AT], b: B[BT], op: (AT, BT) => AT): Option[A[AT]] = f(a, b, op)
+    }
+    def apply[A[_], B[_], AT, BT](implicit oo: OperateOpt[A, B, AT, BT]): Aux[A, B, AT, BT] = oo
+
+    implicit def ifBothArrs[A[_], B[_], AT, BT, SA[_], SB[_]] (implicit
+      ar: IsArray[A, AT] { type S = SA[AT] },
+      br: IsArray[B, BT] { type S = SB[BT] },
+      nx: OperateOpt[SA, SB, AT, BT] { type Out = SA[AT] },
+    ): Aux[A, B, AT, BT] = instance(
+      (a, b, op) => (ar.toList(a), br.toList(b)) match {
+        case (lstA, lstB) if lstA.length == lstB.length => {
+          val lst: List[Option[SA[AT]]] = for(
+            (nxa, nxb) <- lstA.zip(lstB)
+          ) yield (nx(nxa, nxb, op))
+          val flatLst = lst.flatten
+          if(flatLst.length > 0) {Some(ar.fromList(flatLst))} else {None}
+        }
+      }
+    )
+
+    implicit def ifBothBase[A[_], B[_], AT, BT] (implicit
+      ar: IsArray[A, AT] { type S = AT },
+      br: IsArray[B, BT] { type S = BT },
+    ): Aux[A, B, AT, BT] = instance(
+      (a, b, op) => (ar.toList(a), br.toList(b)) match {
+        case (lstA, lstB) if lstA.length == lstB.length => {
+          val lst: List[AT] = for(
+            (at, bt) <- lstA.zip(lstB)
+          ) yield (op(at, bt))
+          Some(ar.fromList(lst))
+        }
+      }
+    )
+  }
+    
+
   trait Is1d[A] {}
   object Is1d {
     def apply[A](implicit i1: Is1d[A]): Is1d[A] = i1
@@ -211,9 +256,7 @@ object ArrayDefs {
       println(s"LIST ${lst}")
       val dim = dm()
       val (lf, rg) = sp(sh(a))
-      println(s"LEFT ${lf} RIGHT ${rg}")
       val shape: SH = in(lf) ++ rg
-      println(s"SHAPE ${shape}")
       val arrO = fe(lst, shape)
       arrO.get
     })
