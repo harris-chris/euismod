@@ -49,17 +49,17 @@ object ArrayDefs {
     def shape(a: A[T])(implicit sh: Shape[A[T]]): sh.Out = sh(a)
     def flatten(a: A[T])(implicit fl: Flatten[A, T]): List[T] = fl(a)
     def fromElems[AR <: HList, SH <: HList](a: A[T], listT: List[T], shape: SH)(implicit 
-      ga: GetArrsDesc.Aux[A[T], HNil, AR],
+      sa: SubArrays.Aux[A[T], AR],
       fe: FromElemsOpt[T, AR, SH], 
     ): fe.Out = fe(listT, shape)
     def fromElems[AR <: HList, SH <: HList](a: A[T], listT: List[T])(implicit 
       sh: Shape.Aux[A[T], SH],
-      ga: GetArrsDesc.Aux[A[T], HNil, AR],
+      sa: SubArrays.Aux[A[T], AR],
       fe: FromElemsOpt[T, AR, SH], 
     ): fe.Out = fe(listT, sh(a))
     def reshape[AR <: HList, SH <: HList](a: A[T], shape: SH)(implicit 
       fl: Flatten[A, T],
-      ga: GetArrsDesc.Aux[A[T], HNil, AR],
+      sa: SubArrays.Aux[A[T], AR],
       fe: FromElemsOpt[T, AR, SH],
     ): fe.Out = {
       fromElems(a, fl(a), shape)
@@ -68,7 +68,7 @@ object ArrayDefs {
       fl: Flatten[A, T],
       a_tIsArr: IsArray[A, _T],
       sh: Shape[A[T]] { type Out = SH }, 
-      ga: GetArrsDesc.Aux[A[_T], HNil, AR],
+      sa: SubArrays.Aux[A[_T], AR],
       fr: FromElemsOpt[_T, AR, SH] { type Out = Option[A[_T]] },
     ): A[_T] = {
       val shape: SH = sh(a)
@@ -100,24 +100,24 @@ object ArrayDefs {
       def shape(implicit sh: Shape[A[T]]): sh.Out = tc.shape(a)
       def flatten(implicit fl: Flatten[A, T]): List[T] = fl(a)
       def fromElems[AR <: HList, SH <: HList](listT: List[T], shape: SH)(implicit 
-        ga: GetArrsDesc.Aux[A[T], HNil, AR],
+        ga: SubArrays.Aux[A[T], AR],
         fr: FromElemsOpt[T, AR, SH],
       ): fr.Out = tc.fromElems(a, listT, shape)
       def fromElems[AR <: HList, SH <: HList](listT: List[T])(implicit 
         sh: Shape[A[T]] { type Out = SH },
-        ga: GetArrsDesc.Aux[A[T], HNil, AR],
+        ga: SubArrays.Aux[A[T], AR],
         fr: FromElemsOpt[T, AR, SH], 
       ): fr.Out = tc.fromElems(a, listT)
       def reshape[AR <: HList, SH <: HList](shape: SH)(implicit 
         fl: Flatten[A, T],
-        ga: GetArrsDesc.Aux[A[T], HNil, AR],
+        ga: SubArrays.Aux[A[T], AR],
         rs: FromElemsOpt[T, AR, SH],
       ) = tc.reshape(a, shape)
       def map[_T, AR <: HList, SH <: HList](f: T => _T)(implicit
         ai: IsArray[A, _T],
         fl: Flatten[A, T],
         sh: Shape.Aux[A[T], SH], 
-        ga: GetArrsDesc.Aux[A[_T], HNil, AR],
+        ga: SubArrays.Aux[A[_T], AR],
         fr: FromElemsOpt.Aux[_T, AR, SH, Option[A[_T]]],
       ): A[_T] = tc.map(a, f)
     }
@@ -203,7 +203,7 @@ object ArrayDefs {
       sh: Shape.Aux[A[T], FSH],
       sp: Split.Aux[FSH, Succ[DM], FLF, RG],
       in: Init.Aux[FLF, LF],
-      ga: GetArrsDesc.Aux[A[T], HNil, AR],
+      sa: SubArrays.Aux[A[T], AR],
       pr: Prepend.Aux[LF, RG, SH],
       fe: FromElemsOpt.Aux[T, AR, SH, Option[Out]], 
       dm: ToInt[DM],
@@ -324,7 +324,7 @@ object ArrayDefs {
       A[_], T, ARD <: HList, AllArrs <: HList, Idx <: HList, IntsIdx <: HList, IntsN <: Nat, AllArrsN <: Nat,
       TakeN <: Nat, RdArrs <: HList, RevRdArrs <: HList,
     ](implicit 
-      ga: GetArrsDesc.Aux[A[T], HNil, ARD],
+      sa: SubArrays.Aux[A[T], ARD],
       r0: Reverse.Aux[ARD, AllArrs],
       fl: Filter.Aux[Idx, Int, IntsIdx],
       lf: Length.Aux[IntsIdx, IntsN],
@@ -411,26 +411,27 @@ object ArrayDefs {
     implicit def go[A] (implicit
       ga: GetArrsDesc[A, HNil],
     ): Aux[A, ga.Out] = new SubArrays[A] { type Out = ga.Out }
+
+    trait GetArrsDesc[A, L] {self =>
+      type Out <: HList
+    }
+    object GetArrsDesc {
+      type Aux[A, L, O <: HList] = GetArrsDesc[A, L] { type Out = O }
+      def apply[A, L](implicit ga: GetArrsDesc[A, L]): Aux[A, L, ga.Out] = ga
+
+      implicit def ifSIsEle[A[_], T, L <: HList](implicit 
+        aIsArr: IsArray[A, T] { type S = T },
+        rv: Reverse[A[T] :: L],
+      ): Aux[A[T], L, rv.Out] = new GetArrsDesc[A[T], L] { type Out = rv.Out }
+
+      implicit def ifSIsArr[A[_], T, _S[_], _S1, L <: HList](implicit 
+        aIsABs: IsArray[A, T] { type S = _S[T] },
+        sIsABs: IsArray[_S, T],
+        gaForS: GetArrsDesc[_S[T], A[T] :: L],
+      ): Aux[A[T], L, gaForS.Out] = new GetArrsDesc[A[T], L] { type Out = gaForS.Out }
+    }
   }
 
-  trait GetArrsDesc[A, L] {self =>
-    type Out <: HList
-  }
-  object GetArrsDesc {
-    type Aux[A, L, O <: HList] = GetArrsDesc[A, L] { type Out = O }
-    def apply[A, L](implicit ga: GetArrsDesc[A, L]): Aux[A, L, ga.Out] = ga
-
-    implicit def ifSIsEle[A[_], T, L <: HList](implicit 
-      aIsArr: IsArray[A, T] { type S = T },
-      rv: Reverse[A[T] :: L],
-    ): Aux[A[T], L, rv.Out] = new GetArrsDesc[A[T], L] { type Out = rv.Out }
-
-    implicit def ifSIsArr[A[_], T, _S[_], _S1, L <: HList](implicit 
-      aIsABs: IsArray[A, T] { type S = _S[T] },
-      sIsABs: IsArray[_S, T],
-      gaForS: GetArrsDesc[_S[T], A[T] :: L],
-    ): Aux[A[T], L, gaForS.Out] = new GetArrsDesc[A[T], L] { type Out = gaForS.Out }
-  }
 
   sealed trait DepthCT[A] { self =>
     type Out <: Nat
@@ -439,7 +440,7 @@ object ArrayDefs {
     type Aux[A, O <: Nat] = DepthCT[A] { type Out = O }
     def apply[A](implicit de: DepthCT[A]): Aux[A, de.Out] = de
     implicit def ifArr[A[_], T, O <: Nat, Arrs <: HList](implicit 
-      ar: GetArrsDesc.Aux[A[T], HNil, Arrs],
+      sa: SubArrays.Aux[A[T], Arrs],
       le: Length.Aux[Arrs, O],
     ): Aux[A[T], O] = new DepthCT[A[T]] { type Out = O }
   }
@@ -780,7 +781,7 @@ object ArrayDefs {
 
     implicit def ifArray[A[_], T, AR <: HList, SH <: HList](implicit 
       sh: Shape.Aux[A[T], SH],
-      ga: GetArrsDesc.Aux[A[T], HNil, AR],
+      sa: SubArrays.Aux[A[T], AR],
       fe: FromElemsOpt.Aux[T, AR, SH, Option[A[T]]], 
       flA: Flatten[A, T],
       flB: Flatten[A, Boolean],
