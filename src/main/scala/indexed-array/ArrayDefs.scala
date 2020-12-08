@@ -37,7 +37,7 @@ object ArrayDefs {
     def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
     def ++[B[_]](a: A[T], b: B[T])(implicit 
-      cnCt: ConcatenateCT[A, B, T, Nat._0],
+      cnCt: Concatenate[A, B, T, Nat._0],
     ): cnCt.Out = cnCt(a, b)
     def toList(a: A[T]): List[S] = (for(i <- 0 to length(a) - 1) yield (getAtN(a, i))).toList
     def fromList(listS: List[S]): A[T] = 
@@ -93,7 +93,7 @@ object ArrayDefs {
       def getAtN(n: Int): _S = tc.getAtN(a, n)
       def apply[R](r: R)(implicit ai: ApplyIndex[A[T], R]) = tc.apply(a, r)
       def ::(other: _S) = tc.cons(a, other)
-      def ++[B[_]](b: B[T])(implicit cn: ConcatenateCT[A, B, T, Nat._0]) = tc.++(a, b)
+      def ++[B[_]](b: B[T])(implicit cn: Concatenate[A, B, T, Nat._0]) = tc.++(a, b)
       def length: Int = tc.length(a)
       def toList: List[_S] = tc.toList(a)
       def fromList(listS: List[_S]): A[T] = tc.fromList(listS)
@@ -145,31 +145,31 @@ object ArrayDefs {
     ): Aux[AR, O] = dc
 
     implicit def ifTwoPlusElemsRemainingDesc[A0[_], A1[_], T, A2p <: HList, DE0 <: Nat, DE1 <: Nat] (implicit
-      d0: DepthCT.Aux[A0[T], DE0],
-      d1: DepthCT.Aux[A1[T], DE1],
+      d0: Depth.Aux[A0[T], DE0],
+      d1: Depth.Aux[A1[T], DE1],
       gt: GT[DE0, DE1],
       nx: ArraySort.Aux[A1[T] :: A2p, Descending],
     ): Aux[A0[T] :: A1[T] :: A2p, Descending] = 
       new ArraySort[A0[T] :: A1[T] :: A2p] { type Out = Descending }
 
     implicit def ifTwoElemsRemainingDesc[A0[_], A1[_], T, DE0 <: Nat, DE1 <: Nat] (implicit
-      d0: DepthCT.Aux[A0[T], DE0],
-      d1: DepthCT.Aux[A1[T], DE1],
+      d0: Depth.Aux[A0[T], DE0],
+      d1: Depth.Aux[A1[T], DE1],
       gt: GT[DE0, DE1],
     ): Aux[A0[T] :: A1[T] :: HNil, Descending] = 
       new ArraySort[A0[T] :: A1[T] :: HNil] { type Out = Descending }
 
     implicit def ifTwoPlusElemsRemainingAsc[A0[_], A1[_], T, A2p <: HList, DE0 <: Nat, DE1 <: Nat] (implicit
-      d0: DepthCT.Aux[A0[T], DE0],
-      d1: DepthCT.Aux[A1[T], DE1],
+      d0: Depth.Aux[A0[T], DE0],
+      d1: Depth.Aux[A1[T], DE1],
       gt: GT[DE1, DE0],
       nx: ArraySort.Aux[A1[T] :: A2p, Ascending],
     ): Aux[A0[T] :: A1[T] :: A2p, Ascending] = 
       new ArraySort[A0[T] :: A1[T] :: A2p] { type Out = Ascending }
 
     implicit def ifTwoElemsRemainingAsc[A0[_], A1[_], T, DE0 <: Nat, DE1 <: Nat] (implicit
-      d0: DepthCT.Aux[A0[T], DE0],
-      d1: DepthCT.Aux[A1[T], DE1],
+      d0: Depth.Aux[A0[T], DE0],
+      d1: Depth.Aux[A1[T], DE1],
       gt: GT[DE1, DE0],
     ): Aux[A0[T] :: A1[T] :: HNil, Ascending] = 
       new ArraySort[A0[T] :: A1[T] :: HNil] { type Out = Ascending }
@@ -197,7 +197,7 @@ object ArrayDefs {
       AR <: HList, SH <: HList, Out
     ] (implicit 
       aIsArr: IsArray[A, T],
-      de: DepthCT.Aux[A[T], DE],
+      de: Depth.Aux[A[T], DE],
       e0: GT[DE, Nat._1],
       rd: ReduceToList[A, T, DM],
       sh: Shape.Aux[A[T], FSH],
@@ -356,7 +356,7 @@ object ArrayDefs {
 
     implicit def ifIs1d[A[_], T](implicit 
       aIsArr: IsArray[A, T],
-      de: DepthCT.Aux[A[T], Nat._1],
+      de: Depth.Aux[A[T], Nat._1],
       fl: Flatten[A, T],
     ): PrettyPrint[A[T]] = instance((a, indO) => {
       val mW = maxWidth(a)
@@ -364,7 +364,7 @@ object ArrayDefs {
     })
     implicit def ifIs1dp[A[_], T, _S[_], DE <: Nat](implicit 
       aIsArr: IsArray[A, T] { type S = _S[T] },
-      de: DepthCT.Aux[A[T], DE],
+      de: Depth.Aux[A[T], DE],
       deIsGt2: GT[DE, Nat._1],
       toInt: ToInt[DE],
       fl: Flatten[A, T],
@@ -433,16 +433,16 @@ object ArrayDefs {
   }
 
 
-  sealed trait DepthCT[A] { self =>
+  sealed trait Depth[A] { self =>
     type Out <: Nat
   }
-  object DepthCT {
-    type Aux[A, O <: Nat] = DepthCT[A] { type Out = O }
-    def apply[A](implicit de: DepthCT[A]): Aux[A, de.Out] = de
+  object Depth {
+    type Aux[A, O <: Nat] = Depth[A] { type Out = O }
+    def apply[A](implicit de: Depth[A]): Aux[A, de.Out] = de
     implicit def ifArr[A[_], T, O <: Nat, Arrs <: HList](implicit 
       sa: SubArrays.Aux[A[T], Arrs],
       le: Length.Aux[Arrs, O],
-    ): Aux[A[T], O] = new DepthCT[A[T]] { type Out = O }
+    ): Aux[A[T], O] = new Depth[A[T]] { type Out = O }
   }
 
   trait Shape[A] { self =>
@@ -663,19 +663,19 @@ object ArrayDefs {
     implicit def psEqualsZero[A]: Aux[A, Nat._0, Nat._0] = instance(a => a)
   }
 
-  trait TransposeDT[A, IN] {
+  trait Transpose[A, IN] {
     type Out = A
     def apply(a: A): Out
   }
-  object TransposeDT {
-    type Aux[A, IN] = TransposeDT[A, IN]
-    def apply[A, IN](implicit tr: TransposeDT[A, IN]): Aux[A, IN] = tr
-    def instance[A, IN](f: A => A): Aux[A, IN] = new TransposeDT[A, IN] { 
+  object Transpose {
+    type Aux[A, IN] = Transpose[A, IN]
+    def apply[A, IN](implicit tr: Transpose[A, IN]): Aux[A, IN] = tr
+    def instance[A, IN](f: A => A): Aux[A, IN] = new Transpose[A, IN] { 
       def apply(a: A): A = f(a)
     }
 
     implicit def ifNil[A, DE <: Nat, DEm1 <: Nat](implicit
-      de: DepthCT.Aux[A, DE],
+      de: Depth.Aux[A, DE],
       e1: Pred.Aux[DE, DEm1],
       tr: TransAllDT[A, Nat._0, DEm1],
     ): Aux[A, AllSlice] = instance(a => tr(a))
@@ -685,15 +685,15 @@ object ArrayDefs {
     ): Aux[A, (XA, XB)] = instance(a => tr(a))
   }
   
-  trait ConcatenateCT[A[_], B[_], T, D <: Nat] { self =>
+  trait Concatenate[A[_], B[_], T, D <: Nat] { self =>
     type Out = Option[A[T]]
     def apply(a: A[T], b: B[T]): Out
   }
-  object ConcatenateCT {
-    def apply[A[_], B[_], T, D <: Nat](implicit cn: ConcatenateCT[A, B, T, D]): ConcatenateCT[A, B, T, D] = cn
+  object Concatenate {
+    def apply[A[_], B[_], T, D <: Nat](implicit cn: Concatenate[A, B, T, D]): Concatenate[A, B, T, D] = cn
     implicit def ifDim0[A[_], B[_], T](implicit 
       ad: AddOpt.Aux[A, B, T],
-    ): ConcatenateCT[A, B, T, Nat._0] = new ConcatenateCT[A, B, T, Nat._0] { 
+    ): Concatenate[A, B, T, Nat._0] = new Concatenate[A, B, T, Nat._0] { 
       def apply(a: A[T], b: B[T]): Out = ad(a, b)
     }
     implicit def ifNotDim0[A[_], B[_], T, D <: Nat, Dm1 <: Nat, _SA[_], _SB[_]](implicit
@@ -703,8 +703,8 @@ object ArrayDefs {
       sAIsArr: IsArray[_SA, T],
       sBIsArr: IsArray[_SB, T],
       dm1: Pred.Aux[D, Dm1],
-      sConc: ConcatenateCT[_SA, _SB, T, Dm1] { type Out = Option[_SA[T]] },
-    ): ConcatenateCT[A, B, T, D] = new ConcatenateCT[A, B, T, D] {
+      sConc: Concatenate[_SA, _SB, T, Dm1] { type Out = Option[_SA[T]] },
+    ): Concatenate[A, B, T, D] = new Concatenate[A, B, T, D] {
       def apply(a: A[T], b: B[T]): Out = {
         val cs = for((sA, sB) <- aIsArr.toList(a).zip(bIsArr.toList(b))) yield (sConc(sA, sB))
         if(cs.forall(_.isDefined)) {Some(aIsArr.fromList(cs.map(_.get)))} else {None}
@@ -712,21 +712,21 @@ object ArrayDefs {
     }
   }
 
-  trait ConcatenateRT[A[_], B[_], T] { self =>
+  trait ConcatenateOpt[A[_], B[_], T] { self =>
     type Out = Option[A[T]]
     def apply(a: A[T], b: B[T], dim: Int): Out
   }
-  object ConcatenateRT {
-    type Aux[A[_], B[_], T] = ConcatenateRT[A, B, T]
-    def apply[A[_], B[_], T](implicit cn: ConcatenateRT[A, B, T]): ConcatenateRT[A, B, T] = cn
+  object ConcatenateOpt {
+    type Aux[A[_], B[_], T] = ConcatenateOpt[A, B, T]
+    def apply[A[_], B[_], T](implicit cn: ConcatenateOpt[A, B, T]): ConcatenateOpt[A, B, T] = cn
     def instance[A[_], B[_], T](f: (A[T], B[T], Int) => Option[A[T]],
-    ): Aux[A, B, T] = new ConcatenateRT[A, B, T] {
+    ): Aux[A, B, T] = new ConcatenateOpt[A, B, T] {
       def apply(a: A[T], b: B[T], dim: Int): Option[A[T]] = f(a, b, dim)
     }
     implicit def ifNoSubConc[A[_], B[_], T](implicit 
       aIsArr: IsArray[A, T] { type S = T },
       bIsArr: IsArray[B, T] { type S = T },
-      cnCt: ConcatenateCT[A, B, T, Nat._0],
+      cnCt: Concatenate[A, B, T, Nat._0],
     ): Aux[A, B, T] = instance((a, b, dim) => 
       if(dim == 0) {
         cnCt(a, b)
@@ -793,7 +793,7 @@ object ArrayDefs {
 
     implicit def ifHeadIsListIntNotBase[A[_], _S, R1p <: HList, DE <: Nat](implicit
       aIsArr: IsArray[A, Boolean] { type S = _S },
-      de: DepthCT.Aux[A[Boolean], DE],
+      de: Depth.Aux[A[Boolean], DE],
       deGt1: GT[DE, Nat._1],
       maskS: MaskFromNumSeq[_S, R1p], 
     ): Aux[A[Boolean], List[Int] :: R1p] = instance((r, m) => {

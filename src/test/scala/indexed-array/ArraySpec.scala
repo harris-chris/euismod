@@ -228,20 +228,20 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The DepthCT typeclass") {
+  feature("The Depth typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    object DepthCTTest extends Tag("DepthCTTest")
-    scenario("DepthCT has type Out of Nat 1 for a 1d array", DepthCTTest) {
-      "implicitly[DepthCT[List1d[Double]] { type Out = Nat._1 }]" should compile
+    object DepthTest extends Tag("DepthTest")
+    scenario("Depth has type Out of Nat 1 for a 1d array", DepthTest) {
+      "implicitly[Depth[List1d[Double]] { type Out = Nat._1 }]" should compile
     }
-    scenario("DepthCT has type Out of Nat 2 for a 2d array", DepthCTTest) {
-      "implicitly[DepthCT[List2d[Double]] { type Out = Nat._2 }]" should compile
+    scenario("Depth has type Out of Nat 2 for a 2d array", DepthTest) {
+      "implicitly[Depth[List2d[Double]] { type Out = Nat._2 }]" should compile
     }
-    scenario("DepthCT has type Out of Nat 3 for a 3d array", DepthCTTest) {
-      "implicitly[DepthCT[List3d[Double]] { type Out = Nat._3 }]" should compile
+    scenario("Depth has type Out of Nat 3 for a 3d array", DepthTest) {
+      "implicitly[Depth[List3d[Double]] { type Out = Nat._3 }]" should compile
     }
   }
 
@@ -265,14 +265,14 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The TransposeDT typeclass") {
+  feature("The Transpose typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    object TransposeDTTest extends Tag("TransposeDTTest")
-    scenario("transposing a 2d array with AllSlice correctly flips the axes", TransposeDTTest) {
-      val act = TransposeDT[List2d[Double], AllSlice].apply(dbl2d)
+    object TransposeTest extends Tag("TransposeTest")
+    scenario("transposing a 2d array with AllSlice correctly flips the axes", TransposeTest) {
+      val act = Transpose[List2d[Double], AllSlice].apply(dbl2d)
       val exp = List2d[Double](
         List(
           List(0.0 , 0.1 , 0.2 ),
@@ -284,8 +284,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       assert(act === exp)
     }
-    scenario("transposing a 3d array with AllSlice correctly flips the axes", TransposeDTTest) {
-      val act = TransposeDT[List3d[Double], AllSlice].apply(dbl3d)
+    scenario("transposing a 3d array with AllSlice correctly flips the axes", TransposeTest) {
+      val act = Transpose[List3d[Double], AllSlice].apply(dbl3d)
       val exp = List3d[Double](
         List(
           List(
@@ -317,7 +317,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       assert(act === exp)
     }
-    scenario("transposing a 4d array with AllSlice correctly flips the axes", TransposeDTTest) {
+    scenario("transposing a 4d array with AllSlice correctly flips the axes", TransposeTest) {
       val act = TransAllDT[List4d[Double], Nat._0, Nat._3].apply(dbl4d)
       val exp = List4d[Double](
         List(
@@ -395,8 +395,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       assert(act === exp)
     }
-    scenario("Transposing a 2d array along axes 0/1 matches with numpy", TransposeDTTest) {
-      val act = TransposeDT[List2d[Double], (Nat._0, Nat._1)].apply(dbl2d)
+    scenario("Transposing a 2d array along axes 0/1 matches with numpy", TransposeTest) {
+      val act = Transpose[List2d[Double], (Nat._0, Nat._1)].apply(dbl2d)
       val exp = List2d[Double](
         List(
           List(0.0 , 0.1 , 0.2 ),
@@ -408,7 +408,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       assert(act === exp)
     }
-    scenario("Transposing a 3d array along axes 0/1 matches with numpy", TransposeDTTest) {
+    scenario("Transposing a 3d array along axes 0/1 matches with numpy", TransposeTest) {
       val exp = List3d[Double](
         List(
           List(
@@ -424,10 +424,10 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
             List(0.12 , 0.121, 0.122, 0.123, 0.124)
           ))
       )
-      val act = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(dbl3d)
+      val act = Transpose[List3d[Double], (Nat._0, Nat._1)].apply(dbl3d)
       assert(act === exp)
     }
-    scenario("Transposing a 3d array along axes 1/2 matches with numpy", TransposeDTTest) {
+    scenario("Transposing a 3d array along axes 1/2 matches with numpy", TransposeTest) {
       val exp = List3d[Double](
         List(
           List(
@@ -445,11 +445,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
             List(0.104, 0.114, 0.124)
           ))
       )
-      val act = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(dbl3d)
+      val act = Transpose[List3d[Double], (Nat._1, Nat._2)].apply(dbl3d)
       assert(act === exp)
     }
-    scenario("Transposing a 4d array along axes 2/3 matches with numpy", TransposeDTTest) {
-      //val act = TransposeDT[List4d[Double], (Nat._2, Nat._3)].apply(dbl4d)
+    scenario("Transposing a 4d array along axes 2/3 matches with numpy", TransposeTest) {
+      //val act = Transpose[List4d[Double], (Nat._2, Nat._3)].apply(dbl4d)
       val act = TransAxDT[List4d[Double], Nat._2, Nat._3].apply(dbl4d)
       val exp = List4d[Double](
         List(
@@ -489,33 +489,33 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       assert(act === exp)
     }
-    scenario("Transposing a 3d array along 1/2 then 0/1 is the same as a full transpose", TransposeDTTest) {
-      val st1 = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(dbl3d)
-      val st2 = TransposeDT[List3d[Double], (Nat._1, Nat._2)].apply(st1)
-      val act = TransposeDT[List3d[Double], (Nat._0, Nat._1)].apply(st2)
-      val exp = TransposeDT[List3d[Double], AllSlice].apply(dbl3d)
+    scenario("Transposing a 3d array along 1/2 then 0/1 is the same as a full transpose", TransposeTest) {
+      val st1 = Transpose[List3d[Double], (Nat._0, Nat._1)].apply(dbl3d)
+      val st2 = Transpose[List3d[Double], (Nat._1, Nat._2)].apply(st1)
+      val act = Transpose[List3d[Double], (Nat._0, Nat._1)].apply(st2)
+      val exp = Transpose[List3d[Double], AllSlice].apply(dbl3d)
       assert(act === exp)
     }
-    scenario("Transposing a 4d array 0/1, 1/2, 2/3, 0/1, 1/2, 0/1 is the same as a full transpose", TransposeDTTest) {
-      val st1 = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(dbl4d)
-      val st2 = TransposeDT[List4d[Double], (Nat._1, Nat._2)].apply(st1)
-      val st3 = TransposeDT[List4d[Double], (Nat._2, Nat._3)].apply(st2)
-      val st4 = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st3)
-      val st5 = TransposeDT[List4d[Double], (Nat._1, Nat._2)].apply(st4)
-      val act = TransposeDT[List4d[Double], (Nat._0, Nat._1)].apply(st5)
-      val exp = TransposeDT[List4d[Double], AllSlice].apply(dbl4d)
+    scenario("Transposing a 4d array 0/1, 1/2, 2/3, 0/1, 1/2, 0/1 is the same as a full transpose", TransposeTest) {
+      val st1 = Transpose[List4d[Double], (Nat._0, Nat._1)].apply(dbl4d)
+      val st2 = Transpose[List4d[Double], (Nat._1, Nat._2)].apply(st1)
+      val st3 = Transpose[List4d[Double], (Nat._2, Nat._3)].apply(st2)
+      val st4 = Transpose[List4d[Double], (Nat._0, Nat._1)].apply(st3)
+      val st5 = Transpose[List4d[Double], (Nat._1, Nat._2)].apply(st4)
+      val act = Transpose[List4d[Double], (Nat._0, Nat._1)].apply(st5)
+      val exp = Transpose[List4d[Double], AllSlice].apply(dbl4d)
       assert(act === exp)
     }
   }
 
-  feature("The ConcatenateRT typeclass") {
+  feature("The ConcatenateOpt typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    object ConcatenateRTTest extends Tag("ConcatenateRTTest")
-    scenario("Concatenating a 3d array along dimension 0 returns the correct result", ConcatenateRTTest) {
-      val cn = ConcatenateRT[List3d, List3d, Int]
+    object ConcatenateOptTest extends Tag("ConcatenateOptTest")
+    scenario("Concatenating a 3d array along dimension 0 returns the correct result", ConcatenateOptTest) {
+      val cn = ConcatenateOpt[List3d, List3d, Int]
       val b = ints3d.map(_+1).apply(List(0))
       val conc = cn(ints3d, b, 0).get
       assert(conc.shape == 3 :: 3 :: 4 :: HNil)
@@ -537,8 +537,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
             List(10, 11, 12, 13),
       )))
     }
-    scenario("Concatenating a 3d array along dimension 1 returns the correct result", ConcatenateRTTest) {
-      val cn = ConcatenateRT[List3d, List3d, Int]
+    scenario("Concatenating a 3d array along dimension 1 returns the correct result", ConcatenateOptTest) {
+      val cn = ConcatenateOpt[List3d, List3d, Int]
       val b = ints3d.map(_+1).apply(List(0, 1) :: List(0) :: List(0, 1, 2, 3) :: HNil)
       val conc =  cn(ints3d, b, 1).get
       assert(conc.shape == 2 :: 4 :: 4 :: HNil)
@@ -557,8 +557,8 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
             List(14, 15, 16, 17),
       )))
     }
-    scenario("Concatenating a 3d array along dimension 2 returns the correct result", ConcatenateRTTest) {
-      val cn = ConcatenateRT[List3d, List3d, Int]
+    scenario("Concatenating a 3d array along dimension 2 returns the correct result", ConcatenateOptTest) {
+      val cn = ConcatenateOpt[List3d, List3d, Int]
       val b = ints3d.map(_+1).apply(List(0, 1) :: List(0, 1, 2) :: List(0) :: HNil)
       val conc = cn(ints3d, b, 2).get
       assert(conc.shape == 2 :: 3 :: 5 :: HNil)
