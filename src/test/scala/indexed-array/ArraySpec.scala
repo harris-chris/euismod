@@ -1100,23 +1100,23 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The IsArray.shape method returns an HList of the total shape of the array") {
+  feature("The Shape Typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
     object ShapeTest extends Tag("ShapeTest")
     scenario("An 1d array of _ elements should return the correct shape", ShapeTest) {
-      assert(dbl1d.shape === dbl1d.length :: HNil)
+      assert(Shape[List1d[Double]].apply(dbl1d) === dbl1d.length :: HNil)
     }
     scenario("An 2d array of _ elements should return the correct shape", ShapeTest) {
-      assert(dbl2d.shape === dbl2d.length :: dbl2d.getAtN(0).length :: HNil)
+      assert(Shape[List2d[Double]].apply(dbl2d) === dbl2d.length :: dbl2d.getAtN(0).length :: HNil)
     }
     scenario("An 3d array of _ elements should return the correct shape", ShapeTest) {
       val l2d = dbl3d.getAtN(0).getAtN(0).length
       val l1d = dbl3d.getAtN(0).length
       val l0d = dbl3d.length
-      assert(dbl3d.shape === l0d :: l1d :: l2d :: HNil)
+      assert(Shape[List3d[Double]].apply(dbl3d) === l0d :: l1d :: l2d :: HNil)
     }
   }
 
