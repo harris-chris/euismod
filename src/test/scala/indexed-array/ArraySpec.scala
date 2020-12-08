@@ -897,7 +897,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("a List1d can be constructed from a list of Ts", FromElemsOptTest) {
       val ts3: List[Double] = List(1.5, 2.5, 3.5)
       val newShape = 3 :: HNil
-      val ga = GetArrsDesc[List1d[Double], HNil]
+      val ga = SubArrays[List1d[Double]]
       val fe = FromElemsOpt[Double, ga.Out, Int :: HNil]
       val act = fe(ts3, newShape)
       assert(act match {
@@ -910,7 +910,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("a List2d can be constructed from a list of Ts", FromElemsOptTest, Current) {
       val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)
       val newShape = 2 :: 3 :: HNil
-      val ga = GetArrsDesc[List2d[Double], HNil]
+      val ga = SubArrays[List2d[Double]]
       val fe = FromElemsOpt[Double, ga.Out, Int :: Int :: HNil]
       val actO = fe(ts3, newShape)
       val exp = List2d[Double](List(
@@ -929,7 +929,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         0.000, 0.001, 0.002, 0.010, 0.011, 0.012, 0.100, 0.101, 0.102, 0.110, 0.111, 0.112,
       )
       val newShape = 2 :: 2 :: 3 :: HNil
-      val ga = GetArrsDesc[List3d[Double], HNil]
+      val ga = SubArrays[List3d[Double]]
       val fe = FromElemsOpt[Double, ga.Out, Int :: Int :: Int :: HNil]
       val actO = fe(ts3, newShape)
       val exp = List3d[Double](
@@ -952,7 +952,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("a List1d can be constructed from a 2d array and a list of Ts", FromElemsOptTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val newShape = 6 :: HNil
-      val ga = GetArrsDesc[List2d[Double], HNil]
+      val ga = SubArrays[List2d[Double]]
       val fe = FromElemsOpt[Double, ga.Out, Int :: HNil]
       val act = fe(ts6, newShape)
       assert(act match {

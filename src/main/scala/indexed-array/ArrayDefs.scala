@@ -401,12 +401,24 @@ object ArrayDefs {
     implicit val ifHNil: CombineShapesOpt[HNil] = instance((a, b, isHead) => Some(HNil))
   }
 
-  sealed trait GetArrsDesc[A, L <: HList] {self =>
+  trait SubArrays[A] {self => 
+    type Out <: HList
+  }
+  object SubArrays {
+    type Aux[A, O <: HList] = SubArrays[A] { type Out = O }
+    def apply[A](implicit sa: SubArrays[A]): Aux[A, sa.Out] = sa
+
+    implicit def go[A] (implicit
+      ga: GetArrsDesc[A, HNil],
+    ): Aux[A, ga.Out] = new SubArrays[A] { type Out = ga.Out }
+  }
+
+  trait GetArrsDesc[A, L] {self =>
     type Out <: HList
   }
   object GetArrsDesc {
-    type Aux[A, L <: HList, O <: HList] = GetArrsDesc[A, L] { type Out = O }
-    def apply[A, L <: HList](implicit ga: GetArrsDesc[A, L]): Aux[A, L, ga.Out] = ga
+    type Aux[A, L, O <: HList] = GetArrsDesc[A, L] { type Out = O }
+    def apply[A, L](implicit ga: GetArrsDesc[A, L]): Aux[A, L, ga.Out] = ga
 
     implicit def ifSIsEle[A[_], T, L <: HList](implicit 
       aIsArr: IsArray[A, T] { type S = T },
