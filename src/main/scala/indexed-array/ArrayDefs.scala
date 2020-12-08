@@ -138,7 +138,7 @@ object ArrayDefs {
     implicit def ifBothArrs[A[_], B[_], AT, BT, SA[_], SB[_]] (implicit
       ar: IsArray[A, AT] { type S = SA[AT] },
       br: IsArray[B, BT] { type S = SB[BT] },
-      nx: OperateOpt[SA, SB, AT, BT] { type Out = SA[AT] },
+      nx: OperateOpt.Aux[SA, SB, AT, BT],
     ): Aux[A, B, AT, BT] = instance(
       (a, b, op) => (ar.toList(a), br.toList(b)) match {
         case (lstA, lstB) if lstA.length == lstB.length => {
@@ -146,8 +146,19 @@ object ArrayDefs {
             (nxa, nxb) <- lstA.zip(lstB)
           ) yield (nx(nxa, nxb, op))
           val flatLst = lst.flatten
-          if(flatLst.length > 0) {Some(ar.fromList(flatLst))} else {None}
+          if(flatLst.length == lstA.length) {Some(ar.fromList(flatLst))} else {None}
         }
+        case (lstA, lstB) if lstB.length == 1 => {
+          val lst: List[Option[SA[AT]]] = lstA.map(nx(_, lstB(0), op)) 
+          val flatLst = lst.flatten
+          if(flatLst.length == lstA.length) {Some(ar.fromList(flatLst))} else {None}
+        }
+        case (lstA, lstB) if lstA.length == 1 => {
+          val lst: List[Option[SA[AT]]] = lstB.map(nx(lstA(0), _, op)) 
+          val flatLst = lst.flatten
+          if(flatLst.length == lstB.length) {Some(ar.fromList(flatLst))} else {None}
+        }
+        case _ => None
       }
     )
 
@@ -162,6 +173,15 @@ object ArrayDefs {
           ) yield (op(at, bt))
           Some(ar.fromList(lst))
         }
+        case (lstA, lstB) if lstB.length == 1 => {
+          val lst: List[AT] = lstA.map(op(_, lstB(0)))
+          Some(ar.fromList(lst))
+        }
+        case (lstA, lstB) if lstA.length == 1 => {
+          val lst: List[AT] = lstB.map(op(lstA(0), _))
+          Some(ar.fromList(lst))
+        }
+        case _ => None
       }
     )
   }

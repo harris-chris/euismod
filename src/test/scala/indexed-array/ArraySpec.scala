@@ -1168,14 +1168,40 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object OperateTest extends Tag("OperateTest")
-    //scenario("Operate for two same-sized 2d arrays returns a correct 2d array", OperateTest) {
-      //val dblMult2 = dbl2d.map(_ * 2)
-      //assert(OperateOpt[List2d[Double], List2d[Double]].apply(dbl2d, dblMult2) === dbl2d.map(_ * 3))
-    //}
-    //scenario("Same but second array has a squashed dimension", OperateTest) {
-      //val dbl2 = dbl1d.map(_ * 2)
-      //assert(OperateOpt[List1d[Double], List1d[Double]].apply(dbl1d, dbl2) === dbl1d.map(_ * 3))
-    //}
+    scenario("Operate for two same-sized 1d arrays returns a correct 1d array", OperateTest) {
+      val dblMult2 = dbl1d.map(_ * 2)
+      assert(OperateOpt[List1d, List1d, Double, Double].apply(
+        dbl1d, dblMult2, (a, b) => a + b,
+      ) === Some(dbl1d.map(_ * 3)))
+    }
+    scenario("Operate for two same-sized 3d arrays returns a correct 3d array", OperateTest) {
+      val dblMult2 = dbl3d.map(_ * 2)
+      assert(OperateOpt[List3d, List3d, Double, Double].apply(
+        dbl3d, dblMult2, (a, b) => a + b,
+      ) === Some(dbl3d.map(_ * 3)))
+    }
+    scenario("Operate for two same-sized but different data 2d arrays returns a correct 2d array", OperateTest) {
+      val a1 = List2d[String](List(List("a", "b"), List("c", "d"))) 
+      val a2 = List2d[Int](List(List(0, 1), List(2, 3)))
+      val exp = List2d[String](List(List("a0", "b1"), List("c2", "d3")))
+      assert(OperateOpt[List2d, List2d, String, Int].apply(
+        a1, a2, (a, b) => a + b,
+      ) === Some(exp))
+    }
+    scenario("Operate for a multi-elem 1d arr and a single-elem 1d arr returns a correct 1d array", OperateTest) {
+      val a1 = dbl1d
+      val a2 = List1d[Double](List(2.0))
+      assert(OperateOpt[List1d, List1d, Double, Double].apply(
+        a1, a2, (a, b) => a * b,
+      ) === Some(dbl1d.map(_ * 2.0)))
+    }
+    scenario("Operate for a multi-elem 2d arr and a single-elem 2d arr returns a correct 2d array", OperateTest) {
+      val a1 = dbl2d
+      val a2 = List2d[Double](List(List(2.0)))
+      assert(OperateOpt[List2d, List2d, Double, Double].apply(
+        a1, a2, (a, b) => a * b,
+      ) === Some(dbl2d.map(_ * 2.0)))
+    }
   }
 
 }
