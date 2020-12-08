@@ -577,62 +577,62 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The AddRT typeclass") {
+  feature("The AddOpt typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    object AddRTTest extends Tag("AddRTTest")
-    scenario("adding a List1d to a List1d produces a combined array", AddRTTest) {
+    object AddOptTest extends Tag("AddOptTest")
+    scenario("adding a List1d to a List1d produces a combined array", AddOptTest) {
       val l1 = List1d[Int](List(1, 2, 3))
       val l2 = List1d[Int](List(4, 5, 6))
       val exp = List1d[Int](List(1, 2, 3, 4, 5, 6))
       val t: List[Int] = l1.flatten
-      assert(AddRT[List1d, List1d, Int].apply(l1, l2) === Some(exp))
+      assert(AddOpt[List1d, List1d, Int].apply(l1, l2) === Some(exp))
     }
-    scenario("adding a List2d to a List2d returns a combined array", AddRTTest) {
+    scenario("adding a List2d to a List2d returns a combined array", AddOptTest) {
       val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = List2d[Int](List(List(7, 8, 9), List(10, 11, 12)))
       val exp = List2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9), List(10, 11, 12)))
-      assert(AddRT[List2d, List2d, Int].apply(l1, l2) === Some(exp))
+      assert(AddOpt[List2d, List2d, Int].apply(l1, l2) === Some(exp))
     }
-    scenario("adding a List2d to a List2d with different dim0 size returns a combined array", AddRTTest) {
+    scenario("adding a List2d to a List2d with different dim0 size returns a combined array", AddOptTest) {
       val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = List2d[Int](List(List(7, 8, 9)))
       val exp = List2d[Int](List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9)))
-      assert(AddRT[List2d, List2d, Int].apply(l1, l2) === Some(exp))
+      assert(AddOpt[List2d, List2d, Int].apply(l1, l2) === Some(exp))
     }
-    scenario("adding a List2d to a List2d with different dim1 length returns None", AddRTTest) {
+    scenario("adding a List2d to a List2d with different dim1 length returns None", AddOptTest) {
       val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
-      assert(AddRT[List2d, List2d, Int].apply(l1, l2) === None)
+      assert(AddOpt[List2d, List2d, Int].apply(l1, l2) === None)
     }
-    scenario("adding a List3d to a List3d with dim1 and dim2 lengths the same returns a combined array", AddRTTest) {
+    scenario("adding a List3d to a List3d with dim1 and dim2 lengths the same returns a combined array", AddOptTest) {
       val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
-      assert(AddRT[List2d, List2d, Int].apply(l1, l2) === None)
+      assert(AddOpt[List2d, List2d, Int].apply(l1, l2) === None)
     }
-    scenario("adding a List3d to a List3d with different dim1 length returns None", AddRTTest) {
+    scenario("adding a List3d to a List3d with different dim1 length returns None", AddOptTest) {
       val l1 = List2d[Int](List(List(1, 2, 3), List(4, 5, 6)))
       val l2 = List2d[Int](List(List(7, 8), List(10, 11)))
-      assert(AddRT[List2d, List2d, Int].apply(l1, l2) === None)
+      assert(AddOpt[List2d, List2d, Int].apply(l1, l2) === None)
     }
   }
 
-  feature("MaskFromNumSeqDT typeclass") {
+  feature("MaskFromNumSeq typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
-    object MaskFromNumSeqDTTest extends Tag("MaskFromNumSeqDTTest")
-    scenario("MaskDTFromNumSeq returns a correct mask for a 1d array", MaskFromNumSeqDTTest) {
+    object MaskFromNumSeqTest extends Tag("MaskFromNumSeqTest")
+    scenario("MaskDTFromNumSeq returns a correct mask for a 1d array", MaskFromNumSeqTest) {
       val allFalse = dbl1d.map(_ => false)
       assert(
-        MaskFromNumSeqDT[List1d[Boolean], List[Int] :: HNil].apply(List(1, 2) :: HNil, allFalse) ===
+        MaskFromNumSeq[List1d[Boolean], List[Int] :: HNil].apply(List(1, 2) :: HNil, allFalse) ===
         List1d[Boolean](allFalse.data.updated(1, true).updated(2, true))
       )
     }
-    scenario("MaskFromNumSeqDT returns a correct mask for a 2d array", MaskFromNumSeqDTTest) {
+    scenario("MaskFromNumSeq returns a correct mask for a 2d array", MaskFromNumSeqTest) {
       val allFalse = dbl2d.map(_ => false)
       val exp = List2d[Boolean](
         List(
@@ -642,11 +642,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         )
       )
       assert(
-        MaskFromNumSeqDT[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
+        MaskFromNumSeq[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
           List(1, 2) :: List(3,4) :: HNil, allFalse) === exp
       )
     }
-    scenario("MaskFromNumSeqDT returns a correct mask for a 3d array", MaskFromNumSeqDTTest) {
+    scenario("MaskFromNumSeq returns a correct mask for a 3d array", MaskFromNumSeqTest) {
       val allFalse = dbl3d.map(_ => false)
       val exp = List3d[Boolean](
         List(
@@ -663,7 +663,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         )
       )
       assert(
-        MaskFromNumSeqDT[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
+        MaskFromNumSeq[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
           List(0) :: List(0,2) :: List(2, 3) :: HNil, allFalse) === exp
       )
     }
@@ -676,7 +676,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     object WhereTest extends Tag("WhereTest")
     scenario("Where with a 1d arraylike and a masking array returns a correct result", WhereTest) {
-      val mask = MaskFromNumSeqDT[List1d[Boolean], List[Int] :: HNil].apply(
+      val mask = MaskFromNumSeq[List1d[Boolean], List[Int] :: HNil].apply(
         List(1, 2) :: HNil, dbl1d.map(_ => false))
       val newValues = dbl1d.map(_ => 3.0)
       val act = Where[List1d, Double].apply(dbl1d, mask, newValues)
@@ -684,7 +684,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === exp)
     }
     scenario("Where with a 2d arraylike and a masking array returns a correct result", WhereTest) {
-      val mask = MaskFromNumSeqDT[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
+      val mask = MaskFromNumSeq[List2d[Boolean], List[Int] :: List[Int] :: HNil].apply(
         List(1, 2) :: List(0, 1) :: HNil, dbl2d.map(_ => false))
       val invMask = mask.map(b => if(b == true) {false} else {true})
       val newValues = dbl2d.map(_ => 3.0)
@@ -694,7 +694,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(ai(act, invMask) == ai(dbl2d, invMask))
     }
     scenario("Where with a 3d arraylike and a masking array returns a correct result", WhereTest) {
-      val mask = MaskFromNumSeqDT[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
+      val mask = MaskFromNumSeq[List3d[Boolean], List[Int] :: List[Int] :: List[Int] :: HNil].apply(
         List(1, 2) :: List(0, 1) :: List(2) :: HNil, dbl3d.map(_ => false))
       val invMask = mask.map(b => if(b == true) {false} else {true})
       val newValues = dbl3d.map(_ => 3.0)
@@ -704,7 +704,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(ai(act, invMask) == ai(dbl3d, invMask))
     }
     scenario("Where with a 4d arraylike and a masking array returns a correct result", WhereTest) {
-      val mask = MaskFromNumSeqDT[List4d[Boolean], List[Int] :: List[Int] :: List[Int] :: List[Int] :: HNil].apply(
+      val mask = MaskFromNumSeq[List4d[Boolean], List[Int] :: List[Int] :: List[Int] :: List[Int] :: HNil].apply(
         List(1, 2) :: List(0, 1) :: List(2) :: List(0, 2) :: HNil, dbl4d.map(_ => false))
       val invMask = mask.map(b => if(b == true) {false} else {true})
       val newValues = dbl4d.map(_ => 3.0)

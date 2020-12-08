@@ -486,24 +486,7 @@ object ArrayDefs {
         gsForS.apply(ai.getAtN(a, 0), ai.length(a) :: l)
       )
     }
- }
-
-  //trait FromElems[T, Arrs <: HList, SH <: HList] {
-    //type Out
-    //def apply(l: List[T], sh: SH): Out
-  //}
-  //object FromElems {
-    //type Aux[T, Arrs <: HList, SH <: HList, O] = FromElems[T, Arrs, SH] { type Out = O }
-    //def instance[T, Arrs <: HList, SH <: HList, O](f: (List[T], SH) => O): Aux[T, Arrs, SH, O] = 
-    //new FromElems[T, Arrs, SH] {
-      //type Out = O
-      //def apply(l: List[T], sh: SH): Out = f(l, sh)
-    //}
-    //def apply[T, Arrs <: HList, SH <: HList](implicit fe: FromElems[T, Arrs, SH]): Aux[T, Arrs, SH, fe.Out] = fe
-    //implicit def ifListT[T, Arrs <: HList, SH <: HList, RSH <: HList, O]( implicit 
-      //fr: FromElemsDT[T, Arrs, SH, Nat._0],
-    //): Aux[T, Arrs, SH, fr.Out] = instance((l, sh) => fr(l, sh))
-  //}
+  }
 
   trait FromElemsOpt[X, Arrs <: HList, SH <: HList] {
     type Out <: Option[Any]
@@ -590,15 +573,15 @@ object ArrayDefs {
     ): Flatten[A, T] = instance(a => aIsArr.toList(a).map(sIsArr.flatten(_)).flatten) 
   }
 
-  trait AddRT[A[_], B[_], T] { self =>
+  trait AddOpt[A[_], B[_], T] { self =>
     type Out = Option[A[T]]
     def apply(a: A[T], b: B[T]): Out
   }
-  object AddRT {
-    type Aux[A[_], B[_], T] = AddRT[A, B, T]
-    def apply[A[_], B[_], T](implicit ad: AddRT[A, B, T]): Aux[A, B, T] = ad
+  object AddOpt {
+    type Aux[A[_], B[_], T] = AddOpt[A, B, T]
+    def apply[A[_], B[_], T](implicit ad: AddOpt[A, B, T]): Aux[A, B, T] = ad
     def instance[A[_], B[_], T](f: (A[T], B[T]) => Option[A[T]]): Aux[A, B, T] = 
-    new AddRT[A, B, T] { 
+    new AddOpt[A, B, T] { 
       def apply(a: A[T], b: B[T]): Option[A[T]] = f(a, b)
     }
     implicit def ifSameType[A[_], T, SH <: HList](implicit 
@@ -709,7 +692,7 @@ object ArrayDefs {
   object ConcatenateCT {
     def apply[A[_], B[_], T, D <: Nat](implicit cn: ConcatenateCT[A, B, T, D]): ConcatenateCT[A, B, T, D] = cn
     implicit def ifDim0[A[_], B[_], T](implicit 
-      ad: AddRT.Aux[A, B, T],
+      ad: AddOpt.Aux[A, B, T],
     ): ConcatenateCT[A, B, T, Nat._0] = new ConcatenateCT[A, B, T, Nat._0] { 
       def apply(a: A[T], b: B[T]): Out = ad(a, b)
     }
@@ -754,7 +737,7 @@ object ArrayDefs {
       bIsArr: IsArray[B, T] { type S = _SB[T] },
       sAIsArr: IsArray[_SA, T],
       sBIsArr: IsArray[_SB, T],
-      ad: AddRT[A, B, T],
+      ad: AddOpt[A, B, T],
       sConc: Aux[_SA, _SB, T],
     ): Aux[A, B, T] = instance((a, b, dim) => 
       if(dim == 0) {
@@ -795,16 +778,16 @@ object ArrayDefs {
     })
   }
 
-  trait MaskFromNumSeqDT[A, R <: HList] {
+  trait MaskFromNumSeq[A, R <: HList] {
     type Out = A
     def apply(ref: R, mask: A): Out
   }
-  object MaskFromNumSeqDT {
-    type Aux[A, R <: HList] = MaskFromNumSeqDT[A, R] { type Out = A }
-    def instance[A, R <: HList](f: (R, A) => A): Aux[A, R] = new MaskFromNumSeqDT[A, R] { 
+  object MaskFromNumSeq {
+    type Aux[A, R <: HList] = MaskFromNumSeq[A, R] { type Out = A }
+    def instance[A, R <: HList](f: (R, A) => A): Aux[A, R] = new MaskFromNumSeq[A, R] { 
       def apply(ref: R, mask: A): A = f(ref, mask)
     }
-    def apply[A, R <: HList](implicit ma: MaskFromNumSeqDT[A, R]): Aux[A, R] = ma 
+    def apply[A, R <: HList](implicit ma: MaskFromNumSeq[A, R]): Aux[A, R] = ma 
 
     implicit def ifRefIsHNil[A]: Aux[A, HNil] = instance((r, m) => m)
 
@@ -812,7 +795,7 @@ object ArrayDefs {
       aIsArr: IsArray[A, Boolean] { type S = _S },
       de: DepthCT.Aux[A[Boolean], DE],
       deGt1: GT[DE, Nat._1],
-      maskS: MaskFromNumSeqDT[_S, R1p], 
+      maskS: MaskFromNumSeq[_S, R1p], 
     ): Aux[A[Boolean], List[Int] :: R1p] = instance((r, m) => {
       val newS = for((s, i) <- aIsArr.toList(m).zipWithIndex) yield (
         if (r.head.contains(i)) {maskS(r.tail, s)} else {s}
