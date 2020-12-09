@@ -183,30 +183,33 @@ object ArrayDefs {
     })
   }
 
-  trait BroadcastOpt[SHA <: HList, SHB <: HList] {
+  trait BroadcastShapesOpt[SHA <: HList, SHB <: HList] {
     type Out <: Option[_]
     def apply(a: SHA, b: SHB): Out
   }
-  object BroadcastOpt {
-    type Aux[SHA <: HList, SHB <: HList, O] = BroadcastOpt[SHA, SHB] { type Out = O }
+  object BroadcastShapesOpt {
+    type Aux[SHA <: HList, SHB <: HList, O] = BroadcastShapesOpt[SHA, SHB] { type Out = O }
     def instance[SHA <: HList, SHB <: HList, O <: Option[_]] (
       f: (SHA, SHB) => O,
-    ): Aux[SHA, SHB, O] = new BroadcastOpt[SHA, SHB] {
+    ): Aux[SHA, SHB, O] = new BroadcastShapesOpt[SHA, SHB] {
       type Out = O
       def apply(a: SHA, b: SHB): Out = f(a, b)
     }
     def apply[SHA <: HList, SHB <: HList](
-      implicit br: BroadcastOpt[SHA, SHB],
+      implicit br: BroadcastShapesOpt[SHA, SHB],
     ): Aux[SHA, SHB, br.Out] = br
 
-    implicit def ifSHAGtSHB[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
+    implicit def ifSHBGtSHA[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
       l0: Length.Aux[SHA, LA],
       l1: Length.Aux[SHB, LB],
       e0: GT[LB, LA],
-      nx: BroadcastOpt[SHB, SHA],
+      nx: BroadcastShapesOpt[SHB, SHA],
     ): Aux[SHA, SHB, nx.Out] = instance((a, b) => nx(b, a))
 
-    implicit def ifSH0GtEqSH0[SHA <: HList, SHB <: HList] (implicit
+    implicit def ifSH0GtEqSH0[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
+      l0: Length.Aux[SHA, LA],
+      l1: Length.Aux[SHB, LB],
+      e0: GTEq[LA, LB],
       al: ToList[SHA, Int],
       bl: ToList[SHB, Int],
     ): Aux[SHA, SHB, Option[SHA]] = instance((a, b) => {
