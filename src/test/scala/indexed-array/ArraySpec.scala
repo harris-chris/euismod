@@ -1202,6 +1202,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         a1, a2, (a, b) => a * b,
       ) === Some(dbl2d.map(_ * 2.0)))
     }
+    scenario("check") {
+      type T0 = Int :: String :: Double :: HNil
+      val e0: Split[T0, Nat._1] { type Out = (Int :: HNil, String :: Double :: HNil) } = Split[T0, Nat._1]
+      val e1: Split[T0, Nat._2] { type Out = (Int :: String :: HNil, Double :: HNil) } = Split[T0, Nat._2]
+    }
   }
 
 }

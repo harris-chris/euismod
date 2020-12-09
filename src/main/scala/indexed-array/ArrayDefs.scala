@@ -122,6 +122,63 @@ object ArrayDefs {
     }
   }
 
+  trait ExpandDims[A, N <: Nat, AR <: HList] {
+    type Out
+    def apply(a: A): Out
+  }
+  object ExpandDims {
+    type Aux[A, N <: Nat, AR <: HList, O] = ExpandDims[A, N, AR] { type Out = O }
+    def apply[A, N <: Nat, AR <: HList](implicit ed: ExpandDims[A, N, AR]): Aux[A, N, AR, ed.Out] = ed 
+    def instance[A, N <: Nat, AR <: HList, O](f: A => O): Aux[A, N, AR, O] = new ExpandDims[A, N, AR] {
+      type Out = O
+      def apply(a: A): Out = f(a)
+    }
+
+    implicit def ifDepthMatches[A, N <: Nat, A0, A1p <: HList, D0 <: Nat, D1 <: Nat] (implicit
+      in: InsertDim[A, A0, N]
+    ): Aux[A, N, A0 :: A1p, in.Out] = instance(a => in(a))
+
+    implicit def ifDepthDoesntMatch[A, N <: Nat, A0, A1p <: HList, D0 <: Nat, D1 <: Nat] (implicit
+      d0: Depth.Aux[A, D0],
+      d1: Depth.Aux[A0, D1],
+      gt: GT[D1, Succ[D0]],
+      ed: ExpandDims[A, N, A1p]
+    ): Aux[A, N, A0 :: A1p, ed.Out] = instance(a => ed(a))
+  }
+
+  trait InsertDim[A, _A, N <: Nat] {
+    type Out = _A
+    def apply(a: A): Out
+  }
+  object InsertDim {
+    type Aux[A, _A , N <: Nat] = InsertDim[A, _A, N]
+    def apply[A, _A, N <: Nat] (implicit 
+      id: InsertDim[A, _A, N],
+    ): Aux[A, _A, N] = id 
+    def instance[A, _A, N <: Nat](f: A => _A): Aux[A, _A, N] = new InsertDim[A, _A, N] {
+      def apply(a: A): _A = f(a)
+    }
+
+    implicit def ifDepthmatches[
+      A[_], _A[_], N <: Nat, T, D0 <: Nat, D1 <: Nat, AR <: HList, SH <: HList, SHP <: HList, SHS <: HList,
+    ] (implicit
+      d0: Depth.Aux[A[T], D0],
+      d1: Depth.Aux[_A[T], D1],
+      e0: Succ[D0] =:= D1,
+      sa: SubArrays.Aux[_A[T], AR],
+      sh: Shape.Aux[A[T], SH],
+      sp: Split.Aux[SH, N, SHP, SHS],
+      fl: Flatten[A, T],
+      pr: Prepend.Aux[SHP, Int :: SHS, SHP :: Int :: SHS],
+      fe: FromElemsOpt.Aux[T, AR, SHP :: Int :: SHS, Option[_A[T]]], 
+    ): Aux[A[T], _A[T], N] = instance(a => {
+      val origSh = sh(a)
+      val (pre, suf) = sp(origSh)
+      val newSh = pr(pre, (1 :: suf))
+      fe(fl(a), newSh).get
+    })
+  }
+
   trait OperateOpt[A[_], B[_], AT, BT] {
     type Out = Option[A[AT]]
     def apply(a: A[AT], b: B[BT], op: (AT, BT) => AT): Out 
