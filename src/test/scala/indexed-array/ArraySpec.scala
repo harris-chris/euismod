@@ -1205,36 +1205,59 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The InsertDim typeclass") {
+  feature("The ExpandDims typeclass") {
     import Dummy.Types._
     import Dummy.Values._
     import ArrayDefs.IsArraySyntax._
     import Dummy.IsArrayImplicits._
-    object InsertDimTest extends Tag("InsertDimTest")
-    scenario("Correctly inserting at dim0 into a 1d array creates a 2d array", InsertDimTest) {
-      val act = InsertDim[List1d[Double], List2d[Double], Nat._0].apply(dbl1d)
+    object ExpandDimsTest extends Tag("ExpandDimsTest")
+    scenario("Correctly inserting at dim0 into a 1d array creates a 2d array", ExpandDimsTest) {
+      val act = ExpandDims[List1d[Double], List2d[Double], Nat._0].apply(dbl1d)
       val exp = List2d[Double](List(dbl1d.data))
       assert(act.shape === 1 :: dbl1d.shape)
       assert(act === exp)
     }
-    scenario("Correctly inserting at dim2 into a 1d array creates a 2d array", InsertDimTest) {
-      val act = InsertDim[List1d[Double], List2d[Double], Nat._1].apply(dbl1d)
+    scenario("Correctly inserting at dim2 into a 1d array creates a 2d array", ExpandDimsTest) {
+      val act = ExpandDims[List1d[Double], List2d[Double], Nat._1].apply(dbl1d)
       val exp = List2d[Double](dbl1d.data.map(List(_)))
       assert(act.shape === dbl1d.length :: 1 :: HNil)
       assert(act === exp)
     }
-    scenario("Correctly inserting at dim1 into a 2d array creates a 3d array", InsertDimTest) {
-      val act = InsertDim[List2d[Double], List3d[Double], Nat._1].apply(dbl2d)
+    scenario("Correctly inserting at dim1 into a 2d array creates a 3d array", ExpandDimsTest) {
+      val act = ExpandDims[List2d[Double], List3d[Double], Nat._1].apply(dbl2d)
       val exp = List3d[Double](dbl2d.data.map(List(_)))    
       assert(act.shape === dbl2d.shape.at(_0) :: 1 :: dbl2d.shape.at(_1) :: HNil)
       assert(act === exp)
     }
-    scenario("Correctly inserting at dim2 into a 3d array creates a 4d array", InsertDimTest) {
-      val act = InsertDim[List3d[Double], List4d[Double], Nat._3].apply(dbl3d)
+    scenario("Correctly inserting at dim2 into a 3d array creates a 4d array", ExpandDimsTest) {
+      val act = ExpandDims[List3d[Double], List4d[Double], Nat._3].apply(dbl3d)
       val exp = List4d[Double](dbl3d.data.map(_.map(_.map(List(_))))) 
       assert(act.shape === dbl3d.shape ++ (1 :: HNil))
       assert(act === exp)
     }
   }
 
+  feature("The ExpandDimsFromSubArrays typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.IsArrayImplicits._
+    object ExpandDimsFromSubArraysTest extends Tag("ExpandDimsFromSubArraysTest")
+    scenario("Correctly inserting using EDFSA at dim0 into a 1d array creates a 2d array", ExpandDimsFromSubArraysTest) {
+      val act = ExpandDimsFromSubArrays[
+        List1d[Double], List2d[Double] :: List1d[Double] :: HNil, Nat._0
+      ].apply(dbl1d)
+      val exp = List2d[Double](List(dbl1d.data))
+      assert(act.shape === 1 :: dbl1d.shape)
+      assert(act === exp)
+    }
+    scenario("Correctly inserting using EDFSA at dim1 into a 2d array creates a 3d array", ExpandDimsFromSubArraysTest) {
+      val act = ExpandDimsFromSubArrays[
+        List2d[Double], List3d[Double] :: List2d[Double] :: List1d[Double] :: HNil, Nat._1
+      ].apply(dbl2d)
+      val exp = List3d[Double](dbl2d.data.map(List(_)))    
+      assert(act.shape === dbl2d.shape.at(_0) :: 1 :: dbl2d.shape.at(_1) :: HNil)
+      assert(act === exp)
+    }
+  }
 }

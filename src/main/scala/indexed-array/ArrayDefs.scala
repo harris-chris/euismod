@@ -122,40 +122,43 @@ object ArrayDefs {
     }
   }
 
-  trait ExpandDims[A, N <: Nat, AR <: HList] {
+  trait ExpandDimsFromSubArrays[A, AR <: HList, N <: Nat] {
     type Out
     def apply(a: A): Out
   }
-  object ExpandDims {
-    type Aux[A, N <: Nat, AR <: HList, O] = ExpandDims[A, N, AR] { type Out = O }
-    def apply[A, N <: Nat, AR <: HList](implicit ed: ExpandDims[A, N, AR]): Aux[A, N, AR, ed.Out] = ed 
-    def instance[A, N <: Nat, AR <: HList, O](f: A => O): Aux[A, N, AR, O] = new ExpandDims[A, N, AR] {
+  object ExpandDimsFromSubArrays {
+    type Aux[A, AR <: HList, N <: Nat, O] = ExpandDimsFromSubArrays[A, AR, N] { type Out = O }
+    def apply[A, AR <: HList, N <: Nat] (implicit 
+      ed: ExpandDimsFromSubArrays[A, AR, N],
+    ): Aux[A, AR, N, ed.Out] = ed 
+    def instance[A, AR <: HList, N <: Nat, O](f: A => O): Aux[A, AR, N, O] = 
+    new ExpandDimsFromSubArrays[A, AR, N] {
       type Out = O
       def apply(a: A): Out = f(a)
     }
 
-    implicit def ifDepthMatches[A, N <: Nat, A0, A1p <: HList, D0 <: Nat, D1 <: Nat] (implicit
-      in: InsertDim[A, A0, N]
-    ): Aux[A, N, A0 :: A1p, in.Out] = instance(a => in(a))
+    implicit def ifDepthMatches[A, A0, A1p <: HList, N <: Nat, D0 <: Nat, D1 <: Nat] (implicit
+      in: ExpandDims[A, A0, N]
+    ): Aux[A, A0 :: A1p, N, in.Out] = instance(a => in(a))
 
-    implicit def ifDepthDoesntMatch[A, N <: Nat, A0, A1p <: HList, D0 <: Nat, D1 <: Nat] (implicit
+    implicit def ifDepthDoesntMatch[A, A0, A1p <: HList, N <: Nat, D0 <: Nat, D1 <: Nat] (implicit
       d0: Depth.Aux[A, D0],
       d1: Depth.Aux[A0, D1],
       gt: GT[D1, Succ[D0]],
-      ed: ExpandDims[A, N, A1p]
-    ): Aux[A, N, A0 :: A1p, ed.Out] = instance(a => ed(a))
+      ed: ExpandDimsFromSubArrays[A, A1p, N]
+    ): Aux[A, A0 :: A1p, N, ed.Out] = instance(a => ed(a))
   }
 
-  trait InsertDim[A, _A, N <: Nat] {
+  trait ExpandDims[A, _A, N <: Nat] {
     type Out = _A
     def apply(a: A): Out
   }
-  object InsertDim {
-    type Aux[A, _A , N <: Nat] = InsertDim[A, _A, N]
+  object ExpandDims {
+    type Aux[A, _A , N <: Nat] = ExpandDims[A, _A, N]
     def apply[A, _A, N <: Nat] (implicit 
-      id: InsertDim[A, _A, N],
+      id: ExpandDims[A, _A, N],
     ): Aux[A, _A, N] = id 
-    def instance[A, _A, N <: Nat](f: A => _A): Aux[A, _A, N] = new InsertDim[A, _A, N] {
+    def instance[A, _A, N <: Nat](f: A => _A): Aux[A, _A, N] = new ExpandDims[A, _A, N] {
       def apply(a: A): _A = f(a)
     }
 
