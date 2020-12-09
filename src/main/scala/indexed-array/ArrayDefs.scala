@@ -160,7 +160,8 @@ object ArrayDefs {
     }
 
     implicit def ifDepthmatches[
-      A[_], _A[_], N <: Nat, T, D0 <: Nat, D1 <: Nat, AR <: HList, SH <: HList, SHP <: HList, SHS <: HList,
+      A[_], _A[_], N <: Nat, T, D0 <: Nat, D1 <: Nat, AR <: HList, SH <: HList, _SH <: HList,
+      SHP <: HList, SHS <: HList,
     ] (implicit
       d0: Depth.Aux[A[T], D0],
       d1: Depth.Aux[_A[T], D1],
@@ -169,12 +170,12 @@ object ArrayDefs {
       sh: Shape.Aux[A[T], SH],
       sp: Split.Aux[SH, N, SHP, SHS],
       fl: Flatten[A, T],
-      pr: Prepend.Aux[SHP, Int :: SHS, SHP :: Int :: SHS],
-      fe: FromElemsOpt.Aux[T, AR, SHP :: Int :: SHS, Option[_A[T]]], 
+      pr: Prepend.Aux[SHP, Int :: SHS, _SH],
+      fe: FromElemsOpt.Aux[T, AR, _SH, Option[_A[T]]], 
     ): Aux[A[T], _A[T], N] = instance(a => {
       val origSh = sh(a)
       val (pre, suf) = sp(origSh)
-      val newSh = pr(pre, (1 :: suf))
+      val newSh = pre ++ (1 :: suf)
       fe(fl(a), newSh).get
     })
   }
