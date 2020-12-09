@@ -183,6 +183,44 @@ object ArrayDefs {
     })
   }
 
+  trait BroadcastOpt[SHA <: HList, SHB <: HList] {
+    type Out <: Option[_]
+    def apply(a: SHA, b: SHB): Out
+  }
+  object BroadcastOpt {
+    type Aux[SHA <: HList, SHB <: HList, O] = BroadcastOpt[SHA, SHB] { type Out = O }
+    def instance[SHA <: HList, SHB <: HList, O <: Option[_]] (
+      f: (SHA, SHB) => O,
+    ): Aux[SHA, SHB, O] = new BroadcastOpt[SHA, SHB] {
+      type Out = O
+      def apply(a: SHA, b: SHB): Out = f(a, b)
+    }
+    def apply[SHA <: HList, SHB <: HList](
+      implicit br: BroadcastOpt[SHA, SHB],
+    ): Aux[SHA, SHB, br.Out] = br
+
+    implicit def ifSHAGtSHB[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
+      l0: Length.Aux[SHA, LA],
+      l1: Length.Aux[SHB, LB],
+      e0: GT[LB, LA],
+      nx: BroadcastOpt[SHB, SHA],
+    ): Aux[SHA, SHB, nx.Out] = instance((a, b) => nx(b, a))
+
+    implicit def ifSH0GtEqSH0[SHA <: HList, SHB <: HList] (implicit
+      al: ToList[SHA, Int],
+      bl: ToList[SHB, Int],
+    ): Aux[SHA, SHB, Option[SHA]] = instance((a, b) => {
+      def go(a: List[Int], b: List[Int]): Boolean = (a.headOption, b.headOption) match {
+        case (Some(ah), Some(bh)) if ah == bh => go(a.tail, b.tail)
+        case (Some(ah), Some(bh)) if ah != bh => go(a.tail, b)
+        case (Some(ah), None) => true
+        case (None, None) => true
+        case (None, Some(bh)) => false
+      }
+      if(go(al(a), bl(b))) { Some(a) } else { None }
+    })
+  }
+
   trait OperateOpt[A[_], B[_], AT, BT] {
     type Out = Option[A[AT]]
     def apply(a: A[AT], b: B[BT], op: (AT, BT) => AT): Out 
@@ -196,9 +234,11 @@ object ArrayDefs {
     }
     def apply[A[_], B[_], AT, BT](implicit oo: OperateOpt[A, B, AT, BT]): Aux[A, B, AT, BT] = oo
 
-    implicit def ifBothArrs[A[_], B[_], AT, BT, SA[_], SB[_]] (implicit
-      ar: IsArray[A, AT] { type S = SA[AT] },
-      br: IsArray[B, BT] { type S = SB[BT] },
+    implicit def ifSameDepthArrs[A[_], B[_], AT, BT, SA[_], SB[_], DA <: Nat, DB <: Nat] (implicit
+      ar: IsArray[A, AT] { type S = SA[AT] }, br: IsArray[B, BT] { type S = SB[BT] },
+      da: Depth.Aux[A[AT], DA],
+      db: Depth.Aux[B[BT], DB],
+      e0: DA =:= DB,
       nx: OperateOpt.Aux[SA, SB, AT, BT],
     ): Aux[A, B, AT, BT] = instance(
       (a, b, op) => (ar.toList(a), br.toList(b)) match {
