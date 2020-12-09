@@ -220,6 +220,8 @@ object ArrayDefs {
       ed: ExpandDims.Aux[A, A0, N0, _A],
       nx: ExpandDimsHList[_A, A1p, N1p],
     ): Aux[A, A0 :: A1p, N0 :: N1p, nx.Out] = instance(a => nx(ed(a)))
+
+    implicit def ifHNil[A]: Aux[A, HNil, HNil, A] = instance(a => a)
   }
 
   trait BroadcastShapesOpt[SHA <: HList, SHB <: HList] {

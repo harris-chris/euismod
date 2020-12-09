@@ -1205,6 +1205,22 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("The ExpandDimsHList typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.IsArrayImplicits._
+    object ExpandDimsHListTest extends Tag("ExpandDimsHListTest")
+    scenario("Correctly inserting at dims 1 & 2 into a 1d array creates a 3d array", ExpandDimsHListTest) {
+      val act = ExpandDimsHList[
+        List1d[Double], List2d[Double] :: List3d[Double] :: HNil, _1 :: _2 :: HNil
+      ].apply(dbl1d)
+      assert(act.shape === dbl1d.length :: 1 :: 1 :: HNil)
+      val exp = List3d[Double](dbl1d.data.map(e => List(List(e))))
+      assert(act === exp)
+    }
+  }
+
   feature("The ExpandDims typeclass") {
     import Dummy.Types._
     import Dummy.Values._
@@ -1229,12 +1245,12 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act.shape === dbl2d.shape.at(_0) :: 1 :: dbl2d.shape.at(_1) :: HNil)
       assert(act === exp)
     }
-    scenario("Correctly inserting at dim2 into a 3d array creates a 4d array", ExpandDimsTest) {
-      val act = ExpandDims[List3d[Double], List4d[Double], Nat._3].apply(dbl3d)
-      val exp = List4d[Double](dbl3d.data.map(_.map(_.map(List(_))))) 
-      assert(act.shape === dbl3d.shape ++ (1 :: HNil))
-      assert(act === exp)
-    }
+    //scenario("Correctly inserting at dim2 into a 3d array creates a 4d array", ExpandDimsTest) {
+      //val act = ExpandDims[List3d[Double], List4d[Double], Nat._3].apply(dbl3d)
+      //val exp = List4d[Double](dbl3d.data.map(_.map(_.map(List(_))))) 
+      //assert(act.shape === dbl3d.shape ++ (1 :: HNil))
+      //assert(act === exp)
+    //}
   }
 
   feature("The ExpandDimsFromSubArrays typeclass") {
