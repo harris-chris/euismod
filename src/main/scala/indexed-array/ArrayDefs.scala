@@ -122,6 +122,30 @@ object ArrayDefs {
     }
   }
 
+  trait ExpandShapeDims[SH <: HList, M <: HList] {
+    type Out <: HList
+    def apply(sh: SH): Out
+  }
+  object ExpandShapeDims {
+    // use M as output
+    type Aux[SH <: HList, M <: HList, O] = ExpandShapeDims[SH, M] { type Out = O }
+    def instance[SH <: HList, M <: HList, O <: HList](f: SH => O): Aux[SH, M, O] = new ExpandShapeDims[SH, M] {
+      type Out = O
+      def apply(sh: SH): Out = f(sh)
+    }
+    def apply[SH <: HList, M <: HList] (implicit es: ExpandShapeDims[SH, M]): Aux[SH, M, es.Out] = es
+    
+    implicit def ifHeadIsTrue[SH1p <: HList, M1p <: HList] (implicit
+      nx: ExpandShapeDims[SH1p, M1p],
+    ): Aux[Int :: SH1p, Nat._1 :: M1p, Int :: nx.Out] = instance(sh => sh.head :: nx(sh.tail))
+    
+    implicit def ifHeadIsFalse[SH <: HList, M1p <: HList] (implicit
+      nx: ExpandShapeDims[SH, M1p],
+    ): Aux[SH, Nat._0 :: M1p, Int :: nx.Out] = instance(sh => 1 :: nx(sh))
+
+    implicit def ifHNil: Aux[HNil, HNil, HNil] = instance(sh => HNil)
+  }
+
   trait ExpandDimsFromSubArrays[A, AR <: HList, N <: Nat] {
     type Out
     def apply(a: A): Out
