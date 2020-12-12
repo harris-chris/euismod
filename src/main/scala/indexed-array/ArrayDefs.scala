@@ -146,34 +146,9 @@ object ArrayDefs {
     implicit def ifHNil: Aux[HNil, HNil, HNil] = instance(sh => HNil)
   }
 
-  trait ExpandDimsFromSubArrays[A, AR <: HList, N <: Nat] {
-    type Out
-    def apply(a: A): Out
-  }
-  object ExpandDimsFromSubArrays {
-    type Aux[A, AR <: HList, N <: Nat, O] = ExpandDimsFromSubArrays[A, AR, N] { type Out = O }
-    def apply[A, AR <: HList, N <: Nat] (implicit 
-      ed: ExpandDimsFromSubArrays[A, AR, N],
-    ): Aux[A, AR, N, ed.Out] = ed 
-    def instance[A, AR <: HList, N <: Nat, O](f: A => O): Aux[A, AR, N, O] = 
-    new ExpandDimsFromSubArrays[A, AR, N] {
-      type Out = O
-      def apply(a: A): Out = f(a)
-    }
-
-    implicit def ifDepthMatches[A, A0, A1p <: HList, N <: Nat, D0 <: Nat, D1 <: Nat] (implicit
-      in: ExpandDims[A, A0, N]
-    ): Aux[A, A0 :: A1p, N, in.Out] = instance(a => in(a))
-
-    implicit def ifDepthDoesntMatch[A, A0, A1p <: HList, N <: Nat, D0 <: Nat, D1 <: Nat] (implicit
-      d0: Depth.Aux[A, D0],
-      d1: Depth.Aux[A0, D1],
-      gt: GT[D1, Succ[D0]],
-      ed: ExpandDimsFromSubArrays[A, A1p, N]
-    ): Aux[A, A0 :: A1p, N, ed.Out] = instance(a => ed(a))
-  }
-
   trait ExpandDims[A, _A, N] {
+    // _A is new shape
+    // N is index
     type Out
     def apply(a: A): Out
   }
@@ -186,6 +161,13 @@ object ArrayDefs {
       type Out = O
       def apply(a: A): Out = f(a)
     }
+
+    //implicit def ifHListBool[A[_], _A[_], T, SH <: HList, _SH <: HList, N <: HList] (implicit
+      //sh: Shape.Aux[A[T], SH],
+      //es: ExpandShapeDims.Aux[SH, N, _SH],
+      //fl: Flatten[A, T],
+      //fe: FromElemsOpt.Aux[T, AR, _SH, Option[_A[T]]], 
+    //): Aux[A[T], _A[T], N, _A[T]] = ???
 
     implicit def ifDepthmatches[
       A[_], _A[_], N <: Nat, T, D0 <: Nat, D1 <: Nat, AR <: HList, SH <: HList, _SH <: HList,
@@ -207,7 +189,6 @@ object ArrayDefs {
       fe(fl(a), newSh).get
     })
   }
-
 
   trait BroadcastShapesOpt[SHA <: HList, SHB <: HList] {
     type Out <: Option[_]

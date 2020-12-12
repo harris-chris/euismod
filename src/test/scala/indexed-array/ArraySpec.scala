@@ -1259,30 +1259,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The ExpandDimsFromSubArrays typeclass") {
-    import Dummy.Types._
-    import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
-    import Dummy.IsArrayImplicits._
-    object ExpandDimsFromSubArraysTest extends Tag("ExpandDimsFromSubArraysTest")
-    scenario("Correctly inserting using EDFSA at dim0 into a 1d array creates a 2d array", ExpandDimsFromSubArraysTest) {
-      val act = ExpandDimsFromSubArrays[
-        List1d[Double], List2d[Double] :: List1d[Double] :: HNil, Nat._0
-      ].apply(dbl1d)
-      val exp = List2d[Double](List(dbl1d.data))
-      assert(act.shape === 1 :: dbl1d.shape)
-      assert(act === exp)
-    }
-    scenario("Correctly inserting using EDFSA at dim1 into a 2d array creates a 3d array", ExpandDimsFromSubArraysTest) {
-      val act = ExpandDimsFromSubArrays[
-        List2d[Double], List3d[Double] :: List2d[Double] :: List1d[Double] :: HNil, Nat._1
-      ].apply(dbl2d)
-      val exp = List3d[Double](dbl2d.data.map(List(_)))    
-      assert(act.shape === dbl2d.shape.at(_0) :: 1 :: dbl2d.shape.at(_1) :: HNil)
-      assert(act === exp)
-    }
-  }
-
   feature("The BroadcastShapesOpt typeclass") {
     import Dummy.Types._
     import Dummy.Values._
