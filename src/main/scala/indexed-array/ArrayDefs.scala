@@ -206,47 +206,8 @@ object ArrayDefs {
       val newSh = pre ++ (1 :: suf)
       fe(fl(a), newSh).get
     })
-
-    implicit def ifHList[
-      A, _A, NS <: HList, SA <: HList, L0 <: Nat, L1 <: Nat, TK <: Nat, ARD <: HList, ARA <: HList
-    ] (implicit
-      sa: SubArrays.Aux[_A, SA],
-      l0: Depth.Aux[A, L0],
-      l1: Depth.Aux[_A, L1],
-      tk: NatDiff.Aux[L1, L0, TK],
-      ad: Take.Aux[SA, TK, ARD], 
-      rv: Reverse.Aux[ARD, ARA],
-      ed: ExpandDimsHList[A, ARA, NS],
-    ): Aux[A, _A, NS, ed.Out] = instance(a => ed(a))
-
   }
 
-  trait ExpandDimsHList[A, AR <: HList, NS <: HList] {
-    type Out
-    def apply(a: A): Out
-  }
-    
-  object ExpandDimsHList {
-    type Aux[A, AR <: HList, NS <: HList, O] = ExpandDimsHList[A, AR, NS] { type Out = O }
-    def apply[A, AR <: HList, NS <: HList] (implicit 
-      ed: ExpandDimsHList[A, AR, NS],
-    ): Aux[A, AR, NS, ed.Out] = ed 
-    def instance[A, AR <: HList, NS <: HList, O](f: A => O): Aux[A, AR, NS, O] = 
-    new ExpandDimsHList[A, AR, NS] {
-      type Out = O
-      def apply(a: A): O = f(a)
-    }
-
-    implicit def ifHList[A, A0, A1p <: HList, N0 <: Nat, N1p <: HList, DA <: Nat, DR <: Nat, _A] (implicit
-      da: Depth.Aux[A, DA],
-      dr: Depth.Aux[A0, DR],
-      e0: Succ[DA] =:= DR,
-      ed: ExpandDims.Aux[A, A0, N0, _A],
-      nx: ExpandDimsHList[_A, A1p, N1p],
-    ): Aux[A, A0 :: A1p, N0 :: N1p, nx.Out] = instance(a => nx(ed(a)))
-
-    implicit def ifHNil[A]: Aux[A, HNil, HNil, A] = instance(a => a)
-  }
 
   trait BroadcastShapesOpt[SHA <: HList, SHB <: HList] {
     type Out <: Option[_]

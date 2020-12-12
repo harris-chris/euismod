@@ -1227,28 +1227,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The ExpandDimsHList typeclass") {
-    import Dummy.Types._
-    import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
-    import Dummy.IsArrayImplicits._
-    object ExpandDimsHListTest extends Tag("ExpandDimsHListTest")
-    scenario("Correctly inserting at dims 1 & 2 into a 1d array creates a 3d array", ExpandDimsHListTest) {
-      val act = ExpandDimsHList[
-        List1d[Double], List2d[Double] :: List3d[Double] :: HNil, _1 :: _2 :: HNil
-      ].apply(dbl1d)
-      assert(act.shape === dbl1d.length :: 1 :: 1 :: HNil)
-      val exp = List3d[Double](dbl1d.data.map(e => List(List(e))))
-      assert(act === exp)
-    }
-    scenario("Correctly inserting at dims 0 & 2 into a 2d array creates a 4d array", ExpandDimsHListTest) {
-      val act = ExpandDimsHList[
-        List2d[Double], List3d[Double] :: List4d[Double] :: HNil, _0 :: _2 :: HNil
-      ].apply(dbl2d)
-      assert(act.shape === 1 :: dbl2d.shape.at(_0) :: dbl2d.shape.at(_1) :: 1 :: HNil)
-    }
-  }
-
   feature("The ExpandDims typeclass") {
     import Dummy.Types._
     import Dummy.Values._
