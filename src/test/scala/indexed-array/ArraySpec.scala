@@ -1087,6 +1087,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(l2.isInstanceOf[List2d[Int]])
       assert(l2 === mini233.getAtN(1)(List(0, 1))) 
     }
+    scenario("a Int :: Range :: HNil is used to return a 2d from a 3d array", ApplyIndexTest) {
+      val l2 = ApplyIndex[List3d[Int], Int :: Range :: HNil].apply(mini233, 1 :: Range(0, 2) :: HNil)
+      assert(l2.isInstanceOf[List2d[Int]])
+      assert(l2 === mini233.getAtN(1)(List(0, 1))) 
+    }
     scenario("a List[Int] :: Int :: HNil is used to return a 2d from a 3d array", ApplyIndexTest) {
       val l2 = ApplyIndex[List3d[Int], List[Int] :: Int :: HNil].apply(mini233, List(0) :: 1 :: HNil)
       assert(l2.isInstanceOf[List2d[Int]])

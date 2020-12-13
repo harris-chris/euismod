@@ -484,6 +484,12 @@ object ArrayDefs {
       rs.map(ar.getAtN(a, _)))
     )
 
+    implicit def ifIdxIsRange[A[_], T](implicit
+      ar: IsArray[A, T],
+    ): Aux[A[T], Range, A[T]] = instance((a, rs) => ar.fromList(
+      rs.toList.map(ar.getAtN(a, _)))
+    )
+
     implicit def ifIdxIsHList[
       A[_], T, ARD <: HList, AllAR <: HList, Idx <: HList, IntsIdx <: HList, IntsN <: Nat, AllARN <: Nat,
       TakeN <: Nat, RdAR <: HList, RevRdAR <: HList,
@@ -1017,12 +1023,23 @@ object ArrayDefs {
     ): Aux[A[T], Int :: R1p, AR, ai.Out] = instance((a, r) => 
       ai(ar.getAtN(a, r.head), r.tail)
     )
+
     implicit def ifHeadIsListInt[A[_], T, _S, R1p <: HList, A0[_], A1p <: HList, SO](implicit
       ar: IsArray[A, T] { type S = _S },
       ai: ApplyIndexDT[_S, R1p, A1p] { type Out = SO }, 
       oa: IsArray[A0, T] { type S = SO }
     ): Aux[A[T], List[Int] :: R1p, A0[T] :: A1p, A0[T]] = instance((a, r) => {
       val origS: List[_S] = r.head.map(ar.getAtN(a, _))
+      val locedS: List[SO] = origS.map(ai(_, r.tail))
+      oa.fromList(locedS)
+    })
+
+    implicit def ifHeadIsRange[A[_], T, _S, R1p <: HList, A0[_], A1p <: HList, SO](implicit
+      ar: IsArray[A, T] { type S = _S },
+      ai: ApplyIndexDT[_S, R1p, A1p] { type Out = SO }, 
+      oa: IsArray[A0, T] { type S = SO }
+    ): Aux[A[T], Range :: R1p, A0[T] :: A1p, A0[T]] = instance((a, r) => {
+      val origS: List[_S] = r.head.toList.map(ar.getAtN(a, _))
       val locedS: List[SO] = origS.map(ai(_, r.tail))
       oa.fromList(locedS)
     })
