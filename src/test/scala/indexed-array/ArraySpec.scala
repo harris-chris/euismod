@@ -899,7 +899,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val ts3: List[Double] = List(1.5, 2.5, 3.5)
       val newShape = 3 :: HNil
       val ga = SubArrays[List1d[Double]]
-      val fe = FromElemsAndSubArraysOpt[Double, ga.Out, Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[ga.Out, Double, Int :: HNil]
       val act = fe(ts3, newShape)
       assert(act match {
         case Some(l1) => {
@@ -912,7 +912,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)
       val newShape = 2 :: 3 :: HNil
       val ga = SubArrays[List2d[Double]]
-      val fe = FromElemsAndSubArraysOpt[Double, ga.Out, Int :: Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[ga.Out, Double, Int :: Int :: HNil]
       val actO = fe(ts3, newShape)
       val exp = List2d[Double](List(
         List(0.00, 0.01, 0.02),
@@ -931,7 +931,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       )
       val newShape = 2 :: 2 :: 3 :: HNil
       val ga = SubArrays[List3d[Double]]
-      val fe = FromElemsAndSubArraysOpt[Double, ga.Out, Int :: Int :: Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[ga.Out, Double, Int :: Int :: Int :: HNil]
       val actO = fe(ts3, newShape)
       val exp = List3d[Double](
         List(
@@ -954,7 +954,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val newShape = 6 :: HNil
       val sa = SubArrays[List2d[Double]]
-      val fe = FromElemsAndSubArraysOpt[Double, sa.Out, Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[sa.Out, Double, Int :: HNil]
       val act = fe(ts6, newShape)
       assert(act match {
         case Some(l1) => l1.flatten.toList === ts6
@@ -965,7 +965,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val newShape = 3 :: 2 :: HNil
       val sa = SubArrays[List2d[Double]]
-      val fe = FromElemsAndSubArraysOpt[Double, sa.Out, Int :: Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[sa.Out, Double, Int :: Int :: HNil]
       val act = fe(ts6, newShape)
       assert(act match {
         case Some(l2) => {
