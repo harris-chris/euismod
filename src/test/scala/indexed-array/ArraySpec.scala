@@ -889,17 +889,17 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  feature("The FromElemsOpt typeclass") {
+  feature("The FromElemsAndSubArraysOpt typeclass") {
     import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    object FromElemsOptTest extends Tag("FromElemsOptTest")
-    scenario("a List1d can be constructed from a list of Ts", FromElemsOptTest) {
+    object FromElemsAndSubArraysOptTest extends Tag("FromElemsAndSubArraysOptTest")
+    scenario("a List1d can be constructed from a list of Ts", FromElemsAndSubArraysOptTest) {
       val ts3: List[Double] = List(1.5, 2.5, 3.5)
       val newShape = 3 :: HNil
       val ga = SubArrays[List1d[Double]]
-      val fe = FromElemsOpt[Double, ga.Out, Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[Double, ga.Out, Int :: HNil]
       val act = fe(ts3, newShape)
       assert(act match {
         case Some(l1) => {
@@ -908,11 +908,11 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case None => false
       })
     }
-    scenario("a List2d can be constructed from a list of Ts", FromElemsOptTest, Current) {
+    scenario("a List2d can be constructed from a list of Ts", FromElemsAndSubArraysOptTest, Current) {
       val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)
       val newShape = 2 :: 3 :: HNil
       val ga = SubArrays[List2d[Double]]
-      val fe = FromElemsOpt[Double, ga.Out, Int :: Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[Double, ga.Out, Int :: Int :: HNil]
       val actO = fe(ts3, newShape)
       val exp = List2d[Double](List(
         List(0.00, 0.01, 0.02),
@@ -925,13 +925,13 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case None => false
       })
     }
-    scenario("a List3d can be constructed from a list of Ts", FromElemsOptTest) {
+    scenario("a List3d can be constructed from a list of Ts", FromElemsAndSubArraysOptTest) {
       val ts3: List[Double] = List(
         0.000, 0.001, 0.002, 0.010, 0.011, 0.012, 0.100, 0.101, 0.102, 0.110, 0.111, 0.112,
       )
       val newShape = 2 :: 2 :: 3 :: HNil
       val ga = SubArrays[List3d[Double]]
-      val fe = FromElemsOpt[Double, ga.Out, Int :: Int :: Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[Double, ga.Out, Int :: Int :: Int :: HNil]
       val actO = fe(ts3, newShape)
       val exp = List3d[Double](
         List(
@@ -950,26 +950,62 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case None => false
       })
     }
-    scenario("a List1d can be constructed from a 2d array and a list of Ts", FromElemsOptTest) {
+    scenario("a List1d can be constructed from a 2d array and a list of Ts", FromElemsAndSubArraysOptTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val newShape = 6 :: HNil
       val sa = SubArrays[List2d[Double]]
-      val fe = FromElemsOpt[Double, sa.Out, Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[Double, sa.Out, Int :: HNil]
       val act = fe(ts6, newShape)
       assert(act match {
         case Some(l1) => l1.flatten.toList === ts6
         case None => false
       })
     }
-    scenario("a List2d can be constructed from a 2d array and a list of Ts", FromElemsOptTest) {
+    scenario("a List2d can be constructed from a 2d array and a list of Ts", FromElemsAndSubArraysOptTest) {
       val ts6: List[Double] = List(1.5, 2.5, 3.5, 2.0, 3.0, 4.0)
       val newShape = 3 :: 2 :: HNil
       val sa = SubArrays[List2d[Double]]
-      val fe = FromElemsOpt[Double, sa.Out, Int :: Int :: HNil]
+      val fe = FromElemsAndSubArraysOpt[Double, sa.Out, Int :: Int :: HNil]
       val act = fe(ts6, newShape)
       assert(act match {
         case Some(l2) => {
           l2.flatten.toList === ts6 && l2.shape === newShape
+        }
+        case None => false
+      })
+    }
+  }
+
+  feature("The FromElemsAndArrayOpt typeclass") {
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    object FromElemsAndArrayOptTest extends Tag("FromElemsAndArrayOptTest")
+    scenario("a List1d can be constructed from a list of Ts", FromElemsAndArrayOptTest) {
+      val ts3: List[Double] = List(1.5, 2.5, 3.5)
+      val newShape = 3 :: HNil
+      val fe = FromElemsAndArrayOpt[List1d, Double, Int :: HNil]
+      val act = fe(ts3, newShape)
+      assert(act match {
+        case Some(l1) => {
+          l1.flatten.toList === ts3
+        }
+        case None => false
+      })
+    }
+    scenario("a List2d can be constructed from a list of Ts", FromElemsAndArrayOptTest, Current) {
+      val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)
+      val newShape = 2 :: 3 :: HNil
+      val fe = FromElemsAndArrayOpt[List2d, Double, Int :: Int :: HNil]
+      val actO = fe(ts3, newShape)
+      val exp = List2d[Double](List(
+        List(0.00, 0.01, 0.02),
+        List(0.10, 0.11, 0.12),
+      ))
+      assert(actO match {
+        case Some(act) => {
+          act === exp
         }
         case None => false
       })
