@@ -502,7 +502,7 @@ object ArrayDefs {
       di: NatDiff.Aux[AllARN, IntsN, TakeN],
       dr: Take.Aux[AllAR, TakeN, RdAR],
       re: Reverse.Aux[RdAR, RevRdAR],
-      gi: ApplyIndexDT[A[T], Idx, RevRdAR],
+      gi: ApplyIndexFromSubArrays[A[T], Idx, RevRdAR],
     ): Aux[A[T], Idx, gi.Out] = instance((a, r) => gi(a, r)) 
   }
 
@@ -1005,28 +1005,28 @@ object ArrayDefs {
     })
   }
 
-  trait ApplyIndexDT[A, R, AR] {
+  trait ApplyIndexFromSubArrays[A, R, AR] {
     type Out
     def apply(a: A, ref: R): Out
   }
-  object ApplyIndexDT {
-    type Aux[A, R, AR, O] = ApplyIndexDT[A, R, AR] { type Out = O }
-    def instance[A, R, AR, O](f: (A, R) => O): Aux[A, R, AR, O] = new ApplyIndexDT[A, R, AR] { 
+  object ApplyIndexFromSubArrays {
+    type Aux[A, R, AR, O] = ApplyIndexFromSubArrays[A, R, AR] { type Out = O }
+    def instance[A, R, AR, O](f: (A, R) => O): Aux[A, R, AR, O] = new ApplyIndexFromSubArrays[A, R, AR] { 
       type Out = O
       def apply(a: A, ref: R): Out = f(a, ref)
     }
-    def apply[A, R, AR](implicit ai: ApplyIndexDT[A, R, AR]): Aux[A, R, AR, ai.Out] = ai
+    def apply[A, R, AR](implicit ai: ApplyIndexFromSubArrays[A, R, AR]): Aux[A, R, AR, ai.Out] = ai
 
     implicit def ifHeadIsInt[A[_], T, _S, R1p <: HList, AR <: HList, O](implicit
       ar: IsArray[A, T] { type S = _S },
-      ai: ApplyIndexDT[_S, R1p, AR], 
+      ai: ApplyIndexFromSubArrays[_S, R1p, AR], 
     ): Aux[A[T], Int :: R1p, AR, ai.Out] = instance((a, r) => 
       ai(ar.getAtN(a, r.head), r.tail)
     )
 
     implicit def ifHeadIsListInt[A[_], T, _S, R1p <: HList, A0[_], A1p <: HList, SO](implicit
       ar: IsArray[A, T] { type S = _S },
-      ai: ApplyIndexDT[_S, R1p, A1p] { type Out = SO }, 
+      ai: ApplyIndexFromSubArrays[_S, R1p, A1p] { type Out = SO }, 
       oa: IsArray[A0, T] { type S = SO }
     ): Aux[A[T], List[Int] :: R1p, A0[T] :: A1p, A0[T]] = instance((a, r) => {
       val origS: List[_S] = r.head.map(ar.getAtN(a, _))
@@ -1036,7 +1036,7 @@ object ArrayDefs {
 
     implicit def ifHeadIsRange[A[_], T, _S, R1p <: HList, A0[_], A1p <: HList, SO](implicit
       ar: IsArray[A, T] { type S = _S },
-      ai: ApplyIndexDT[_S, R1p, A1p] { type Out = SO }, 
+      ai: ApplyIndexFromSubArrays[_S, R1p, A1p] { type Out = SO }, 
       oa: IsArray[A0, T] { type S = SO }
     ): Aux[A[T], Range :: R1p, A0[T] :: A1p, A0[T]] = instance((a, r) => {
       val origS: List[_S] = r.head.toList.map(ar.getAtN(a, _))
