@@ -188,6 +188,26 @@ object ArrayDefs {
     implicit def ifHNil: Aux[HNil, HNil, HNil] = instance(sh => HNil)
   }
 
+  trait BroadcastOpt[A, B] {
+    type Out = Option[A]
+    def apply(a: A, b: B): Out
+  }
+  object BroadcastOpt {
+    type Aux[A, B] = BroadcastOpt[A, B]
+    def instance[A, B] (f: (A, B) => Option[A]): Aux[A, B] = new BroadcastOpt[A, B] {
+      def apply(a: a, b: b): Option[A] = f(a, b)
+    }
+    def apply[A, B] (implicit br: BroadcastOpt[A, B]): Aux[A, B] = br
+    
+    implicit def ifShapesBroadcast[A[_], AT, B[_], BT, SHA <: HList, SHB <: HList] (implicit
+      aIa: IsArray[A, AT],
+      bIa: IsArray[B, BT],
+      sa: Shape.Aux[A, SHA],
+      sb: Shape.Aux[B, SHB],
+      bs: BroadcastShapesOpt[SHA, SHB],
+    ): Aux[A, B] = instance((a, b) => bs.apply(a, b))
+  }
+
   trait BroadcastShapesOpt[SHA <: HList, SHB <: HList] {
     type Out <: Option[_]
     def apply(a: SHA, b: SHB): Out
@@ -204,12 +224,12 @@ object ArrayDefs {
       implicit br: BroadcastShapesOpt[SHA, SHB],
     ): Aux[SHA, SHB, br.Out] = br
 
-    implicit def ifSHBGtSHA[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
-      l0: Length.Aux[SHA, LA],
-      l1: Length.Aux[SHB, LB],
-      e0: GT[LB, LA],
-      nx: BroadcastShapesOpt[SHB, SHA],
-    ): Aux[SHA, SHB, nx.Out] = instance((a, b) => nx(b, a))
+    //implicit def ifSHBGtSHA[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
+      //l0: Length.Aux[SHA, LA],
+      //l1: Length.Aux[SHB, LB],
+      //e0: GT[LB, LA],
+      //nx: BroadcastShapesOpt[SHB, SHA],
+    //): Aux[SHA, SHB, nx.Out] = instance((a, b) => nx(b, a))
 
     implicit def ifSHAGtEqSHB[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
       l0: Length.Aux[SHA, LA],
@@ -269,6 +289,21 @@ object ArrayDefs {
         }
         case _ => None
       }
+    )
+    
+    implicit def ifDiffDepthArrs[
+      A[_], B[_], AT, BT, SA[_], SB[_], DA <: Nat, DB <: Nat, SHA <: HList, SHB <: HList, SH <: HList,
+    ] (implicit
+      ar: IsArray[A, AT] { type S = SA[AT] }, br: IsArray[B, BT] { type S = SB[BT] },
+      da: Depth.Aux[A[AT], DA],
+      db: Depth.Aux[B[BT], DB],
+      e0: GT[DA, DB],
+      sa: Shape.Aux[A[AT], SHA],
+      sb: Shape.Aux[B[BT], SHB],
+      br: BroadcastShapesOpt.Aux[SHA, SHB, Option[SHA]],
+      nx: OperateOpt.Aux[SA, SB, AT, BT],
+    ): Aux[A, B, AT, BT] = instance(
+      (a, b, op) => ???
     )
 
     implicit def ifBothBase[A[_], B[_], AT, BT] (implicit
