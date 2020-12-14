@@ -122,33 +122,7 @@ object ArrayDefs {
     }
   }
 
-  trait ExpandShapeDims[SH <: HList, M <: HList] {
-    type Out <: HList
-    def apply(sh: SH): Out
-  }
-  object ExpandShapeDims {
-    // use M as output
-    type Aux[SH <: HList, M <: HList, O] = ExpandShapeDims[SH, M] { type Out = O }
-    def instance[SH <: HList, M <: HList, O <: HList](f: SH => O): Aux[SH, M, O] = new ExpandShapeDims[SH, M] {
-      type Out = O
-      def apply(sh: SH): Out = f(sh)
-    }
-    def apply[SH <: HList, M <: HList] (implicit es: ExpandShapeDims[SH, M]): Aux[SH, M, es.Out] = es
-    
-    implicit def ifHeadIsTrue[SH1p <: HList, M1p <: HList] (implicit
-      nx: ExpandShapeDims[SH1p, M1p],
-    ): Aux[Int :: SH1p, Nat._1 :: M1p, Int :: nx.Out] = instance(sh => sh.head :: nx(sh.tail))
-    
-    implicit def ifHeadIsFalse[SH <: HList, M1p <: HList] (implicit
-      nx: ExpandShapeDims[SH, M1p],
-    ): Aux[SH, Nat._0 :: M1p, Int :: nx.Out] = instance(sh => 1 :: nx(sh))
-
-    implicit def ifHNil: Aux[HNil, HNil, HNil] = instance(sh => HNil)
-  }
-
   trait ExpandDims[A, _A, N] {
-    // _A is new shape
-    // N is index
     type Out
     def apply(a: A): Out
   }
@@ -190,6 +164,30 @@ object ArrayDefs {
     })
   }
 
+  trait ExpandShapeDims[SH <: HList, M <: HList] {
+    type Out <: HList
+    def apply(sh: SH): Out
+  }
+  object ExpandShapeDims {
+    // use M as output
+    type Aux[SH <: HList, M <: HList, O] = ExpandShapeDims[SH, M] { type Out = O }
+    def instance[SH <: HList, M <: HList, O <: HList](f: SH => O): Aux[SH, M, O] = new ExpandShapeDims[SH, M] {
+      type Out = O
+      def apply(sh: SH): Out = f(sh)
+    }
+    def apply[SH <: HList, M <: HList] (implicit es: ExpandShapeDims[SH, M]): Aux[SH, M, es.Out] = es
+    
+    implicit def ifHeadIsTrue[SH1p <: HList, M1p <: HList] (implicit
+      nx: ExpandShapeDims[SH1p, M1p],
+    ): Aux[Int :: SH1p, Nat._1 :: M1p, Int :: nx.Out] = instance(sh => sh.head :: nx(sh.tail))
+    
+    implicit def ifHeadIsFalse[SH <: HList, M1p <: HList] (implicit
+      nx: ExpandShapeDims[SH, M1p],
+    ): Aux[SH, Nat._0 :: M1p, Int :: nx.Out] = instance(sh => 1 :: nx(sh))
+
+    implicit def ifHNil: Aux[HNil, HNil, HNil] = instance(sh => HNil)
+  }
+
   trait BroadcastShapesOpt[SHA <: HList, SHB <: HList] {
     type Out <: Option[_]
     def apply(a: SHA, b: SHB): Out
@@ -213,7 +211,7 @@ object ArrayDefs {
       nx: BroadcastShapesOpt[SHB, SHA],
     ): Aux[SHA, SHB, nx.Out] = instance((a, b) => nx(b, a))
 
-    implicit def ifSH0GtEqSH0[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
+    implicit def ifSHAGtEqSHB[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
       l0: Length.Aux[SHA, LA],
       l1: Length.Aux[SHB, LB],
       e0: GTEq[LA, LB],
@@ -800,6 +798,11 @@ object ArrayDefs {
     )
   }
 
+  /**
+   * Transposes an array, either across two specific axes (if passed a Tuple2[Nat, Nat]) or across
+   * all axes (if passed an AllSlice object).
+   */
+
   trait Transpose[A, IN] {
     type Out = A
     def apply(a: A): Out
@@ -880,6 +883,10 @@ object ArrayDefs {
       implicit def psEqualsZero[A]: Aux[A, Nat._0, Nat._0] = instance(a => a)
     }
   }
+
+  /**
+   * Concatenates an array, 
+   */
   
   trait Concatenate[A[_], B[_], T, D <: Nat] { self =>
     type Out = Option[A[T]]
@@ -1045,14 +1052,6 @@ object ArrayDefs {
     })
 
     implicit def ifRefIsHNil[A, AR <: HList]: Aux[A, HNil, AR, A] = instance((a, r) => a)
-  }
-
-  abstract class GetLoc[A[_], T, R] {
-    def loc(self: A[T], ref: R): A[T] = ???
-  }
-
-  abstract class SetILoc[A[_], T, R] {
-    def loc(self: A[T], ref: R): A[T] = ???
   }
 }
 
