@@ -122,6 +122,45 @@ object ArrayDefs {
     }
   }
 
+  trait ListSubs[A, S] {
+    type Out = List[S]
+    def apply(a: A): Out
+  }
+  object ListSubs {
+    type Aux[A, S] = ListSubs[A, S]
+    def apply[A, S] (implicit tl: ListSubs[A, S]): Aux[A, S] = tl
+    def instance[A, S](f: A => List[S]): Aux[A, S] = new ListSubs[A, S] {
+      def apply(a: A): Out = f(a)
+    }
+
+    implicit def ifArray[A[_], T, _S] (implicit
+      ia: IsArray[A, T] { type S = _S }
+    ): Aux[A[T], _S] = instance(a => 
+      (for(i <- 0 to ia.length(a) - 1) yield (ia.getAtN(a, i))).toList
+    )
+  }
+
+  trait Einsum[A, B] {
+    type Out <: Option[_]
+    def apply(a: A, b: B, op: String): Out
+  }
+  object Einsum {
+    type Aux[A, B, O <: Option[_]] = Einsum[A, B] { type Out = O }
+    def apply[A, B] (implicit ei: Einsum[A, B]): Aux[A, B, ei.Out] = ei
+    def instance[A, B, O <: Option[_]](f: (A, B, String) => O): Aux[A, B, O] = new Einsum[A, B] {
+      type Out = O
+      def apply(a: A, b: B, op: String): Out = f(a, b, op)
+    }
+
+    implicit def ifSameDepth[A[_], B[_], AT, BT, OT, DA <: Nat, DB <: Nat] (implicit
+      na: Numeric[AT],
+      nb: Numeric[BT], 
+      da: Depth.Aux[A[AT], DA],
+      db: Depth.Aux[B[BT], DB],
+    ): Aux[A[AT], B[BT], Option[A[OT]]] = instance((a, b, op) => ???)
+       
+  }
+
   trait ExpandDims[A, _A, N] {
     type Out
     def apply(a: A): Out
@@ -290,22 +329,6 @@ object ArrayDefs {
         }
         case _ => None
       }
-    )
-    
-    implicit def ifDiffDepthArrs[
-      A[_], B[_], AT, BT, SA[_], SB[_], DA <: Nat, DB <: Nat, SHA <: HList, SHB <: HList, SH <: HList,
-    ] (implicit
-      ar: IsArray[A, AT] { type S = SA[AT] }, 
-      br: IsArray[B, BT] { type S = SB[BT] },
-      da: Depth.Aux[A[AT], DA],
-      db: Depth.Aux[B[BT], DB],
-      e0: GT[DA, DB],
-      sa: Shape.Aux[A[AT], SHA],
-      sb: Shape.Aux[B[BT], SHB],
-      bs: BroadcastShapesOpt[SHA, SHB],
-      nx: OperateOpt.Aux[SA, SB, AT, BT],
-    ): Aux[A, B, AT, BT] = instance(
-      (a, b, op) => ???
     )
 
     implicit def ifBothBase[A[_], B[_], AT, BT] (implicit
@@ -834,6 +857,31 @@ object ArrayDefs {
       cs(aSh(a), bSh(b), 0).flatMap(sh => fe(flA(a) ++ flB(b), sh))
     )
   }
+
+  trait Reorder[A, IN] {
+    type Out = A
+    def apply(a: A, in: IN): Out
+  }
+  object Reorder {
+    type Aux[A, IN] = Reorder[A, IN]
+    def apply[A, IN](implicit re: Reorder[A, IN]): Aux[A, IN] = re
+    def instance[A, IN](f: (A, IN) => A): Aux[A, IN] = new Reorder[A, IN] { 
+      def apply(a: A, in: IN): A = f(a, in)
+    }
+
+    //implicit def ifTupleInt[A[_], T] (implicit
+      //ia: IsArray[A, T],
+    //): Aux[A, IN] = 
+
+        //ar: IsArray[A, T] { type S = B[T] },
+        //bIsArr: IsArray[B, T] { type S = BS },
+      //): Aux[A[T], XA, XB] = instance(a => {
+        //val lst2d: List[List[BS]] = ar.toList(a).map(bIsArr.toList(_))
+        //val lstB: List[B[T]] = lst2d.transpose.map(lstBs => bIsArr.fromList(lstBs))
+        //ar.fromList(lstB)
+      //})
+  }
+
 
   /**
    * Transposes an array, either across two specific axes (if passed a Tuple2[Nat, Nat]) or across
