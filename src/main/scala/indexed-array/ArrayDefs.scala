@@ -39,7 +39,7 @@ object ArrayDefs {
     def ++[B[_]](a: A[T], b: B[T])(implicit 
       cnCt: Concatenate[A, B, T, Nat._0],
     ): cnCt.Out = cnCt(a, b)
-    def toList(a: A[T])(implicit ls: ListSubs[A[T], S]): List[S] = ls(a) 
+    def toList(a: A[T])(implicit ls: ListSubs[A[T]]): ls.Out = ls(a) 
     def fromList(listS: List[S]): A[T] = 
       listS.reverse.foldLeft(getEmpty[T])((e, s) => cons(e, s))
     def ndims[SH <: HList](a: A[T])(implicit 
@@ -94,7 +94,7 @@ object ArrayDefs {
       def ::(other: _S) = tc.cons(a, other)
       def ++[B[_]](b: B[T])(implicit cn: Concatenate[A, B, T, Nat._0]) = tc.++(a, b)
       def length: Int = tc.length(a)
-      def toList(implicit ls: ListSubs[A[T], _S]): List[_S] = tc.toList(a)
+      def toList(implicit ls: ListSubs[A[T]]): ls.Out = tc.toList(a)
       def fromList(listS: List[_S]): A[T] = tc.fromList(listS)
       def shape(implicit sh: Shape[A[T]]): sh.Out = tc.shape(a)
       def flatten(implicit fl: Flatten[A, T]): List[T] = fl(a)
@@ -122,20 +122,21 @@ object ArrayDefs {
     }
   }
 
-  trait ListSubs[A, S] {
-    type Out = List[S]
+  trait ListSubs[A] {
+    type Out <: List[_]
     def apply(a: A): Out
   }
   object ListSubs {
-    type Aux[A, S] = ListSubs[A, S]
-    def apply[A, S] (implicit tl: ListSubs[A, S]): Aux[A, S] = tl
-    def instance[A, S](f: A => List[S]): Aux[A, S] = new ListSubs[A, S] {
+    type Aux[A, O <: List[_]] = ListSubs[A] { type Out = O }
+    def apply[A] (implicit tl: ListSubs[A]): Aux[A, tl.Out] = tl
+    def instance[A, O <: List[_]](f: A => O): Aux[A, O] = new ListSubs[A] {
+      type Out = O
       def apply(a: A): Out = f(a)
     }
 
     implicit def ifArray[A[_], T, _S] (implicit
       ia: IsArray[A, T] { type S = _S }
-    ): Aux[A[T], _S] = instance(a => 
+    ): Aux[A[T], List[_S]] = instance(a => 
       (for(i <- 0 to ia.length(a) - 1) yield (ia.getAtN(a, i))).toList
     )
   }
@@ -582,7 +583,7 @@ object ArrayDefs {
       fl(a).map(_.toString.length).max
 
     implicit def ifIs1d[A[_], T, S](implicit 
-      ls: ListSubs[A[T], S],
+      ls: ListSubs.Aux[A[T], List[S]],
       de: Depth.Aux[A[T], Nat._1],
       fl: Flatten[A, T],
     ): PrettyPrint[A[T]] = instance((a, indO) => {
@@ -838,7 +839,7 @@ object ArrayDefs {
       def apply(a: A[T], b: B[T]): Option[A[T]] = f(a, b)
     }
     implicit def ifSameType[A[_], T, _S, SH <: HList](implicit 
-      ls: ListSubs[A[T], _S],
+      ls: ListSubs.Aux[A[T], List[_S]],
       ia: IsArray[A, T] { type S = _S },
       sh: Shape.Aux[A[T], SH],
       cs: CombineShapesOpt[SH],
@@ -869,9 +870,28 @@ object ArrayDefs {
       def apply(a: A, in: IN): A = f(a, in)
     }
 
-    //implicit def ifTupleInt[A[_], T] (implicit
-      //ia: IsArray[A, T],
-    //): Aux[A, IN] = 
+    //implicit def ifTupleInt[A[_], T, S, SS] (implicit
+      //la: ListSubs[A[T]],
+      //lsO: ListSubs[S] = null,
+    //): Aux[A[T], (Int, Int)] = instance((a, in) => 
+      //Option(lsO).map(ls => in match {
+        //case (0, 1) => ???
+        //case (i0, i1) if i1 == i0 + 1 => 
+      //}).getOrElse(in match {
+        //case (0, 1) => ???
+        //case _ => None
+      //})
+    //)
+
+    //def adjacentTuple(a: A, t: (Int, Int)) (implicit
+      //la: ListSubs[A, S]
+    //): Option[A] = {
+      //val tO: Option[(Int, Int)] = t match {
+        //case (t1, t2) if t2 == t1 + 1 => Some((t1, t2))
+        //case (t1, t2) if t1 == t2 + 1 => Some((t2, t1))
+        //case _ => None
+      //}
+    //}
 
         //ar: IsArray[A, T] { type S = B[T] },
         //bIsArr: IsArray[B, T] { type S = BS },
@@ -881,6 +901,29 @@ object ArrayDefs {
         //ar.fromList(lstB)
       //})
   }
+
+  //trait ReorderAx[A] {
+    //type Out = A
+    //def apply(a: A, in: (Int, Int)): Out
+  //}
+  //object ReorderAx {
+    //type Aux[A] = ReorderAx[A] 
+    //def apply[A](implicit re: ReorderAx[A]): Aux[A] = re
+    //def instance[A](f: (A, (Int, Int)) => A): Aux[A] = new ReorderAx[A] { 
+      //def apply(a: A, in: (Int, Int)): A = f(a, in)
+    //}
+
+    //implicit def rec[A, S](implicit 
+      //rO: ReorderAx[S] = null,
+      //lO: ListSubs[A, S] = null,
+    //): Aux[A] = instance(
+      //(a, t) => Option(rO).map(re => Option(lO).map(ls => {
+
+      //}))
+    //)
+  //}
+
+
 
 
   /**
