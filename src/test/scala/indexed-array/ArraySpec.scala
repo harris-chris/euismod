@@ -1342,12 +1342,32 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object BroadcastOptTest extends Tag("BroadcastOptTest")
-    //scenario("Broadcasting from smaller to larger correctly", BroadcastOptTest) {
-      //val act = BroadcastOpt[
-        //List1d[Double], List2d[Double], List2d[Double]
-      //].apply(3 :: HNil, 2 :: 3 :: HNil)
-      //val exp = 2 :: 3 :: HNil
-      //assert(act === Some(exp))
-    //}
+    scenario("Broadcasting from 1d to 1d (1, L) correctly", BroadcastOptTest) {
+      val shape = 1 :: dbl1d.length :: HNil
+      val act = BroadcastOpt[
+        List1d[Double], Int :: Int :: HNil, List2d[Double]
+      ].apply(dbl1d, shape)
+      val exp = List2d[Double](List(dbl1d.data))
+      assert(Shape[List2d[Double]].apply(act.get) === shape)
+      assert(act === Some(exp))
+    }
+    scenario("Broadcasting from 1d to 1d (L, 1) correctly", BroadcastOptTest) {
+      val shape = dbl1d.length :: 1 :: HNil
+      val act = BroadcastOpt[
+        List1d[Double], Int :: Int :: HNil, List2d[Double]
+      ].apply(dbl1d, shape)
+      val exp = List2d[Double](dbl1d.data.map(List(_)))
+      assert(Shape[List2d[Double]].apply(act.get) === shape)
+      assert(act === Some(exp))
+    }
+    scenario("Broadcasting from 2d to 3d (D0, D1, 1) correctly", BroadcastOptTest) {
+      val shape = Shape[List2d[Double]].apply(dbl2d) :+ 1
+      val act = BroadcastOpt[
+        List2d[Double], Int :: Int :: Int :: HNil, List3d[Double]
+      ].apply(dbl2d, shape)
+      val exp = List3d[Double](dbl2d.data.map(_.map(List(_))))
+      assert(Shape[List3d[Double]].apply(act.get) === shape)
+      assert(act === Some(exp))
+    }
   }
 }

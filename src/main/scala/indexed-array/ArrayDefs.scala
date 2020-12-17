@@ -201,16 +201,16 @@ object ArrayDefs {
     def apply[A, SH <: HList, _A] (implicit br: BroadcastOpt[A, SH, _A]): Aux[A, SH, _A] = br
     
     implicit def ifShapesBroadcast[
-      A[_], AT, B[_], BT, _A[_], SHA <: HList, SH <: HList, DB <: Nat, D_A <: Nat,
+      A[_], T, _A[_], SHA <: HList, SH <: HList, LE <: Nat, D_A <: Nat,
     ] (implicit
-      sa: Shape.Aux[A[AT], SHA],
-      db: Depth.Aux[B[AT], DB],
-      d_a: Depth.Aux[_A[AT], D_A],
-      e0: DB =:= D_A,
+      sa: Shape.Aux[A[T], SHA],
+      le: Length.Aux[SH, LE],
+      d_a: Depth.Aux[_A[T], D_A],
+      e0: LE =:= D_A,
       bs: BroadcastShapesOpt.Aux[SHA, SH],
-      fl: Flatten[A, AT],
-      fe: FromElemsAndArrayOpt.Aux[_A, AT, SH, Option[_A[AT]]],
-    ): Aux[A[AT], SH, _A[AT]] = instance((a, shape) => {
+      fl: Flatten[A, T],
+      fe: FromElemsAndArrayOpt.Aux[_A, T, SH, Option[_A[T]]],
+    ): Aux[A[T], SH, _A[T]] = instance((a, shape) => {
       val sO = bs.apply(sa(a), shape)
       sO.flatMap(sh => fe(fl(a), sh))
     })
