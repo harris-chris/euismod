@@ -206,7 +206,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         def getEmpty[_T] = A2[_T](Nil: List[List[_T]])
         def getAtN(a: A2[T], n: Int) = A1[T](a.data(n))
         def length(a: A2[T]) = a.data.length
-        def cons(a: A2[T], sub: S) = A2[T](a1ev.toList(sub) :: a.data)
+        def cons(a: A2[T], sub: S) = A2[T](sub.data :: a.data)
       }
       "the[IsArray[A2, Double] {type S = A1[Double] }]" should compile
     }

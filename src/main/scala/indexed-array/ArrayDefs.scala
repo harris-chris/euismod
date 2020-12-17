@@ -39,7 +39,7 @@ object ArrayDefs {
     def ++[B[_]](a: A[T], b: B[T])(implicit 
       cnCt: Concatenate[A, B, T, Nat._0],
     ): cnCt.Out = cnCt(a, b)
-    def toList(a: A[T]): List[S] = (for(i <- 0 to length(a) - 1) yield (getAtN(a, i))).toList
+    def toList(a: A[T])(implicit ls: ListSubs[A[T], S]): List[S] = ls(a) 
     def fromList(listS: List[S]): A[T] = 
       listS.reverse.foldLeft(getEmpty[T])((e, s) => cons(e, s))
     def ndims[SH <: HList](a: A[T])(implicit 
@@ -94,7 +94,7 @@ object ArrayDefs {
       def ::(other: _S) = tc.cons(a, other)
       def ++[B[_]](b: B[T])(implicit cn: Concatenate[A, B, T, Nat._0]) = tc.++(a, b)
       def length: Int = tc.length(a)
-      def toList: List[_S] = tc.toList(a)
+      def toList(implicit ls: ListSubs[A[T], _S]): List[_S] = tc.toList(a)
       def fromList(listS: List[_S]): A[T] = tc.fromList(listS)
       def shape(implicit sh: Shape[A[T]]): sh.Out = tc.shape(a)
       def flatten(implicit fl: Flatten[A, T]): List[T] = fl(a)
@@ -577,18 +577,17 @@ object ArrayDefs {
     def apply[A](implicit pp: PrettyPrint[A]): PrettyPrint[A] = pp
 
     def maxWidth[A[_], T](a: A[T])(implicit 
-      ar: IsArray[A, T],
       fl: Flatten[A, T],
     ): Int = 
-      ar.flatten(a).map(_.toString.length).max
+      fl(a).map(_.toString.length).max
 
-    implicit def ifIs1d[A[_], T](implicit 
-      ai: IsArray[A, T],
+    implicit def ifIs1d[A[_], T, S](implicit 
+      ls: ListSubs[A[T], S],
       de: Depth.Aux[A[T], Nat._1],
       fl: Flatten[A, T],
     ): PrettyPrint[A[T]] = instance((a, indO) => {
       val mW = maxWidth(a)
-      "[" ++ ai.toList(a).map(_.toString.padTo(mW, ' ')).mkString(", ") ++ "]"
+      "[" ++ ls(a).map(_.toString.padTo(mW, ' ')).mkString(", ") ++ "]"
     })
     implicit def ifIs1dp[A[_], T, _S[_], DE <: Nat](implicit 
       ar: IsArray[A, T] { type S = _S[T] },
@@ -838,12 +837,13 @@ object ArrayDefs {
     new AddOpt[A, B, T] { 
       def apply(a: A[T], b: B[T]): Option[A[T]] = f(a, b)
     }
-    implicit def ifSameType[A[_], T, SH <: HList](implicit 
-      isArr: IsArray[A, T],
+    implicit def ifSameType[A[_], T, _S, SH <: HList](implicit 
+      ls: ListSubs[A[T], _S],
+      ia: IsArray[A, T] { type S = _S },
       sh: Shape.Aux[A[T], SH],
       cs: CombineShapesOpt[SH],
     ): Aux[A, A, T] = instance((a, b) => 
-      cs(sh(a), sh(b), 0).map(_ => isArr.fromList(isArr.toList(a) ++ isArr.toList(b)))
+      cs(sh(a), sh(b), 0).map(_ => ia.fromList(ls(a) ++ ls(b)))
     )
     implicit def ifDiffType[A[_], B[_], T, AR <: HList, SH <: HList](implicit
       flA: Flatten[A, T],
