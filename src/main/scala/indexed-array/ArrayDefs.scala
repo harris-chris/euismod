@@ -188,49 +188,49 @@ object ArrayDefs {
     implicit def ifHNil: Aux[HNil, HNil, HNil] = instance(sh => HNil)
   }
 
-  trait BroadcastOpt[A, _A, B] {
+  trait BroadcastOpt[A, SH <: HList, _A] {
     type Out = Option[_A]
-    def apply(a: A, b: B): Out
+    def apply(a: A, shape: SH): Out
   }
   object BroadcastOpt {
-    type Aux[A, _A, B] = BroadcastOpt[A, _A, B]
-    def instance[A, _A, B] (f: (A, B) => Option[_A]): Aux[A, _A, B] = new BroadcastOpt[A, _A, B] {
-      def apply(a: A, b: B): Option[_A] = f(a, b)
+    type Aux[A, SH <: HList, _A] = BroadcastOpt[A, SH, _A]
+    def instance[A, SH <: HList, _A] (f: (A, SH) => Option[_A]): Aux[A, SH, _A] = 
+    new BroadcastOpt[A, SH, _A] {
+      def apply(a: A, shape: SH): Option[_A] = f(a, shape)
     }
-    def apply[A, _A, B] (implicit br: BroadcastOpt[A, _A, B]): Aux[A, _A, B] = br
+    def apply[A, SH <: HList, _A] (implicit br: BroadcastOpt[A, SH, _A]): Aux[A, SH, _A] = br
     
     implicit def ifShapesBroadcast[
-      A[_], AT, B[_], BT, _A[_], SHA <: HList, SHB <: HList, SH <: HList, DB <: Nat, D_A <: Nat,
+      A[_], AT, B[_], BT, _A[_], SHA <: HList, SH <: HList, DB <: Nat, D_A <: Nat,
     ] (implicit
       sa: Shape.Aux[A[AT], SHA],
-      sb: Shape.Aux[B[BT], SHB],
       db: Depth.Aux[B[AT], DB],
       d_a: Depth.Aux[_A[AT], D_A],
       e0: DB =:= D_A,
-      bs: BroadcastShapesOpt.Aux[SHA, SHB, Option[SH]],
+      bs: BroadcastShapesOpt.Aux[SHA, SH],
       fl: Flatten[A, AT],
       fe: FromElemsAndArrayOpt.Aux[_A, AT, SH, Option[_A[AT]]],
-    ): Aux[A[AT], _A[AT], B[BT]] = instance((a, b) => {
-      val shape = bs.apply(sa(a), sb(b))
-      shape.flatMap(sh => fe(fl(a), sh))
+    ): Aux[A[AT], SH, _A[AT]] = instance((a, shape) => {
+      val sO = bs.apply(sa(a), shape)
+      sO.flatMap(sh => fe(fl(a), sh))
     })
   }
 
   trait BroadcastShapesOpt[SHA <: HList, SHB <: HList] {
-    type Out <: Option[_]
+    type Out <: Option[SHB]
     def apply(a: SHA, b: SHB): Out
   }
   object BroadcastShapesOpt {
-    type Aux[SHA <: HList, SHB <: HList, O] = BroadcastShapesOpt[SHA, SHB] { type Out = O }
-    def instance[SHA <: HList, SHB <: HList, O <: Option[_]] (
-      f: (SHA, SHB) => O,
-    ): Aux[SHA, SHB, O] = new BroadcastShapesOpt[SHA, SHB] {
-      type Out = O
-      def apply(a: SHA, b: SHB): Out = f(a, b)
+    type Aux[SHA <: HList, SHB <: HList] = BroadcastShapesOpt[SHA, SHB]
+    def instance[SHA <: HList, SHB <: HList] (
+      f: (SHA, SHB) => Option[SHB],
+    ): Aux[SHA, SHB] = new BroadcastShapesOpt[SHA, SHB] {
+      type Out = Option[SHB]
+      def apply(a: SHA, b: SHB): Option[SHB] = f(a, b)
     }
     def apply[SHA <: HList, SHB <: HList](
       implicit br: BroadcastShapesOpt[SHA, SHB],
-    ): Aux[SHA, SHB, br.Out] = br
+    ): Aux[SHA, SHB] = br
 
     implicit def ifSHBGtEqSHA[SHA <: HList, SHB <: HList, LA <: Nat, LB <: Nat] (implicit
       l0: Length.Aux[SHA, LA],
@@ -238,7 +238,7 @@ object ArrayDefs {
       e0: GTEq[LB, LA],
       al: ToList[SHA, Int],
       bl: ToList[SHB, Int],
-    ): Aux[SHA, SHB, Option[SHB]] = instance((a, b) => {
+    ): Aux[SHA, SHB] = instance((a, b) => {
       def go(a: List[Int], b: List[Int]): Boolean = (a.headOption, b.headOption) match {
         case (Some(ah), Some(bh)) if ah == bh => go(a.tail, b.tail)
         case (Some(ah), Some(bh)) if ah != bh => go(a, b.tail)
@@ -302,7 +302,7 @@ object ArrayDefs {
       e0: GT[DA, DB],
       sa: Shape.Aux[A[AT], SHA],
       sb: Shape.Aux[B[BT], SHB],
-      bs: BroadcastShapesOpt.Aux[SHA, SHB, Option[SHA]],
+      bs: BroadcastShapesOpt[SHA, SHB],
       nx: OperateOpt.Aux[SA, SB, AT, BT],
     ): Aux[A, B, AT, BT] = instance(
       (a, b, op) => ???

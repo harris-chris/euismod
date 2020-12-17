@@ -1306,7 +1306,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import ArrayDefs.IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object BroadcastShapesOptTest extends Tag("BroadcastShapesOptTest")
-    scenario("Broadcasting from smaller to larger correctly", BroadcastShapesOptTest) {
+    scenario("Broadcasting shape from smaller to larger correctly", BroadcastShapesOptTest) {
       val act = BroadcastShapesOpt[
         Int :: HNil, Int :: Int :: HNil
       ].apply(3 :: HNil, 2 :: 3 :: HNil)
@@ -1334,5 +1334,20 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val exp = None
       assert(act === exp)
     }
+  }
+
+  feature("The BroadcastOpt typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import ArrayDefs.IsArraySyntax._
+    import Dummy.IsArrayImplicits._
+    object BroadcastOptTest extends Tag("BroadcastOptTest")
+    //scenario("Broadcasting from smaller to larger correctly", BroadcastOptTest) {
+      //val act = BroadcastOpt[
+        //List1d[Double], List2d[Double], List2d[Double]
+      //].apply(3 :: HNil, 2 :: 3 :: HNil)
+      //val exp = 2 :: 3 :: HNil
+      //assert(act === Some(exp))
+    //}
   }
 }
