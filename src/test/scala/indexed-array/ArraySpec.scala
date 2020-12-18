@@ -266,6 +266,43 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("The TransposeRT typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object TransposeRTTest extends Tag("TransposeRTTest")
+    scenario("transposing a 2d array with (0, 1) correctly flips the axes", TransposeRTTest) {
+      val act = TransposeAxRT[List2d[Double]].apply(dbl2d, (0, 1))
+      val exp = Transpose[List2d[Double], AllSlice].apply(dbl2d)
+      assert(act === Some(exp))
+    }
+    scenario("transposing a 3d array with (0, 1) correctly flips the axes", TransposeRTTest) {
+      val act = TransposeAxRT[List3d[Double]].apply(dbl3d, (0, 1))
+      val exp = Transpose[List3d[Double], (_0, _1)].apply(dbl3d)
+      assert(act === Some(exp))
+    }
+    scenario("transposing a 3d array with (1, 2) correctly flips the axes", TransposeRTTest) {
+      val act = TransposeAxRT[List3d[Double]].apply(dbl3d, (1, 2))
+      val exp = Transpose[List3d[Double], (_1, _2)].apply(dbl3d)
+      assert(act === Some(exp))
+    }
+  }
+
+  feature("The TransposeFromListInt typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object TransposeFromListIntTest extends Tag("TransposeFromListIntTest")
+    scenario("transposing a 2d array with List(0, 1) correctly flips the axes", TransposeFromListIntTest) {
+      val act = TransposeFromListInt[List2d[Double]].apply(dbl2d, List(1, 0))
+      val exp = Transpose[List2d[Double], (_0, _1)].apply(dbl2d)
+      assert(act === Some(exp))
+    }
+  }
+
+
   feature("The Transpose typeclass") {
     import Dummy.Types._
     import Dummy.Values._

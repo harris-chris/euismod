@@ -859,71 +859,84 @@ object ArrayDefs {
     )
   }
 
-  trait Reorder[A, IN] {
-    type Out = A
-    def apply(a: A, in: IN): Out
+  trait TransposeAxRT[A] {
+    type Out = Option[A]
+    def apply(a: A, in: (Int, Int)): Out
   }
-  object Reorder {
-    type Aux[A, IN] = Reorder[A, IN]
-    def apply[A, IN](implicit re: Reorder[A, IN]): Aux[A, IN] = re
-    def instance[A, IN](f: (A, IN) => A): Aux[A, IN] = new Reorder[A, IN] { 
-      def apply(a: A, in: IN): A = f(a, in)
+  object TransposeAxRT {
+    type Aux[A] = TransposeAxRT[A]
+    def apply[A](implicit re: TransposeAxRT[A]): Aux[A] = re
+    def instance[A](f: (A, (Int, Int)) => Option[A]): Aux[A] = new TransposeAxRT[A] { 
+      def apply(a: A, in: (Int, Int)): Option[A] = f(a, in)
     }
 
-    //implicit def ifTupleInt[A[_], T, S, SS] (implicit
-      //la: ListSubs[A[T]],
-      //lsO: ListSubs[S] = null,
-    //): Aux[A[T], (Int, Int)] = instance((a, in) => 
-      //Option(lsO).map(ls => in match {
-        //case (0, 1) => ???
-        //case (i0, i1) if i1 == i0 + 1 => 
-      //}).getOrElse(in match {
-        //case (0, 1) => ???
-        //case _ => None
-      //})
-    //)
-
-    //def adjacentTuple(a: A, t: (Int, Int)) (implicit
-      //la: ListSubs[A, S]
-    //): Option[A] = {
-      //val tO: Option[(Int, Int)] = t match {
-        //case (t1, t2) if t2 == t1 + 1 => Some((t1, t2))
-        //case (t1, t2) if t1 == t2 + 1 => Some((t2, t1))
-        //case _ => None
-      //}
-    //}
-
-        //ar: IsArray[A, T] { type S = B[T] },
-        //bIsArr: IsArray[B, T] { type S = BS },
-      //): Aux[A[T], XA, XB] = instance(a => {
-        //val lst2d: List[List[BS]] = ar.toList(a).map(bIsArr.toList(_))
-        //val lstB: List[B[T]] = lst2d.transpose.map(lstBs => bIsArr.fromList(lstBs))
-        //ar.fromList(lstB)
-      //})
+    implicit def ifTupleInt[A[_], B[_], T, BS] (implicit
+      ia: IsArray[A, T] { type S = B[T] },
+      la: ListSubs.Aux[A[T], List[B[T]]],
+      ibO: IsArray[B, T] { type S = BS } = null,
+      lsO: ListSubs.Aux[B[T], List[BS]] = null,
+      nxO: TransposeAxRT[B[T]] = null,
+    ): Aux[A[T]] = instance((a, in) => 
+      Option(ibO).flatMap(
+        ib => Option(lsO).flatMap(
+          ls => in match {
+            case (0, 1) => {
+              val lst2d: List[List[BS]] = la(a).map(ls(_))
+              val lstB: List[B[T]] = lst2d.transpose.map(lstBs => ib.fromList(lstBs))
+              val out: A[T] = ia.fromList(lstB)
+              Some(out)
+            }
+            case (i0, i1) if i1 == i0 + 1 => {
+              Option(nxO).flatMap(nx => {
+                val lstS: List[B[T]] = la(a)
+                val lstB: List[B[T]] = lstS.flatMap(
+                  nx(_, (in._1 - 1, in._2 - 1))
+                )
+                if(lstS.length == lstB.length) { Some(ia.fromList(lstB)) } else { None } 
+              }) 
+            }
+          }
+      )))
   }
 
-  //trait ReorderAx[A] {
-    //type Out = A
-    //def apply(a: A, in: (Int, Int)): Out
-  //}
-  //object ReorderAx {
-    //type Aux[A] = ReorderAx[A] 
-    //def apply[A](implicit re: ReorderAx[A]): Aux[A] = re
-    //def instance[A](f: (A, (Int, Int)) => A): Aux[A] = new ReorderAx[A] { 
-      //def apply(a: A, in: (Int, Int)): A = f(a, in)
-    //}
+  trait TransposeFromListInt[A] {
+    type Out = Option[A]
+    def apply(a: A, seq: List[Int]): Out
+  }
+  object TransposeFromListInt {
+    type Aux[A] = TransposeFromListInt[A]
+    def apply[A](implicit re: TransposeFromListInt[A]): Aux[A] = re
+    def instance[A](f: (A, List[Int]) => Option[A]): Aux[A] = new TransposeFromListInt[A] { 
+      def apply(a: A, in: (List[Int])): Option[A] = f(a, in)
+    }
 
-    //implicit def rec[A, S](implicit 
-      //rO: ReorderAx[S] = null,
-      //lO: ListSubs[A, S] = null,
-    //): Aux[A] = instance(
-      //(a, t) => Option(rO).map(re => Option(lO).map(ls => {
+    def swapElems[A](l: List[A], i: Int): List[A] = {
+      val out = l.take(i - 1) ++ List(l(i+1)) ++ List(l(i)) ++ l.takeRight(l.length - (i + 1))
+      assert(out.length == l.length)
+      out
+    }
+    
+    implicit def ifList[A, DE <: Nat] (implicit
+      de: Depth.Aux[A, DE],
+      tl: ToInt[DE],
+      tr: TransposeAxRT[A],
+    ): Aux[A] = instance((a, seq) => {
+      def go(a: A, l: List[Int], i: Int): Option[A] = i match {
+        case i if (i + 1) == l.length => Some(a)
+        case i if l(i + 1) == l(i) + 1 => go(a, l, i + 1)
+        case i if l(i + 1) != l(i) + 1 => {
+          val newL = swapElems(l, i)
+          val newA = tr(a, (i, i + 1))
+          newA.flatMap(go(_, newL, 0))
+        }
+      }
 
-      //}))
-    //)
-  //}
-
-
+      (tl(), seq.length) match {
+        case (x, y) if x == y => go(a, seq, 0)
+        case _ => None
+      }
+    })
+  }
 
 
   /**
