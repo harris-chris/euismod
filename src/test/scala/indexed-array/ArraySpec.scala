@@ -295,9 +295,48 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.IsArrayImplicits._
     import ArrayDefs.IsArraySyntax._
     object TransposeFromListIntTest extends Tag("TransposeFromListIntTest")
-    scenario("transposing a 2d array with List(0, 1) correctly flips the axes", TransposeFromListIntTest) {
+    scenario("transposing a 2d array with List(1) returns None", TransposeFromListIntTest) {
+      val act = TransposeFromListInt[List2d[Double]].apply(dbl2d, List(1))
+      val exp = None
+      assert(act === None)
+    }
+    scenario("transposing a 2d array with List(1, 0) correctly flips the axes", TransposeFromListIntTest) {
       val act = TransposeFromListInt[List2d[Double]].apply(dbl2d, List(1, 0))
       val exp = Transpose[List2d[Double], (_0, _1)].apply(dbl2d)
+      assert(act === Some(exp))
+    }
+    scenario("transposing a 2d array with List(0, 1) does nothing", TransposeFromListIntTest) {
+      val act = TransposeFromListInt[List2d[Double]].apply(dbl2d, List(0, 1))
+      val exp = dbl2d
+      assert(act === Some(exp))
+    }
+    scenario("transposing a 3d array with List(1, 0, 2) correctly transposes", TransposeFromListIntTest) {
+      val act = TransposeFromListInt[List3d[Double]].apply(dbl3d, List(1, 0, 2))
+      val exp = Transpose[List3d[Double], (_0, _1)].apply(dbl3d)
+      assert(act === Some(exp))
+    }
+    scenario("transposing a 3d array with List(2, 0, 1) correctly transposes", TransposeFromListIntTest) {
+      val act = TransposeFromListInt[List3d[Double]].apply(dbl3d, List(2, 0, 1))
+      val a021 = Transpose[List3d[Double], (_0, _1)].apply(dbl3d) 
+      val a012 = Transpose[List3d[Double], (_1, _2)].apply(a021) 
+      val exp = a012
+      assert(act === Some(exp))
+    }
+    scenario("transposing a 3d array with List(2, 1, 0) correctly transposes", TransposeFromListIntTest) {
+      val act = TransposeFromListInt[List3d[Double]].apply(dbl3d, List(2, 1, 0))
+      val a120 = Transpose[List3d[Double], (_0, _1)].apply(dbl3d) 
+      val a102 = Transpose[List3d[Double], (_1, _2)].apply(a120) 
+      val a012 = Transpose[List3d[Double], (_0, _1)].apply(a102)
+      val exp = a012
+      assert(act === Some(exp))
+    }
+    scenario("transposing a 4d array with List(2, 1, 3, 0) correctly transposes", TransposeFromListIntTest, Current) {
+      val act = TransposeFromListInt[List4d[Double]].apply(dbl4d, List(2, 1, 3, 0))
+      val a1230 = Transpose[List4d[Double], (_0, _1)].apply(dbl4d) 
+      val a1203 = Transpose[List4d[Double], (_2, _3)].apply(a1230)
+      val a1023 = Transpose[List4d[Double], (_1, _2)].apply(a1203)
+      val a0123 = Transpose[List4d[Double], (_0, _1)].apply(a1023)
+      val exp = a0123
       assert(act === Some(exp))
     }
   }
@@ -945,7 +984,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case None => false
       })
     }
-    scenario("a List2d can be constructed from a list of Ts", FromElemsAndSubArraysOptTest, Current) {
+    scenario("a List2d can be constructed from a list of Ts", FromElemsAndSubArraysOptTest) {
       val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)
       val newShape = 2 :: 3 :: HNil
       val ga = SubArrays[List2d[Double]]
@@ -1031,7 +1070,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
         case None => false
       })
     }
-    scenario("a List2d can be constructed from a list of Ts", FromElemsAndArrayOptTest, Current) {
+    scenario("a List2d can be constructed from a list of Ts", FromElemsAndArrayOptTest) {
       val ts3: List[Double] = List(0.00, 0.01, 0.02, 0.10, 0.11, 0.12)
       val newShape = 2 :: 3 :: HNil
       val fe = FromElemsAndArrayOpt[List2d, Double, Int :: Int :: HNil]
