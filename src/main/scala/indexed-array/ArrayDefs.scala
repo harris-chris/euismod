@@ -907,14 +907,12 @@ object ArrayDefs {
     type Aux[A] = TransposeFromListInt[A]
     def apply[A](implicit re: TransposeFromListInt[A]): Aux[A] = re
     def instance[A](f: (A, List[Int]) => Option[A]): Aux[A] = new TransposeFromListInt[A] { 
-      def apply(a: A, in: (List[Int])): Option[A] = f(a, in)
+      def apply(a: A, seq: (List[Int])): Option[A] = f(a, seq)
     }
 
     def swapElems[A](l: List[A], i: Int): List[A] = {
       val (l0, l1) = l.splitAt(i)
       val out = l0 ++ (l1(1) :: l1(0) :: l1.drop(2))
-      //val out = l.take(i - 1) ++ List(l(i+1)) ++ List(l(i)) ++ l.takeRight(l.length - (i + 1))
-      if(out.length != l.length) {println(s"L ${l} OUT ${out} I ${i}")}
       assert(out.length == l.length)
       out
     }
@@ -923,11 +921,8 @@ object ArrayDefs {
       de: Depth.Aux[A, DE],
       tl: ToInt[DE],
       tr: TransposeAxRT[A],
-      sh: Shape[A],
     ): Aux[A] = instance((a, seq) => {
-      def go(a: A, l: List[Int], i: Int): Option[A] = {
-        println(s"GO WITH ${sh(a)}, L ${l}, i ${i}")
-      i match {
+      def go(a: A, l: List[Int], i: Int): Option[A] = i match {
         case i if i + 1 == l.length => Some(a)
         case i if l(i + 1) > l(i) => go(a, l, i + 1)
         case i if l(i + 1) < l(i) => {
@@ -937,13 +932,26 @@ object ArrayDefs {
         }
         case i if l(i + 1) == l(i) => None //Throw error, bad input list
       }
-    }
-
-      (tl(), seq.length) match {
-        case (x, y) if x == y => go(a, seq, 0)
-        case _ => None
-      }
+      if((tl() == seq.length) && (tl() == seq.max - seq.min + 1)) { go(a, seq, 0) } else { None }
     })
+  }
+
+  trait TransposeFromString[A] {
+    type Out = Option[A]
+    def apply(a: A, seq: String): Out
+  }
+  object TransposeFromString {
+    type Aux[A] = TransposeFromString[A]
+    def apply[A](implicit re: TransposeFromString[A]): Aux[A] = re
+    def instance[A](f: (A, String) => Option[A]): Aux[A] = new TransposeFromString[A] { 
+      def apply(a: A, seq: String): Option[A] = f(a, seq)
+    }
+    
+    implicit def ifList[A, DE <: Nat] (implicit
+      de: Depth.Aux[A, DE],
+      tl: ToInt[DE],
+      tr: TransposeFromListInt[A],
+    ): Aux[A] = instance((a, seq) => tr(a, seq.map(_.toInt).toList))
   }
 
 

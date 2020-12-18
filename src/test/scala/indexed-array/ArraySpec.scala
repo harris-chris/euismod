@@ -341,6 +341,27 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
+  feature("The TransposeFromString typeclass") {
+    import Dummy.Types._
+    import Dummy.Values._
+    import Dummy.IsArrayImplicits._
+    import ArrayDefs.IsArraySyntax._
+    object TransposeFromStringTest extends Tag("TransposeFromStringTest")
+    scenario("transposing a 2d array with 'ac' returns None", TransposeFromStringTest) {
+      val act = TransposeFromString[List2d[Double]].apply(dbl2d, "ac")
+      val exp = None
+      assert(act === None)
+    }
+    scenario("transposing a 4d array with List(2, 1, 3, 0) correctly transposes", TransposeFromStringTest) {
+      val act = TransposeFromString[List4d[Double]].apply(dbl4d, "kjli")
+      val a1230 = Transpose[List4d[Double], (_0, _1)].apply(dbl4d) 
+      val a1203 = Transpose[List4d[Double], (_2, _3)].apply(a1230)
+      val a1023 = Transpose[List4d[Double], (_1, _2)].apply(a1203)
+      val a0123 = Transpose[List4d[Double], (_0, _1)].apply(a1023)
+      val exp = a0123
+      assert(act === Some(exp))
+    }
+  }
 
   feature("The Transpose typeclass") {
     import Dummy.Types._
