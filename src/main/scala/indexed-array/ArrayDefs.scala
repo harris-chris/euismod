@@ -6,10 +6,10 @@ import IndicesObj.Index
 
 import scala.annotation.implicitNotFound
 import java.time.LocalDate
-import shapeless.{HList, HNil, Lazy, :: => #:}
+import shapeless.{HList, HNil, Lazy, :: => #:, Nat, Succ}
 import shapeless.ops.hlist._
-import shapeless._
-import nat._
+//import shapeless._
+import shapeless.nat._
 import shapeless.ops.nat.{GT, GTEq, Pred, Diff => NatDiff, ToInt}
 import scala.util.{Try, Success, Failure}
 
@@ -153,13 +153,31 @@ object ArrayDefs {
       def apply(a: A, b: B, op: String): Out = f(a, b, op)
     }
 
+    def parseOpString(op: String): (List[String], String) = {
+      def go(
+        opS: List[Char], cur: List[Char], comps: List[String]
+      ): Option[(List[String], String)] = opS match {
+        case ',' :: os => go(os, List(), cur.reverse.toString :: comps)
+        case '-' :: '>' :: os => if(comps != Nil) { Some(((cur.reverse.toString :: comps).reverse, os)) } else { None }
+        case o :: os => go(os, o :: cur, comps)
+        case Nil => None
+      }
+
+      go(op.toList, "", List())
+
+      // then trim whitespace
+    }
+
     implicit def ifSameDepth[A[_], B[_], AT, BT, OT, DA <: Nat, DB <: Nat] (implicit
       na: Numeric[AT],
       nb: Numeric[BT], 
       da: Depth.Aux[A[AT], DA],
       db: Depth.Aux[B[BT], DB],
-    ): Aux[A[AT], B[BT], Option[A[OT]]] = instance((a, b, op) => ???)
-       
+      ta: TransposeFromString[A[AT]],
+      tb: TransposeFromString[B[BT]],
+    ): Aux[A[AT], B[BT], Option[A[OT]]] = instance((a, b, op) => {
+      ???  
+    })
   }
 
   trait ExpandDims[A, _A, N] {
@@ -194,7 +212,7 @@ object ArrayDefs {
       sh: Shape.Aux[A[T], SH],
       sp: Split.Aux[SH, N, SHP, SHS],
       fl: Flatten[A, T],
-      pr: Prepend.Aux[SHP, Int :: SHS, _SH],
+      pr: Prepend.Aux[SHP, Int #: SHS, _SH],
       fe: FromElemsAndSubArraysOpt.Aux[AR, T, _SH, Option[_A[T]]], 
     ): Aux[A[T], _A[T], N, _A[T]] = instance(a => {
       val origSh = sh(a)
