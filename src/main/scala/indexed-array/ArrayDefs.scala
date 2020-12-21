@@ -153,19 +153,25 @@ object ArrayDefs {
       def apply(a: A, b: B, op: String): Out = f(a, b, op)
     }
 
-    def parseOpString(op: String): (List[String], String) = {
+    case class ParsedOp(
+      comps: List[String],
+      out: String,
+    )
+
+    def parseOpString(op: String): Option[ParsedOp] = {
       def go(
         opS: List[Char], cur: List[Char], comps: List[String]
-      ): Option[(List[String], String)] = opS match {
+      ): Option[ParsedOp] = opS match {
         case ',' :: os => go(os, List(), cur.reverse.toString :: comps)
-        case '-' :: '>' :: os => if(comps != Nil) { Some(((cur.reverse.toString :: comps).reverse, os)) } else { None }
+        case '-' :: '>' :: os => if(comps != Nil) { 
+          Some(ParsedOp((cur.reverse.toString :: comps).reverse, os.toString)) 
+        } else { 
+          None
+        }
         case o :: os => go(os, o :: cur, comps)
         case Nil => None
       }
-
-      go(op.toList, "", List())
-
-      // then trim whitespace
+      go(op.toList, Nil: List[Char], Nil: List[String])
     }
 
     implicit def ifSameDepth[A[_], B[_], AT, BT, OT, DA <: Nat, DB <: Nat] (implicit
@@ -237,11 +243,11 @@ object ArrayDefs {
     
     implicit def ifHeadIsTrue[SH1p <: HList, M1p <: HList] (implicit
       nx: ExpandShapeDims[SH1p, M1p],
-    ): Aux[Int :: SH1p, Nat._1 :: M1p, Int :: nx.Out] = instance(sh => sh.head :: nx(sh.tail))
+    ): Aux[Int #: SH1p, Nat._1 #: M1p, Int #: nx.Out] = instance(sh => sh.head :: nx(sh.tail))
     
     implicit def ifHeadIsFalse[SH <: HList, M1p <: HList] (implicit
       nx: ExpandShapeDims[SH, M1p],
-    ): Aux[SH, Nat._0 :: M1p, Int :: nx.Out] = instance(sh => 1 :: nx(sh))
+    ): Aux[SH, Nat._0 #: M1p, Int #: nx.Out] = instance(sh => 1 :: nx(sh))
 
     implicit def ifHNil: Aux[HNil, HNil, HNil] = instance(sh => HNil)
   }
@@ -391,34 +397,34 @@ object ArrayDefs {
       d0: Depth.Aux[A0[T], DE0],
       d1: Depth.Aux[A1[T], DE1],
       gt: GT[DE0, DE1],
-      nx: ArraySort.Aux[A1[T] :: A2p, Descending],
-    ): Aux[A0[T] :: A1[T] :: A2p, Descending] = 
-      new ArraySort[A0[T] :: A1[T] :: A2p] { type Out = Descending }
+      nx: ArraySort.Aux[A1[T] #: A2p, Descending],
+    ): Aux[A0[T] #: A1[T] #: A2p, Descending] = 
+      new ArraySort[A0[T] #: A1[T] #: A2p] { type Out = Descending }
 
     implicit def ifTwoElemsRemainingDesc[A0[_], A1[_], T, DE0 <: Nat, DE1 <: Nat] (implicit
       d0: Depth.Aux[A0[T], DE0],
       d1: Depth.Aux[A1[T], DE1],
       gt: GT[DE0, DE1],
-    ): Aux[A0[T] :: A1[T] :: HNil, Descending] = 
-      new ArraySort[A0[T] :: A1[T] :: HNil] { type Out = Descending }
+    ): Aux[A0[T] #: A1[T] #: HNil, Descending] = 
+      new ArraySort[A0[T] #: A1[T] #: HNil] { type Out = Descending }
 
     implicit def ifTwoPlusElemsRemainingAsc[A0[_], A1[_], T, A2p <: HList, DE0 <: Nat, DE1 <: Nat] (implicit
       d0: Depth.Aux[A0[T], DE0],
       d1: Depth.Aux[A1[T], DE1],
       gt: GT[DE1, DE0],
-      nx: ArraySort.Aux[A1[T] :: A2p, Ascending],
-    ): Aux[A0[T] :: A1[T] :: A2p, Ascending] = 
-      new ArraySort[A0[T] :: A1[T] :: A2p] { type Out = Ascending }
+      nx: ArraySort.Aux[A1[T] #: A2p, Ascending],
+    ): Aux[A0[T] #: A1[T] #: A2p, Ascending] = 
+      new ArraySort[A0[T] #: A1[T] #: A2p] { type Out = Ascending }
 
     implicit def ifTwoElemsRemainingAsc[A0[_], A1[_], T, DE0 <: Nat, DE1 <: Nat] (implicit
       d0: Depth.Aux[A0[T], DE0],
       d1: Depth.Aux[A1[T], DE1],
       gt: GT[DE1, DE0],
-    ): Aux[A0[T] :: A1[T] :: HNil, Ascending] = 
-      new ArraySort[A0[T] :: A1[T] :: HNil] { type Out = Ascending }
+    ): Aux[A0[T] #: A1[T] #: HNil, Ascending] = 
+      new ArraySort[A0[T] #: A1[T] #: HNil] { type Out = Ascending }
 
-    implicit def ifSingleElemList[A0[_], T, O <: ArraySortedBy]: Aux[A0[T] :: HNil, O] = 
-      new ArraySort[A0[T] :: HNil] { type Out = O }
+    implicit def ifSingleElemList[A0[_], T, O <: ArraySortedBy]: Aux[A0[T] #: HNil, O] = 
+      new ArraySort[A0[T] #: HNil] { type Out = O }
     
   }
 
@@ -511,14 +517,14 @@ object ArrayDefs {
 
     implicit def ifHListIntIsBase[A[_], T](implicit
       ia: IsArray[A, T] { type S = T },
-    ): Aux[A, T, Int :: HNil] = instance(
+    ): Aux[A, T, Int #: HNil] = instance(
       (a, ref, elem) => ia.fromList(ia.toList(a).updated(ref.head, elem))
     )
 
     implicit def ifHListIntIsArr[A[_], T, _S[_], R1p <: HList](implicit
       ia: IsArray[A, T] { type S = _S[T] },
       iaS: SetElem[_S, T, R1p],
-    ): Aux[A, T, Int :: R1p] = instance((a, ref, elem) => {
+    ): Aux[A, T, Int #: R1p] = instance((a, ref, elem) => {
       val newS = iaS.apply(ia.getAtN(a, ref.head), ref.tail, elem)
       ia.fromList(ia.toList(a).updated(ref.head, newS))
     })
@@ -636,7 +642,7 @@ object ArrayDefs {
     }
     implicit def ifHeadIsInt[Tl <: HList](implicit 
       cb: CombineShapesOpt[Tl],
-    ): CombineShapesOpt[Int :: Tl] = instance((a, b, dim) => 
+    ): CombineShapesOpt[Int #: Tl] = instance((a, b, dim) => 
       if(dim == 0){
         val t1: Option[HList] = cb(a.tail, b.tail, dim - 1)
         cb(a.tail, b.tail, dim - 1).map(tl => (a.head + b.head) :: tl)
@@ -667,13 +673,13 @@ object ArrayDefs {
 
       implicit def ifSIsEle[A[_], T, L <: HList](implicit 
         ar: IsArray[A, T] { type S = T },
-        rv: Reverse[A[T] :: L],
+        rv: Reverse[A[T] #: L],
       ): Aux[A[T], L, rv.Out] = new GetARDesc[A[T], L] { type Out = rv.Out }
 
       implicit def ifSIsArr[A[_], T, _S[_], _S1, L <: HList](implicit 
         aIsABs: IsArray[A, T] { type S = _S[T] },
         sIsABs: IsArray[_S, T],
-        gaForS: GetARDesc[_S[T], A[T] :: L],
+        gaForS: GetARDesc[_S[T], A[T] #: L],
       ): Aux[A[T], L, gaForS.Out] = new GetARDesc[A[T], L] { type Out = gaForS.Out }
     }
   }
@@ -722,12 +728,12 @@ object ArrayDefs {
 
       implicit def gsIfSIsEle[A[_], T, _S, L <: HList, O <: HList](implicit 
         ai: IsArray[A, T] { type S = T },
-        rv: Reverse[Int :: L] { type Out = O },
+        rv: Reverse[Int #: L] { type Out = O },
       ): RecurAux[A[T], L, O] = recur((a, l) => rv(ai.length(a) :: l))
 
       implicit def gsIfSIsArr[A[_], T, S0[_], L <: HList](implicit 
         ai: IsArray[A, T] { type S = S0[T] },
-        gsForS: ShapeRecur[S0[T], Int :: L],
+        gsForS: ShapeRecur[S0[T], Int #: L],
       ): RecurAux[A[T], L, gsForS.Out] = recur((a, l) => 
         gsForS.apply(ai.getAtN(a, 0), ai.length(a) :: l)
       )
@@ -758,10 +764,10 @@ object ArrayDefs {
     )
 
     implicit def ifShapeIsNotHNil[_S, A0[_], T, A1p <: HList, SH1p <: HList, NxtO](implicit 
-      dc: ArraySort.Aux[A0[T] :: A1p, Ascending],
+      dc: ArraySort.Aux[A0[T] #: A1p, Ascending],
       ai: IsArray[A0, T] { type S = _S },
       fe: FromElemsAndSubArraysOpt.Aux[A1p, A0[T], SH1p, Option[NxtO]],
-    ): Aux[A0[T] :: A1p, _S, Int :: SH1p, Option[NxtO]] = instance(
+    ): Aux[A0[T] #: A1p, _S, Int #: SH1p, Option[NxtO]] = instance(
       (l, sh) => {
         val thisA: A0[T] = ai.getEmpty
         val h1Nil = Nil: List[A0[T]]
@@ -1170,7 +1176,7 @@ object ArrayDefs {
       de: Depth.Aux[A[Boolean], DE],
       deGt1: GT[DE, Nat._1],
       maskS: MaskFromNumSeq[_S, R1p], 
-    ): Aux[A[Boolean], List[Int] :: R1p] = instance((r, m) => {
+    ): Aux[A[Boolean], List[Int] #: R1p] = instance((r, m) => {
       val newS = for((s, i) <- ar.toList(m).zipWithIndex) yield (
         if (r.head.contains(i)) {maskS(r.tail, s)} else {s}
       )
@@ -1179,7 +1185,7 @@ object ArrayDefs {
 
     implicit def ifHeadIsListIntIsBase[A[_]](implicit
       ar: IsArray[A, Boolean] { type S = Boolean },
-    ): Aux[A[Boolean], List[Int] :: HNil] = instance((r, m) => {
+    ): Aux[A[Boolean], List[Int] #: HNil] = instance((r, m) => {
       val newS = for((s, i) <- ar.toList(m).zipWithIndex) yield (
         if (r.head.contains(i)) {true} else {false}
       )
@@ -1202,7 +1208,7 @@ object ArrayDefs {
     implicit def ifHeadIsInt[A[_], T, _S, R1p <: HList, AR <: HList, O](implicit
       ar: IsArray[A, T] { type S = _S },
       ai: ApplyIndexFromSubArrays[_S, R1p, AR], 
-    ): Aux[A[T], Int :: R1p, AR, ai.Out] = instance((a, r) => 
+    ): Aux[A[T], Int #: R1p, AR, ai.Out] = instance((a, r) => 
       ai(ar.getAtN(a, r.head), r.tail)
     )
 
@@ -1210,7 +1216,7 @@ object ArrayDefs {
       ar: IsArray[A, T] { type S = _S },
       ai: ApplyIndexFromSubArrays[_S, R1p, A1p] { type Out = SO }, 
       oa: IsArray[A0, T] { type S = SO }
-    ): Aux[A[T], List[Int] :: R1p, A0[T] :: A1p, A0[T]] = instance((a, r) => {
+    ): Aux[A[T], List[Int] #: R1p, A0[T] #: A1p, A0[T]] = instance((a, r) => {
       val origS: List[_S] = r.head.map(ar.getAtN(a, _))
       val locedS: List[SO] = origS.map(ai(_, r.tail))
       oa.fromList(locedS)
@@ -1220,7 +1226,7 @@ object ArrayDefs {
       ar: IsArray[A, T] { type S = _S },
       ai: ApplyIndexFromSubArrays[_S, R1p, A1p] { type Out = SO }, 
       oa: IsArray[A0, T] { type S = SO }
-    ): Aux[A[T], Range :: R1p, A0[T] :: A1p, A0[T]] = instance((a, r) => {
+    ): Aux[A[T], Range #: R1p, A0[T] #: A1p, A0[T]] = instance((a, r) => {
       val origS: List[_S] = r.head.toList.map(ar.getAtN(a, _))
       val locedS: List[SO] = origS.map(ai(_, r.tail))
       oa.fromList(locedS)
