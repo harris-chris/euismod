@@ -179,8 +179,8 @@ object ArrayDefs {
       nb: Numeric[BT], 
       da: Depth.Aux[A[AT], DA],
       db: Depth.Aux[B[BT], DB],
-      ta: TransposeFromString[A[AT]],
-      tb: TransposeFromString[B[BT]],
+      ta: TransposeUsingString[A[AT]],
+      tb: TransposeUsingString[B[BT]],
     ): Aux[A[AT], B[BT], Option[A[OT]]] = instance((a, b, op) => {
       ???  
     })
@@ -428,6 +428,10 @@ object ArrayDefs {
     
   }
 
+  /**
+   * Typeclass used to remove a specified array dimension, by aggregating (using the combine
+   * function) across that dimension.
+   */
   trait Reduce[A[_], T, DM <: Nat] {
     type Out
     def apply(a: A[T], combine: List[T] => T): Out
@@ -458,50 +462,49 @@ object ArrayDefs {
       dm: ToInt[DM],
     ): Aux[A, T, DM, Out] = instance((a, cmb) => {
       val lst: List[T] = rd(a, cmb)
-      println(s"LIST ${lst}")
       val dim = dm()
       val (lf, rg) = sp(sh(a))
       val shape: SH = in(lf) ++ rg
       val arrO = fe(lst, shape)
       arrO.get
     })
-  }
 
-  trait ReduceToList[A[_], T, DM <: Nat] {
-    type Out = List[T]
-    def apply(a: A[T], combine: List[T] => T): Out
-  }
-  object ReduceToList {
-    type Aux[A[_], T, DM <: Nat] = ReduceToList[A, T, DM]
-    def instance[A[_], T, DM <: Nat](f: (A[T], List[T] => T) => List[T]): Aux[A, T, DM] = 
-    new ReduceToList[A, T, DM] {
-      def apply(a: A[T], combine: List[T] => T): Out = f(a, combine)
+    trait ReduceToList[A[_], T, DM <: Nat] {
+      type Out = List[T]
+      def apply(a: A[T], combine: List[T] => T): Out
     }
-    def apply[A[_], T, DM <: Nat](implicit se: Aux[A, T, DM]): Aux[A, T, DM] = se
+    object ReduceToList {
+      type Aux[A[_], T, DM <: Nat] = ReduceToList[A, T, DM]
+      def instance[A[_], T, DM <: Nat](f: (A[T], List[T] => T) => List[T]): Aux[A, T, DM] = 
+      new ReduceToList[A, T, DM] {
+        def apply(a: A[T], combine: List[T] => T): Out = f(a, combine)
+      }
+      def apply[A[_], T, DM <: Nat](implicit se: Aux[A, T, DM]): Aux[A, T, DM] = se
 
-    implicit def ifDMIs0AndSIs2dPlus[A[_], T, _S[_]] (implicit 
-      ar: IsArray[A, T] { type S = _S[T] },
-      fl: Flatten[_S, T],
-    ): Aux[A, T, Nat._0] = instance((a, cmb) => {
-      val lst2d: List[List[T]] = ar.toList(a).map(fl(_))
-      lst2d.transpose.map(cmb(_))
-    })
-    
-    implicit def ifDMIs0AndSIs1d[A[_], T] (implicit 
-      ar: IsArray[A, T] { type S = T },
-    ): Aux[A, T, Nat._0] = instance((a, cmb) => {
-      List(cmb(ar.toList(a)))
-    })
+      implicit def ifDMIs0AndSIs2dPlus[A[_], T, _S[_]] (implicit 
+        ar: IsArray[A, T] { type S = _S[T] },
+        fl: Flatten[_S, T],
+      ): Aux[A, T, Nat._0] = instance((a, cmb) => {
+        val lst2d: List[List[T]] = ar.toList(a).map(fl(_))
+        lst2d.transpose.map(cmb(_))
+      })
+      
+      implicit def ifDMIs0AndSIs1d[A[_], T] (implicit 
+        ar: IsArray[A, T] { type S = T },
+      ): Aux[A, T, Nat._0] = instance((a, cmb) => {
+        List(cmb(ar.toList(a)))
+      })
 
-    implicit def ifDMGt0[A[_], T, _S[_], DM <: Nat, DMm1 <: Nat](implicit 
-      ar: IsArray[A, T] { type S = _S[T] },
-      e1: GT[DM, Nat._0],
-      pr: Pred.Aux[DM, DMm1],
-      rd: ReduceToList[_S, T, DMm1],
-    ): Aux[A, T, DM] = instance((a, cmb) => {
-      val lst: List[List[T]] = ar.toList(a).map(rd(_, cmb))
-      lst.foldLeft(Nil: List[T])(_ ++ _)
-    })
+      implicit def ifDMGt0[A[_], T, _S[_], DM <: Nat, DMm1 <: Nat](implicit 
+        ar: IsArray[A, T] { type S = _S[T] },
+        e1: GT[DM, Nat._0],
+        pr: Pred.Aux[DM, DMm1],
+        rd: ReduceToList[_S, T, DMm1],
+      ): Aux[A, T, DM] = instance((a, cmb) => {
+        val lst: List[List[T]] = ar.toList(a).map(rd(_, cmb))
+        lst.foldLeft(Nil: List[T])(_ ++ _)
+      })
+    }
   }
 
   sealed trait SetElem[A[_], T, R <: HList] {
@@ -960,14 +963,14 @@ object ArrayDefs {
     })
   }
 
-  trait TransposeFromString[A] {
+  trait TransposeUsingString[A] {
     type Out = Option[A]
     def apply(a: A, seq: String): Out
   }
-  object TransposeFromString {
-    type Aux[A] = TransposeFromString[A]
-    def apply[A](implicit re: TransposeFromString[A]): Aux[A] = re
-    def instance[A](f: (A, String) => Option[A]): Aux[A] = new TransposeFromString[A] { 
+  object TransposeUsingString {
+    type Aux[A] = TransposeUsingString[A]
+    def apply[A](implicit re: TransposeUsingString[A]): Aux[A] = re
+    def instance[A](f: (A, String) => Option[A]): Aux[A] = new TransposeUsingString[A] { 
       def apply(a: A, seq: String): Option[A] = f(a, seq)
     }
     
