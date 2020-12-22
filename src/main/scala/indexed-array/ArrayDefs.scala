@@ -743,6 +743,57 @@ object ArrayDefs {
     }
   }
 
+  trait FromElemsAndSubArraysUsingListOpt[AR <: HList, T] {
+    type Out <: Option[_]
+    def apply(l: List[T], sh: List[Int]): Out
+  }
+  object FromElemsAndSubArraysUsingListOpt {
+    type Aux[AR <: HList, T, O <: Option[_]] = 
+      FromElemsAndSubArraysUsingListOpt[AR, T] { type Out = O }
+    def instance[AR <: HList, T, O <: Option[_]](
+      f: (List[T], List[Int]) => O
+    ): Aux[AR, T, O] = new FromElemsAndSubArraysUsingListOpt[AR, T] {
+      type Out = O
+      def apply(l: List[T], sh: List[Int]): Out = f(l, sh)
+    }
+    def apply[AR <: HList, T](
+      implicit fe: FromElemsAndSubArraysUsingListOpt[AR, T],
+    ): FromElemsAndSubArraysUsingListOpt.Aux[AR, T, fe.Out] = fe
+
+    implicit def ifArraysDescending[AR <: HList, T, SH <: HList, RSH <: HList, RAR <: HList, NxtO](implicit 
+      ds: ArraySort.Aux[AR, Descending],
+      r1: Reverse.Aux[AR, RAR],
+      fe: FromElemsAndSubArraysUsingListOpt.Aux[RAR, T, Option[NxtO]],
+    ): Aux[AR, T, Option[NxtO]] = instance(
+      (l, sh) => fe(l, sh.reverse)
+    )
+
+    implicit def fromListInt[A0[_], A1p <: HList, T, _S, NxtO] (implicit
+      dc: ArraySort.Aux[A0[T] #: A1p, Ascending],
+      ai: IsArray[A0, T] { type S = _S },
+      nxO: FromElemsAndSubArraysUsingListOpt.Aux[A1p, A0[T], Option[NxtO]] = null,
+    ): Aux[A0[T] #: A1p, T, Option[NxtO]] = instance((l, sh) => Option(nxO).flatMap(
+      nx => {
+        val thisA: A0[T] = ai.getEmpty
+        val h1Nil = Nil: List[A0[T]]
+        val combinedS: Option[List[A0[T]]] = combineS[A0, T, _S](thisA, h1Nil, l, sh.head)
+        //combinedS.flatMap(
+          //a1s => fe(a1s, sh.tail)
+        //)
+      }
+    ))
+    //): Aux[A0[T] #: A1p, _S, Int #: SH1p, Option[NxtO]] = instance(
+      //(l, sh) => {
+        //val thisA: A0[T] = ai.getEmpty
+        //val h1Nil = Nil: List[A0[T]]
+        //val combinedS: Option[List[A0[T]]] = combineS[A0, T, _S](thisA, h1Nil, l, sh.head)
+        //combinedS.flatMap(
+          //a1s => fe(a1s, sh.tail)
+        //)
+      //}
+    //)
+  }
+
   trait FromElemsAndSubArraysOpt[AR <: HList, T, SH <: HList] {
     type Out <: Option[_]
     def apply(l: List[T], sh: SH): Out
@@ -789,21 +840,25 @@ object ArrayDefs {
     ): Aux[AR, T, SH, Option[NxtO]] = instance(
       (l, sh) => fe(l, r0(sh))
     )
-
-    def combineS[A[_], T, _S](
-      aEmpty: A[T], as: List[A[T]], l: List[_S], width: Int,
-    )(implicit 
-      ar: IsArray[A, T] { type S = _S },
-    ): Option[List[A[T]]] = l.length match {
-      case 0 => Some(as.reverse)
-      case x if x >= width => {
-        val (ths, rst) = l.splitAt(width)
-        val thsA: A[T] = ths.reverse.foldLeft(aEmpty)((s, o) => ar.cons(s, o))
-        combineS[A, T, _S](aEmpty, thsA :: as, rst, width)
-      }
-      case _ => None
-    }
   }
+
+  def combineS[A[_], T, _S](
+    aEmpty: A[T], as: List[A[T]], l: List[_S], width: Int,
+  )(implicit 
+    ar: IsArray[A, T] { type S = _S },
+  ): Option[List[A[T]]] = l.length match {
+    case 0 => Some(as.reverse)
+    case x if x >= width => {
+      val (ths, rst) = l.splitAt(width)
+      val thsA: A[T] = ths.reverse.foldLeft(aEmpty)((s, o) => ar.cons(s, o))
+      combineS[A, T, _S](aEmpty, thsA :: as, rst, width)
+    }
+    case _ => None
+  }
+
+  /**
+   * Constructs an Array object from an Array type, a list of elements, and a desired shape
+   */
 
   trait FromElemsAndArrayOpt[_A[_], X, SH <: HList] {
     type Out <: Option[Any]
