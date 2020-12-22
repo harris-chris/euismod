@@ -768,30 +768,40 @@ object ArrayDefs {
       (l, sh) => fe(l, sh.reverse)
     )
 
+    implicit def fromListIntIfBase[A0[_], A1p <: HList, T, NxtO] (implicit
+      dc: ArraySort.Aux[A0[T] #: A1p, Ascending],
+      ai: IsArray[A0, T] { type S = T },
+      nxO: FromElemsAndSubArraysUsingListOpt.Aux[A1p, A0[T], Option[NxtO]] = null,
+    ): Aux[A0[T] #: A1p, T, Option[NxtO]] = instance((l, sh) => {
+      val thisA: A0[T] = ai.getEmpty
+      val h1Nil = Nil: List[A0[T]]
+      val combinedS: Option[List[A0[T]]] = combineS[A0, T, T](thisA, h1Nil, l, sh.head)
+      Option(nxO) match {
+        case Some(nx) => {
+          combinedS.flatMap(
+            a1s => nx(a1s, sh.tail)
+          )
+        }
+        case None => {
+
+        }
+      }
+    })
+    
     implicit def fromListInt[A0[_], A1p <: HList, T, _S, NxtO] (implicit
       dc: ArraySort.Aux[A0[T] #: A1p, Ascending],
       ai: IsArray[A0, T] { type S = _S },
       nxO: FromElemsAndSubArraysUsingListOpt.Aux[A1p, A0[T], Option[NxtO]] = null,
-    ): Aux[A0[T] #: A1p, T, Option[NxtO]] = instance((l, sh) => Option(nxO).flatMap(
+    ): Aux[A0[T] #: A1p, _S, Option[NxtO]] = instance((l, sh) => Option(nxO).flatMap(
       nx => {
         val thisA: A0[T] = ai.getEmpty
         val h1Nil = Nil: List[A0[T]]
         val combinedS: Option[List[A0[T]]] = combineS[A0, T, _S](thisA, h1Nil, l, sh.head)
-        //combinedS.flatMap(
-          //a1s => fe(a1s, sh.tail)
-        //)
+        combinedS.flatMap(
+          a1s => nx(a1s, sh.tail)
+        )
       }
     ))
-    //): Aux[A0[T] #: A1p, _S, Int #: SH1p, Option[NxtO]] = instance(
-      //(l, sh) => {
-        //val thisA: A0[T] = ai.getEmpty
-        //val h1Nil = Nil: List[A0[T]]
-        //val combinedS: Option[List[A0[T]]] = combineS[A0, T, _S](thisA, h1Nil, l, sh.head)
-        //combinedS.flatMap(
-          //a1s => fe(a1s, sh.tail)
-        //)
-      //}
-    //)
   }
 
   trait FromElemsAndSubArraysOpt[AR <: HList, T, SH <: HList] {
@@ -961,74 +971,74 @@ object ArrayDefs {
     //): Aux[A[T]] = instance((a, in) => ???)
   //}
 
-  trait ReduceUsingInt[A[_], T] {
-    type Out <: Option[_]
-    def apply(a: A[T], dim: Int, combine: List[T] => T): Out
-  }
-  object ReduceUsingInt {
-    type Aux[A[_], T, O <: Option[_]] = ReduceUsingInt[A, T] { type Out = O }
-    def apply[A[_], T](implicit re: ReduceUsingInt[A, T]): Aux[A, T, re.Out] = re
-    def instance[A[_], T, O <: Option[_]](
-      f: (A[T], Int, List[T] => T) => O
-    ): Aux[A, T, O] = new ReduceUsingInt[A, T] { 
-      type Out = O
-      def apply(a: A[T], dim: Int, combine: List[T] => T): Out = f(a, dim, combine)
-    }
+  //trait ReduceUsingInt[A[_], T] {
+    //type Out <: Option[_]
+    //def apply(a: A[T], dim: Int, combine: List[T] => T): Out
+  //}
+  //object ReduceUsingInt {
+    //type Aux[A[_], T, O <: Option[_]] = ReduceUsingInt[A, T] { type Out = O }
+    //def apply[A[_], T](implicit re: ReduceUsingInt[A, T]): Aux[A, T, re.Out] = re
+    //def instance[A[_], T, O <: Option[_]](
+      //f: (A[T], Int, List[T] => T) => O
+    //): Aux[A, T, O] = new ReduceUsingInt[A, T] { 
+      //type Out = O
+      //def apply(a: A[T], dim: Int, combine: List[T] => T): Out = f(a, dim, combine)
+    //}
 
-    implicit def ifInt[A[_], T, _S, SH <: HList] (implicit
-      rd: ReduceUsingIntToList[A, T],
-      s0: Shape.Aux[A[T], SH],
-      sh: ToList[SH, Int],
-      fe: FromElemsAndSubArraysUsingListOpt.Aux[AR, T, SH, Option[Out]], 
-    ): Aux[A, T, Option[_S]] = instance((a, dim, cmb) => rd(a, dim, cmb).flatMap(
-      lst => {
-        val origShape = sh(s0(a)) 
-        val newShape = (origShape take dim) ++ (origShape drop (dim + 1))
-        val arrO = fe(lst, newShape)
-        arrO.get
-      }
-    ))
+    //implicit def ifInt[A[_], T, _S, SH <: HList] (implicit
+      //rd: ReduceUsingIntToList[A, T],
+      //s0: Shape.Aux[A[T], SH],
+      //sh: ToList[SH, Int],
+      //fe: FromElemsAndSubArraysUsingListOpt.Aux[AR, T, SH, Option[Out]], 
+    //): Aux[A, T, Option[_S]] = instance((a, dim, cmb) => rd(a, dim, cmb).flatMap(
+      //lst => {
+        //val origShape = sh(s0(a)) 
+        //val newShape = (origShape take dim) ++ (origShape drop (dim + 1))
+        //val arrO = fe(lst, newShape)
+        //arrO.get
+      //}
+    //))
 
-    trait ReduceUsingIntToList[A[_], T] {
-      type Out = Option[List[T]]
-      def apply(a: A[T], dim: Int, combine: List[T] => T): Out
-    }
-    object ReduceUsingIntToList {
-      type Aux[A[_], T] = ReduceUsingIntToList[A, T]
-      def apply[A[_], T](implicit re: ReduceUsingIntToList[A, T]): Aux[A, T] = re
-      def instance[A[_], T](
-        f: (A[T], Int, List[T] => T) => Option[List[T]]
-      ): Aux[A, T] = new ReduceUsingIntToList[A, T] { 
-        def apply(a: A[T], dim: Int, combine: List[T] => T): Option[List[T]] = f(a, dim, combine)
-      }
+    //trait ReduceUsingIntToList[A[_], T] {
+      //type Out = Option[List[T]]
+      //def apply(a: A[T], dim: Int, combine: List[T] => T): Out
+    //}
+    //object ReduceUsingIntToList {
+      //type Aux[A[_], T] = ReduceUsingIntToList[A, T]
+      //def apply[A[_], T](implicit re: ReduceUsingIntToList[A, T]): Aux[A, T] = re
+      //def instance[A[_], T](
+        //f: (A[T], Int, List[T] => T) => Option[List[T]]
+      //): Aux[A, T] = new ReduceUsingIntToList[A, T] { 
+        //def apply(a: A[T], dim: Int, combine: List[T] => T): Option[List[T]] = f(a, dim, combine)
+      //}
 
-      implicit def ifInt[A[_], T, _S[_], DE <: Nat] (implicit
-        d0: Depth.Aux[A[T], DE],
-        de: ToInt[DE],
-        ls: ListSubs.Aux[A[T], List[_S[T]]],
-        nxO: ReduceUsingIntToList[_S, T] = null,
-        flO: Flatten[_S, T] = null,
-      ): Aux[A, T] = instance((a, dim, cmb) => Option(nxO).flatMap( 
-        nx => dim match {
-          case d if d > 0 => { 
-            val lstS: List[_S[T]] = ls(a)
-            val lst: List[List[T]] = lstS.flatMap(nx(_, dim - 1, cmb))
-            if(lstS.length == lst.length) { 
-              Some(lst.foldLeft(Nil: List[T])(_ ++ _))
-            } else { None }
-          }
-          case 0 => {
-            Option(flO).flatMap(
-              fl => {
-                val lst2d: List[List[T]] = ls(a).map(fl(_))
-                Some(lst2d.transpose.map(cmb(_)))
-              }
-            )
-          }
-        }
-      ))
-    }
-  }
+      //implicit def ifInt[A[_], T, _S[_], DE <: Nat] (implicit
+        //d0: Depth.Aux[A[T], DE],
+        //de: ToInt[DE],
+        //ls: ListSubs.Aux[A[T], List[_S[T]]],
+        //nxO: ReduceUsingIntToList[_S, T] = null,
+        //flO: Flatten[_S, T] = null,
+      //): Aux[A, T] = instance((a, dim, cmb) => Option(nxO).flatMap( 
+        //nx => dim match {
+          //case d if d > 0 => { 
+            //val lstS: List[_S[T]] = ls(a)
+            //val lst: List[List[T]] = lstS.flatMap(nx(_, dim - 1, cmb))
+            //if(lstS.length == lst.length) { 
+              //Some(lst.foldLeft(Nil: List[T])(_ ++ _))
+            //} else { None }
+          //}
+          //case 0 => {
+            //Option(flO).flatMap(
+              //fl => {
+                //val lst2d: List[List[T]] = ls(a).map(fl(_))
+                //Some(lst2d.transpose.map(cmb(_)))
+              //}
+            //)
+          //}
+        //}
+      //))
+    //}
+  //}
 
   trait TransposeAxRT[A] {
     type Out = Option[A]
