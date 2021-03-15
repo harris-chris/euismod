@@ -16,15 +16,12 @@ object ArrayDefs {
   trait AllSlice extends Slices
   case object allSlice extends AllSlice
 
-  case class Element[T] (
-    get: T
-  ) extends IsBase[Element[T]]
-
   @implicitNotFound(f"Cannot find IsArray implicit")
   abstract class IsArray[A[_], T] extends IsBase[A[T]] { self =>
-    type S
+    type S  //the sub-type returned by getAtN
     type Elem = T
 
+    /* Abstract methods */
     def getEmpty[_T]: A[_T] 
     def getAtN(a: A[T], n: Int): S
     def length(a: A[T]): Int
@@ -118,6 +115,10 @@ object ArrayDefs {
       ): A[_T] = tc.map(a, f)
     }
   }
+
+  /*
+   * Return the sub-arrays of the given array as a list of array objects.
+   */
 
   trait ListSubs[A] {
     type Out <: List[_]
