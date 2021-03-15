@@ -6,11 +6,7 @@ ThisBuild / version          := "0.1.0"
 
 addCompilerPlugin("io.tryp" % "splain" % "0.5.7" cross CrossVersion.patch)
 
-lazy val sportDate = ProjectRef(
-  uri("ssh://git@github.com/chrisharriscjh/sport-date.git#master"), "SportDate"
-)
-
-lazy val SportArray = (project in file("."))
+lazy val Euismod = (project in file("."))
   .settings(
     libraryDependencies += scalaTest % Test,
     scalacOptions ++= Seq(
@@ -19,13 +15,6 @@ lazy val SportArray = (project in file("."))
       /*"-Xlog-implicits", */
     )
   )
-  .dependsOn(sportDate)
-
-def removegit = Command.command("removegit"){state =>
-  val home = sys.env("HOME")
-  val k = ("rm -rf "+ home + "/.sbt/1.0/staging/").!
-  state
-}
 
 libraryDependencies += {
   val version = scalaBinaryVersion.value match {
@@ -43,8 +32,6 @@ sourceGenerators in Test += Def.task {
   IO.write(file, """object amm extends App { ammonite.Main.main(args) }""")
   Seq(file)
 }.taskValue
-
-commands ++= Seq(removegit)
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 

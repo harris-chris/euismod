@@ -1,7 +1,4 @@
-[0m[[0m[31merror[0m] [0m[0m/data/vap/sport-array/src/main/scala/indexed-array/Indices.scala:4:8: value DateType is not a member of object sportarray.Skeleton[0m
-[0m[[0m[31merror[0m] [0m[0mimport Skeleton.{DateType, Element, Composite}[0m
+[0m[[0m[31merror[0m] [0m[0m/data/vap/euismod/src/main/scala/euismod/Main.scala:5:8: not found: object Skeleton[0m
+[0m[[0m[31merror[0m] [0m[0mimport Skeleton._[0m
 [0m[[0m[31merror[0m] [0m[0m       ^[0m
-[0m[[0m[31merror[0m] [0m[0m/data/vap/sport-array/src/main/scala/indexed-array/Indices.scala:5:17: value IsIdxElemImplicits is not a member of object sportarray.Skeleton[0m
-[0m[[0m[31merror[0m] [0m[0mimport Skeleton.IsIdxElemImplicits._[0m
-[0m[[0m[31merror[0m] [0m[0m                ^[0m
-[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m
