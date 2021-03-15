@@ -16,7 +16,7 @@
             
         ],
         "classpath": [
-            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.4.3-23-550c6c0a/sbt-bloop-1.4.3-23-550c6c0a.jar",
+            "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.4.8/sbt-bloop-1.4.8.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-sbt/sbt/1.3.10/sbt-1.3.10.jar",
             "/home/chris/.sbt/boot/scala-2.12.10/lib/scala-library.jar",
             "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.5.0/jna-5.5.0.jar",
@@ -117,12 +117,12 @@
                 "-deprecation"
             ],
             "jars": [
-                "/home/chris/.sbt/boot/scala-2.12.10/lib/scala-xml_2.12.jar",
-                "/home/chris/.sbt/boot/scala-2.12.10/lib/jansi.jar",
                 "/home/chris/.sbt/boot/scala-2.12.10/lib/jline.jar",
+                "/home/chris/.sbt/boot/scala-2.12.10/lib/jansi.jar",
                 "/home/chris/.sbt/boot/scala-2.12.10/lib/scala-reflect.jar",
-                "/home/chris/.sbt/boot/scala-2.12.10/lib/scala-library.jar",
-                "/home/chris/.sbt/boot/scala-2.12.10/lib/scala-compiler.jar"
+                "/home/chris/.sbt/boot/scala-2.12.10/lib/scala-xml_2.12.jar",
+                "/home/chris/.sbt/boot/scala-2.12.10/lib/scala-compiler.jar",
+                "/home/chris/.sbt/boot/scala-2.12.10/lib/scala-library.jar"
             ],
             "analysis": "/data/vap/sport-array/project/target/streams/compile/bloopAnalysisOut/_global/streams/inc_compile_2.12.zip",
             "setup": {
@@ -192,7 +192,7 @@
         "platform": {
             "name": "jvm",
             "config": {
-                "home": "/usr/lib/jvm/java-11-openjdk",
+                "home": "/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre",
                 "options": [
                     "-Duser.dir=/data/vap/sport-array/project"
                 ]
@@ -206,12 +206,12 @@
                 {
                     "organization": "ch.epfl.scala",
                     "name": "sbt-bloop",
-                    "version": "1.4.3-23-550c6c0a",
+                    "version": "1.4.8",
                     "configurations": "default",
                     "artifacts": [
                         {
                             "name": "sbt-bloop",
-                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.4.3-23-550c6c0a/sbt-bloop-1.4.3-23-550c6c0a.jar"
+                            "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.4.8/sbt-bloop-1.4.8.jar"
                         }
                     ]
                 },
@@ -1612,10 +1612,6 @@
                         {
                             "name": "config",
                             "classifier": "sources",
-                            "checksum": {
-                                "type": "sha1",
-                                "digest": "c7af5bd41815a5edc8e7a81082e88fe18f9729e0"
-                            },
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/typesafe/config/1.3.3/config-1.3.3-sources.jar"
                         }
                     ]

@@ -1,0 +1,39 @@
+[0m[[0m[0minfo[0m] [0m[0m[32mArraySpec:[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: Arraylike objects should be able to implement IsArray[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: Implicit class conversions and typeclass syntax for IsArray implementations[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Depth typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The PrettyPrint typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The TransposeRT typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The TransposeFromListInt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: transposing a 2d array with List(1) returns None[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: transposing a 2d array with List(1, 0) correctly flips the axes[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: transposing a 2d array with List(0, 1) does nothing[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: transposing a 3d array with List(1, 0, 2) correctly transposes[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: transposing a 3d array with List(2, 0, 1) correctly transposes[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: transposing a 3d array with List(2, 1, 0) correctly transposes[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: transposing a 4d array with List(2, 1, 3, 0) correctly transposes[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Transpose typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ConcatenateOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The AddOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: MaskFromNumSeq typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Where typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Reduce typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: Multi-dimensional arrays[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: IsArray.getAtN[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: IsArray.cons[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: IsArray.getEmpty[_T][0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The SubArrays typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ArraysSort typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The FromElemsAndSubArraysOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The FromElemsAndArrayOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: IsArray.map[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ApplyIndex typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The IsArray.length method returns the length of the top dimension[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Shape Typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The SetElem typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Flatten typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Operate typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ExpandShapeDims typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ExpandDims typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The BroadcastShapesOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The BroadcastOpt typeclass[0m[0m

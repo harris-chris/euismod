@@ -1,0 +1,19 @@
+[0m[[0m[0mdebug[0m] [0m[0mPackaging /data/vap/sport-array/target/scala-2.13/sportarray_2.13-0.1.0-tests.jar ...[0m
+[0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	amm$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /data/vap/sport-array/target/scala-2.13/test-classes/amm$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	sportarray[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /data/vap/sport-array/target/scala-2.13/test-classes/sportarray[0m
+[0m[[0m[0mdebug[0m] [0m[0m	sportarray/test$UnitType.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /data/vap/sport-array/target/scala-2.13/test-classes/sportarray/test$UnitType.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	sportarray/ArraySpec.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /data/vap/sport-array/target/scala-2.13/test-classes/sportarray/ArraySpec.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	sportarray/test.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /data/vap/sport-array/target/scala-2.13/test-classes/sportarray/test.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	sportarray/test$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /data/vap/sport-array/target/scala-2.13/test-classes/sportarray/test$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	amm$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /data/vap/sport-array/target/scala-2.13/test-classes/amm$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	amm.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /data/vap/sport-array/target/scala-2.13/test-classes/amm.class[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone packaging.[0m

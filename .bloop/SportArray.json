@@ -101,7 +101,7 @@
         "platform": {
             "name": "jvm",
             "config": {
-                "home": "/usr/lib/jvm/java-11-openjdk",
+                "home": "/nix/store/48ddc74sdlinbg5q5655i4z8kp6xasb0-openjdk-11.0.9+11/lib/openjdk",
                 "options": [
                     "-Duser.dir=/data/vap/sport-array"
                 ]

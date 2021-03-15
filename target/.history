@@ -1,0 +1,340 @@
+removegit
+test
+exit
+test
+removegit
+reload
+test
+exit
+test
+removegit
+reload
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+sbt test
+test
+run
+test
+exit
+test
+exit
+repl
+console
+exit
+test
+test:run
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test:testOnly -- -n ReshapesTest
+test:testOnly -- -n Current
+test:testOnly -- -n ReshapesTest
+test:testOnly -- -n Current
+test:testOnly -- -n ReshapesTest
+test:testOnly -- -n Current
+test
+exit
+test:testOnly -- -n Current
+exit
+test
+test:testOnly -- -n Current
+test
+test:testOnly -- -n Current
+test
+test:testOnly -- -n Current
+test
+test:testOnly -- -n MapTest
+test
+test:testOnly -- -n GetEmptyTest
+test   
+test:testOnly -- -n MapTest
+test
+exit
+test:testOnly -- -n GetILocTest
+reload
+test:testOnly -- -n GetILocTest
+exit
+test:testOnly -- -n GetILocTest
+reload
+test:testOnly -- -n GetILocTest
+reload
+test:testOnly -- -n GetILocTest
+test
+exit
+test
+test:testOnly -- -n GetILocTest
+reload
+test:testOnly -- -n GetILocTest
+test
+exit
+test:testOnly -- -n GetILocTest
+test:testOnly -- -n Current
+test
+exit
+test
+exit
+test
+reload
+test
+reload
+test
+exit
+test
+test:testOnly -- -n AddTest
+test
+test:testOnly -- -n AddTest
+exit
+test
+exit
+test
+test:testOnly -- -n AddTest
+test
+test:testOnly -- -n AddTest
+exit
+test:testOnly -- -n StackTest
+test:testOnly -- -n ConcatenateTest
+exit
+test:testOnly -- -n ConcatenateTest
+test
+exit
+test
+exit
+test:testOnly -- -n FlattenTest
+exit
+test:testOnly -- -n ConcatenateTest
+exit
+test:testOnly -- -n ConcatenateTest
+test
+exit
+test
+exit
+test
+exit
+test:testOnly -- -n ConcatenateRTTest
+test:testOnly -- -n PrettyPrintTest
+test:testOnly -- -n DepthCTTest
+test:testOnly -- -n PrettyPrintTest
+exit
+test:testOnly -- -n PrettyPrintTest
+exit
+test:testOnly -- -n PrettyPrintTest
+test:testOnly -- -n PrettyPrintTesti
+test:testOnly -- -n PrettyPrintTest
+exit
+test:testOnly -- -n PrettyPrintTest
+exit
+test:testOnly -- -n ConcatenateRTTest
+test
+exit
+test
+test:testOnly -- -n MaskDTTest
+test:testOnly -- -n MaskDTFromNumSeqTest
+exit
+test
+exit
+test:testOnly -- -n MaskDTFromNumSeqTest
+test
+exit
+test:testOnly -- -n MaskDTFromNumSeqTest
+test
+exit
+test
+test:testOnly -- -n ApplyIndexTest
+exit
+test:testOnly -- -n SetElemTest
+test
+exit
+test:testOnly -- -n TransposeTest
+exit
+test:testOnly -- -n FromElemsDTTest
+exit
+test:testOnly -- -n FromElemsDTTest
+test:testOnly -- -n FromElemsDTTest8
+test:testOnly -- -n FromElemsDTTest
+test
+test:testOnly -- -n TransposeTest
+exit
+test:testOnly -- -n TransposeTest
+test:testOnly -- -n TransposeDTTest
+exit
+test:testOnly -- -n TransposeDTTest
+exit
+test
+test:testOnly -- -n TransAllDTTest
+reload
+test:testOnly -- -n TransAllDTTest
+exit
+test:testOnly -- -n TransAllDTTest
+reload
+test:testOnly -- -n TransAllDTTest
+reload
+test:testOnly -- -n TransAllDTTest
+reload
+test:testOnly -- -n TransAllDTTest
+reload
+test:testOnly -- -n TransAllDTTest
+reload
+exit
+test:testOnly -- -n TransAllDTTest
+reload
+test:testOnly -- -n TransAllDTTest
+exit
+test:testOnly -- -n TransAllDTTest
+reload
+test:testOnly -- -n TransAllDTTest
+test:testOnly -- -n TransposeDTTest
+exit
+test:testOnly -- -n Current
+test
+exit
+test
+exit
+test
+exit
+test:testOnly -- -n WhereTEst
+test:testOnly -- -n WhereTest
+test
+test:testOnly -- -n WhereTest
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+test:testOnly -- -n ReduceTest
+exit
+test
+exit
+test
+test:testOnly -- -n ReduceTest
+test:testOnly -- -n Current
+exit
+test:testOnly -- -n Current
+test:testOnly -- -n ReduceTest
+test:testOnly -- -n Current
+test:testOnly -- -n ReduceTest
+exit
+test:testOnly -- -n ReduceTest
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test:testOnly -- -n MapTest
+exit
+test
+exit
+test
+tets
+test
+test:testOnly -- -n Current
+test
+exit
+test
+test:testOnly -- -n OperateTest
+test
+test:testOnly -- -n OperateTest
+test
+test:testOnly -- -n OperateTest
+exit
+test:testOnly -- -n InsertDimTest
+exit
+test:testOnly -- -n ExpandDimsFromSubArraysTest
+exit
+test
+exit
+test:testOnly -- -n BroadcastShapesOPt
+test:testOnly -- -n BroadcastShapesOpt
+test:testOnly -- -n BroadcastShapesOptTest
+exit
+test
+exit
+test
+exit
+test
+test:testOnly -- -n ExpandShapeDimsTest
+exit
+test
+exit
+test
+exit
+test
+test:testOnly -- -n FromElemsAndArrayOptTest
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+test:testOnly -- -n TransposeRTTest
+test:testOnly -- -n TransposeFromListIntTest
+test:testOnly -- -n Current
+test:testOnly -- -n TransposeFromListIntTest
+git add .
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+exit
+test
+tets
+test

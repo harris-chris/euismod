@@ -1,0 +1,11 @@
+[0m[[0m[31merror[0m] [0m[0m/data/vap/sport-array/src/main/scala/indexed-array/ArrayDefs.scala:145:17: not found: type EinsumEither[0m
+[0m[[0m[31merror[0m] [0m[0m    type Out <: EinsumEither[_][0m
+[0m[[0m[31merror[0m] [0m[0m                ^[0m
+[0m[[0m[31merror[0m] [0m[0m/data/vap/sport-array/src/main/scala/indexed-array/ArrayDefs.scala:171:16: not found: value OutOpElemNotInInOp[0m
+[0m[[0m[31merror[0m] [0m[0m          Left(OutOpElemNotInInOp[E](inOpL, outOpL, badElems))[0m
+[0m[[0m[31merror[0m] [0m[0m               ^[0m
+[0m[[0m[31merror[0m] [0m[0m/data/vap/sport-array/src/main/scala/indexed-array/ArrayDefs.scala:172:19: type mismatch;[0m
+[0m[[0m[31merror[0m] [0m[0m  [31mUnit[0m|[32mOption[O][0m[0m
+[0m[[0m[31merror[0m] [0m[0m        case _ => { }[0m
+[0m[[0m[31merror[0m] [0m[0m                  ^[0m
+[0m[[0m[31merror[0m] [0m[0mthree errors found[0m

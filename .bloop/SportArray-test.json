@@ -155,7 +155,7 @@
         "platform": {
             "name": "jvm",
             "config": {
-                "home": "/usr/lib/jvm/java-11-openjdk",
+                "home": "/nix/store/48ddc74sdlinbg5q5655i4z8kp6xasb0-openjdk-11.0.9+11/lib/openjdk",
                 "options": [
                     "-Duser.dir=/data/vap/sport-array"
                 ]
@@ -735,19 +735,11 @@
                     "artifacts": [
                         {
                             "name": "javassist",
-                            "checksum": {
-                                "type": "sha1",
-                                "digest": "598244f595db5c5fb713731eddbb1c91a58d959b"
-                            },
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/javassist/javassist/3.21.0-GA/javassist-3.21.0-GA.jar"
                         },
                         {
                             "name": "javassist",
                             "classifier": "sources",
-                            "checksum": {
-                                "type": "sha1",
-                                "digest": "81fefbd46ba6a18fc7af83b9c60b28c0862cd492"
-                            },
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/org/javassist/javassist/3.21.0-GA/javassist-3.21.0-GA-sources.jar"
                         }
                     ]
@@ -811,19 +803,11 @@
                     "artifacts": [
                         {
                             "name": "javaparser-core",
-                            "checksum": {
-                                "type": "sha1",
-                                "digest": "c00bf4bbcaa2ecb51bcbdd483bc58b8d569bf88c"
-                            },
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.2.5/javaparser-core-3.2.5.jar"
                         },
                         {
                             "name": "javaparser-core",
                             "classifier": "sources",
-                            "checksum": {
-                                "type": "sha1",
-                                "digest": "8804532795a855e746c1ff5243752e940c06680b"
-                            },
                             "path": "/home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.2.5/javaparser-core-3.2.5-sources.jar"
                         }
                     ]

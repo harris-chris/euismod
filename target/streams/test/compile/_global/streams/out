@@ -1,0 +1,5 @@
+[0m[[0m[33mwarn[0m] [0m[0m/data/vap/sport-array/src/test/scala/indexed-array/ArraySpec.scala:34:13: abstract type pattern A[Double] is unchecked since it is eliminated by erasure[0m
+[0m[[0m[33mwarn[0m] [0m[0m    case p: A[Double] => {[0m
+[0m[[0m[33mwarn[0m] [0m[0m            ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m149 deprecations (since 3.1.0); re-run with -deprecation for details[0m
+[0m[[0m[33mwarn[0m] [0m[0mtwo warnings found[0m

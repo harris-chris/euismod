@@ -6,7 +6,7 @@ import IndicesObj.Index
 
 import scala.annotation.implicitNotFound
 import java.time.LocalDate
-import shapeless.{HList, HNil, Lazy, :: => #:, Nat, Succ}
+import shapeless.{HList, HNil, Lazy, :: => #:, Nat, Succ, LUBConstraint}
 import shapeless.ops.hlist._
 //import shapeless._
 import shapeless.nat._
@@ -139,51 +139,6 @@ object ArrayDefs {
     ): Aux[A[T], List[_S]] = instance(a => 
       (for(i <- 0 to ia.length(a) - 1) yield (ia.getAtN(a, i))).toList
     )
-  }
-
-  trait Einsum[A, B] {
-    type Out <: Option[_]
-    def apply(a: A, b: B, op: String): Out
-  }
-  object Einsum {
-    type Aux[A, B, O <: Option[_]] = Einsum[A, B] { type Out = O }
-    def apply[A, B] (implicit ei: Einsum[A, B]): Aux[A, B, ei.Out] = ei
-    def instance[A, B, O <: Option[_]](f: (A, B, String) => O): Aux[A, B, O] = new Einsum[A, B] {
-      type Out = O
-      def apply(a: A, b: B, op: String): Out = f(a, b, op)
-    }
-
-    case class ParsedOp(
-      comps: List[String],
-      out: String,
-    )
-
-    def parseOpString(op: String): Option[ParsedOp] = {
-      def go(
-        opS: List[Char], cur: List[Char], comps: List[String]
-      ): Option[ParsedOp] = opS match {
-        case ',' :: os => go(os, List(), cur.reverse.toString :: comps)
-        case '-' :: '>' :: os => if(comps != Nil) { 
-          Some(ParsedOp((cur.reverse.toString :: comps).reverse, os.toString)) 
-        } else { 
-          None
-        }
-        case o :: os => go(os, o :: cur, comps)
-        case Nil => None
-      }
-      go(op.toList, Nil: List[Char], Nil: List[String])
-    }
-
-    implicit def ifSameDepth[A[_], B[_], AT, BT, OT, DA <: Nat, DB <: Nat] (implicit
-      na: Numeric[AT],
-      nb: Numeric[BT], 
-      da: Depth.Aux[A[AT], DA],
-      db: Depth.Aux[B[BT], DB],
-      ta: TransposeUsingString[A[AT]],
-      tb: TransposeUsingString[B[BT]],
-    ): Aux[A[AT], B[BT], Option[A[OT]]] = instance((a, b, op) => {
-      ???  
-    })
   }
 
   trait ExpandDims[A, _A, N] {
@@ -383,6 +338,11 @@ object ArrayDefs {
   type ArraySortedBy
   type Ascending <: ArraySortedBy
   type Descending <: ArraySortedBy
+
+  /*
+   * Witnesses that an HList of Array objects are sorted in Ascending (from lowest depth to
+   * highest) or Descending (from highest depth to lowest) order.
+   */
 
   trait ArraySort[AR <: HList] {
     type Out <: ArraySortedBy
@@ -743,66 +703,95 @@ object ArrayDefs {
     }
   }
 
-  trait FromElemsAndSubArraysUsingListOpt[AR <: HList, T] {
-    type Out <: Option[_]
-    def apply(l: List[T], sh: List[Int]): Out
-  }
-  object FromElemsAndSubArraysUsingListOpt {
-    type Aux[AR <: HList, T, O <: Option[_]] = 
-      FromElemsAndSubArraysUsingListOpt[AR, T] { type Out = O }
-    def instance[AR <: HList, T, O <: Option[_]](
-      f: (List[T], List[Int]) => O
-    ): Aux[AR, T, O] = new FromElemsAndSubArraysUsingListOpt[AR, T] {
-      type Out = O
-      def apply(l: List[T], sh: List[Int]): Out = f(l, sh)
-    }
-    def apply[AR <: HList, T](
-      implicit fe: FromElemsAndSubArraysUsingListOpt[AR, T],
-    ): FromElemsAndSubArraysUsingListOpt.Aux[AR, T, fe.Out] = fe
+  //trait FromElemsAndSubArraysUsingListOpt[A0, A1p <: HList, X] {
+    //type Out = Option[List[A0]]
+    //def apply(l: List[X], sh: List[Int]): Out
+  //}
+  //object FromElemsAndSubArraysUsingListOpt {
+    //type Aux[A0, A1p <: HList, X] = FromElemsAndSubArraysUsingListOpt[A0, A1p, X]
+    //def instance[A0, A1p <: HList, X](
+      //f: (List[X], List[Int]) => Option[List[A0]]
+    //): Aux[A0, A1p, X] = new FromElemsAndSubArraysUsingListOpt[A0, A1p, X] {
+      //def apply(l: List[X], sh: List[Int]): Out = f(l, sh)
+    //}
+    //def apply[A0, A1p <: HList, X](
+      //implicit fe: FromElemsAndSubArraysUsingListOpt[A0, A1p, X],
+    //): FromElemsAndSubArraysUsingListOpt.Aux[A0, A1p, X] = fe
 
-    implicit def ifArraysDescending[AR <: HList, T, SH <: HList, RSH <: HList, RAR <: HList, NxtO](implicit 
-      ds: ArraySort.Aux[AR, Descending],
-      r1: Reverse.Aux[AR, RAR],
-      fe: FromElemsAndSubArraysUsingListOpt.Aux[RAR, T, Option[NxtO]],
-    ): Aux[AR, T, Option[NxtO]] = instance(
-      (l, sh) => fe(l, sh.reverse)
-    )
+    //implicit def ifArraysDescending[A0, A1p <: HList, X, SH <: HList, RSH <: HList, RAR <: HList](implicit 
+      //ds: ArraySort.Aux[A0 #: A1p, Descending],
+      //r1: Reverse.Aux[A0 #: A1p, RAR],
+      //fe: FromElemsAndSubArraysUsingListOpt[A0, A1p, X],
+    //): Aux[A0, A1p, X] = instance(
+      //(l, sh) => fe(l, sh.reverse)
+    //)
 
-    implicit def fromListIntIfBase[A0[_], A1p <: HList, T, NxtO] (implicit
-      dc: ArraySort.Aux[A0[T] #: A1p, Ascending],
-      ai: IsArray[A0, T] { type S = T },
-      nxO: FromElemsAndSubArraysUsingListOpt.Aux[A1p, A0[T], Option[NxtO]] = null,
-    ): Aux[A0[T] #: A1p, T, Option[NxtO]] = instance((l, sh) => {
-      val thisA: A0[T] = ai.getEmpty
-      val h1Nil = Nil: List[A0[T]]
-      val combinedS: Option[List[A0[T]]] = combineS[A0, T, T](thisA, h1Nil, l, sh.head)
-      Option(nxO) match {
-        case Some(nx) => {
-          combinedS.flatMap(
-            a1s => nx(a1s, sh.tail)
-          )
-        }
-        case None => {
+    //// TODO: what if X is an concrete type that is not T? eg T = Int, X = Double
+    //// just have one typeclass for if X = T, one for if X[T]
+    //implicit def ifArrIsFinal[A0[_], T, X] (implicit
+      //ai: IsArray[A0, T] { type S = X },
+    //): Aux[A0[T], HNil, X] = instance(
+      //(l, sh) => if(sh.length == 1 && l.length == sh.head) {
+        //Some(List(ai.fromList(l)))
+      //} else { None }
+    //)
 
-        }
-      }
-    })
+    //// TODO: remove ArraySort to wrapper layer.
+    //implicit def ifArrIsNotHNil[A0[_], A1[_], A2p <: HList, T, X](implicit 
+      //dc: ArraySort.Aux[A0[T] #: A1[T] #: A2p, Ascending],
+      //ai: IsArray[A0, T] { type S = X },
+      //fe: FromElemsAndSubArraysUsingListOpt[A1[T], A2p, A0[T]] = null,
+    //): Aux[A0[T], A1[T] #: A2p, X] = instance(
+      //(l, sh) => sh match {
+        //case s :: Nil => {
+          //if(l.length == s) { Some(List(ai.fromList(l))) } else { None }
+        //}
+        //case h :: t => {
+          //val thisA: A0[T] = ai.getEmpty
+          //val h1Nil = Nil: List[A0[T]]
+          //val combinedS: Option[List[A0[T]]] = combineS[A0, T, X](thisA, h1Nil, l, sh.head)
+          //combinedS.flatMap(
+            //a1s => fe(a1s, sh.tail)
+          //)
+        //}
+      //}
+    //)
+
+    ////implicit def fromListIntIfBase[A0[_], A1p <: HList, T, NxtO] (implicit
+      ////dc: ArraySort.Aux[A0[T] #: A1p, Ascending],
+      ////ai: IsArray[A0, T] { type S = T },
+      ////nxO: FromElemsAndSubArraysUsingListOpt.Aux[A1p, A0[T], Option[NxtO]],
+    ////): Aux[A0[T] #: A1p, T, Option[NxtO]] = instance((l, sh) => {
+      ////val thisA: A0[T] = ai.getEmpty
+      ////val h1Nil = Nil: List[A0[T]]
+      ////val combinedS: Option[List[A0[T]]] = combineS[A0, T, T](thisA, h1Nil, l, sh.head)
+      ////Option(nxO) match {
+        ////case Some(nx) => {
+          ////combinedS.flatMap(
+            ////a1s => nx(a1s, sh.tail)
+          ////)
+        ////}
+        ////case None => {
+
+        ////}
+      ////}
+    ////})
     
-    implicit def fromListInt[A0[_], A1p <: HList, T, _S, NxtO] (implicit
-      dc: ArraySort.Aux[A0[T] #: A1p, Ascending],
-      ai: IsArray[A0, T] { type S = _S },
-      nxO: FromElemsAndSubArraysUsingListOpt.Aux[A1p, A0[T], Option[NxtO]] = null,
-    ): Aux[A0[T] #: A1p, _S, Option[NxtO]] = instance((l, sh) => Option(nxO).flatMap(
-      nx => {
-        val thisA: A0[T] = ai.getEmpty
-        val h1Nil = Nil: List[A0[T]]
-        val combinedS: Option[List[A0[T]]] = combineS[A0, T, _S](thisA, h1Nil, l, sh.head)
-        combinedS.flatMap(
-          a1s => nx(a1s, sh.tail)
-        )
-      }
-    ))
-  }
+    //implicit def fromListInt[A0[_], A1p <: HList, T, _S, NxtO] (implicit
+      //dc: ArraySort.Aux[A0[T] #: A1p, Ascending],
+      //ai: IsArray[A0, T] { type S = _S },
+      //nxO: FromElemsAndSubArraysUsingListOpt[A1p, A0[T], Option[NxtO]] = null,
+    //): Aux[A0[T] #: A1p, _S, Option[NxtO]] = instance((l, sh) => Option(nxO).flatMap(
+      //nx => {
+        //val thisA: A0[T] = ai.getEmpty
+        //val h1Nil = Nil: List[A0[T]]
+        //val combinedS: Option[List[A0[T]]] = combineS[A0, T, _S](thisA, h1Nil, l, sh.head)
+        //combinedS.flatMap(
+          //a1s => nx(a1s, sh.tail)
+        //)
+      //}
+    //))
+  //}
 
   trait FromElemsAndSubArraysOpt[AR <: HList, T, SH <: HList] {
     type Out <: Option[_]
