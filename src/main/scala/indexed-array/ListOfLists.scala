@@ -2,7 +2,6 @@ package sportarray
 
 import ArrayDefs._
 import Skeleton._
-import IndicesObj._
 
 import shapeless._
 import shapeless.ops.hlist._

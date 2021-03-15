@@ -1,14 +1,11 @@
 package sportarray
 
-//import Skeleton.{DataType, PositionsData, ValuesData, WeightsData, PricesData}
 import Skeleton.{IsBase}
-import IndicesObj.Index
 
 import scala.annotation.implicitNotFound
 import java.time.LocalDate
 import shapeless.{HList, HNil, Lazy, :: => #:, Nat, Succ, LUBConstraint}
 import shapeless.ops.hlist._
-//import shapeless._
 import shapeless.nat._
 import shapeless.ops.nat.{GT, GTEq, Pred, Diff => NatDiff, ToInt}
 import scala.util.{Try, Success, Failure}

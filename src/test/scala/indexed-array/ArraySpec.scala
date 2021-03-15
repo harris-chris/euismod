@@ -9,7 +9,6 @@ import sportdate.SportDate
 import sportdate.{IsSportDateInstances, IsSportDateSyntax}
 
 import Skeleton.{IsBase}
-import IndicesObj._
 
 import shapeless._
 import shapeless.{HList, HNil, Lazy, :: => #:}
