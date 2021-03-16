@@ -1,38 +1,38 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<testsuite hostname="nixos" name="euismod.ArraySpec" tests="117" errors="0" failures="0" skipped="0" time="0.139" timestamp="2021-03-15T20:15:15">
+<testsuite hostname="nixos" name="euismod.ArraySpec" tests="117" errors="0" failures="0" skipped="0" time="0.249" timestamp="2021-03-16T20:04:00">
                      <properties>
       <property name="jline.esc.timeout" value="0"/><property name="java.runtime.name" value="OpenJDK Runtime Environment"/><property name="sun.boot.library.path" value="/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/amd64"/><property name="java.vm.version" value="25.272-b10"/><property name="java.vm.vendor" value="Oracle Corporation"/><property name="java.vendor.url" value="http://java.oracle.com/"/><property name="path.separator" value=":"/><property name="jna.loaded" value="true"/><property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/><property name="file.encoding.pkg" value="sun.io"/><property name="user.country" value="US"/><property name="sun.java.launcher" value="SUN_STANDARD"/><property name="sun.os.patch.level" value="unknown"/><property name="jna.nosys" value="true"/><property name="java.vm.specification.name" value="Java Virtual Machine Specification"/><property name="user.dir" value="/data/vap/euismod"/><property name="java.runtime.version" value="1.8.0_272-b10"/><property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment"/><property name="java.endorsed.dirs" value="/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/endorsed"/><property name="os.arch" value="amd64"/><property name="java.io.tmpdir" value="/tmp"/><property name="line.separator" value="
-"/><property name="java.vm.specification.vendor" value="Oracle Corporation"/><property name="log4j.ignoreTCL" value="true"/><property name="os.name" value="Linux"/><property name="sun.jnu.encoding" value="UTF-8"/><property name="jnidispatch.path" value="/home/chris/.cache/JNA/temp/jna4659332514235505944.tmp"/><property name="java.library.path" value="/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib"/><property name="java.specification.name" value="Java Platform API Specification"/><property name="java.class.version" value="52.0"/><property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/><property name="os.version" value="5.4.92"/><property name="swoval.tmpdir" value="/home/chris/.sbt/1.0"/><property name="user.home" value="/home/chris"/><property name="user.timezone" value="Asia/Tokyo"/><property name="java.awt.printerjob" value="sun.print.PSPrinterJob"/><property name="file.encoding" value="UTF-8"/><property name="java.specification.version" value="1.8"/><property name="java.class.path" value="/nix/store/fgqqpijpnqvx7dczz2sbrrlzig9jx9yk-sbt-1.3.13/share/sbt/bin/sbt-launch.jar"/><property name="user.name" value="chris"/><property name="jline.shutdownhook" value="false"/><property name="java.vm.specification.version" value="1.8"/><property name="sun.java.command" value="/nix/store/fgqqpijpnqvx7dczz2sbrrlzig9jx9yk-sbt-1.3.13/share/sbt/bin/sbt-launch.jar"/><property name="java.home" value="/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre"/><property name="sun.arch.data.model" value="64"/><property name="user.language" value="en"/><property name="java.specification.vendor" value="Oracle Corporation"/><property name="awt.toolkit" value="sun.awt.X11.XToolkit"/><property name="java.vm.info" value="mixed mode"/><property name="java.version" value="1.8.0_272"/><property name="java.ext.dirs" value="/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/ext:/usr/java/packages/lib/ext"/><property name="sun.boot.class.path" value="/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/resources.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/rt.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/sunrsasign.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/jsse.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/jce.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/charsets.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/jfr.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/classes"/><property name="java.vendor" value="Oracle Corporation"/><property name="file.separator" value="/"/><property name="java.vendor.url.bug" value="http://bugreport.sun.com/bugreport/"/><property name="sun.io.unicode.encoding" value="UnicodeLittle"/><property name="sun.cpu.endian" value="little"/><property name="sun.cpu.isalist" value=""/>
+"/><property name="java.vm.specification.vendor" value="Oracle Corporation"/><property name="log4j.ignoreTCL" value="true"/><property name="os.name" value="Linux"/><property name="sun.jnu.encoding" value="UTF-8"/><property name="jnidispatch.path" value="/home/chris/.cache/JNA/temp/jna4887674737765272478.tmp"/><property name="java.library.path" value="/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib"/><property name="java.specification.name" value="Java Platform API Specification"/><property name="java.class.version" value="52.0"/><property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/><property name="os.version" value="5.4.92"/><property name="swoval.tmpdir" value="/home/chris/.sbt/1.0"/><property name="user.home" value="/home/chris"/><property name="user.timezone" value="Asia/Tokyo"/><property name="java.awt.printerjob" value="sun.print.PSPrinterJob"/><property name="file.encoding" value="UTF-8"/><property name="java.specification.version" value="1.8"/><property name="java.class.path" value="/nix/store/fgqqpijpnqvx7dczz2sbrrlzig9jx9yk-sbt-1.3.13/share/sbt/bin/sbt-launch.jar"/><property name="user.name" value="chris"/><property name="jline.shutdownhook" value="false"/><property name="java.vm.specification.version" value="1.8"/><property name="sun.java.command" value="/nix/store/fgqqpijpnqvx7dczz2sbrrlzig9jx9yk-sbt-1.3.13/share/sbt/bin/sbt-launch.jar"/><property name="java.home" value="/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre"/><property name="sun.arch.data.model" value="64"/><property name="user.language" value="en"/><property name="java.specification.vendor" value="Oracle Corporation"/><property name="awt.toolkit" value="sun.awt.X11.XToolkit"/><property name="java.vm.info" value="mixed mode"/><property name="java.version" value="1.8.0_272"/><property name="java.ext.dirs" value="/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/ext:/usr/java/packages/lib/ext"/><property name="sun.boot.class.path" value="/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/resources.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/rt.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/sunrsasign.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/jsse.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/jce.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/charsets.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/lib/jfr.jar:/nix/store/3gr6id5i7bi0qhx29vilv1xcwkzjakcl-openjdk-8u272-b10/lib/openjdk/jre/classes"/><property name="java.vendor" value="Oracle Corporation"/><property name="file.separator" value="/"/><property name="java.vendor.url.bug" value="http://bugreport.sun.com/bugreport/"/><property name="sun.io.unicode.encoding" value="UnicodeLittle"/><property name="sun.cpu.endian" value="little"/><property name="sun.cpu.isalist" value=""/>
     </properties>
-                     <testcase classname="euismod.ArraySpec" name="Feature: Arraylike objects should be able to implement IsArray Scenario: A 1d type that can implement IsArray, implements IsArray" time="0.008">
+                     <testcase classname="euismod.ArraySpec" name="Feature: Arraylike objects should be able to implement IsArray Scenario: A 1d type that can implement IsArray, implements IsArray" time="0.013">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: Arraylike objects should be able to implement IsArray Scenario: A 2d 1dOf1d type that can implement IsArray, implements IsArray" time="0.0">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: Arraylike objects should be able to implement IsArray Scenario: A 2d list-of-list type that can implement IsArray, implements IsArray" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: Implicit class conversions and typeclass syntax for IsArray implementations Scenario: The user creates a valid arraylike and implements the typeclass; syntax should be available" time="0.005">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: Implicit class conversions and typeclass syntax for IsArray implementations Scenario: The user creates a valid arraylike and implements the typeclass; syntax should be available" time="0.007">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Depth typeclass Scenario: Depth has type Out of Nat 1 for a 1d array" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Depth typeclass Scenario: Depth has type Out of Nat 1 for a 1d array" time="0.0">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Depth typeclass Scenario: Depth has type Out of Nat 2 for a 2d array" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Depth typeclass Scenario: Depth has type Out of Nat 3 for a 3d array" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Depth typeclass Scenario: Depth has type Out of Nat 3 for a 3d array" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The PrettyPrint typeclass Scenario: Pretty printing a 1d array produces numpy-like output" time="0.011">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The PrettyPrint typeclass Scenario: Pretty printing a 1d array produces numpy-like output" time="0.019">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The PrettyPrint typeclass Scenario: Pretty printing a 2d array produces numpy-like output" time="0.003">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The PrettyPrint typeclass Scenario: Pretty printing a 3d array produces numpy-like output" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The PrettyPrint typeclass Scenario: Pretty printing a 4d array produces numpy-like output" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The PrettyPrint typeclass Scenario: Pretty printing a 4d array produces numpy-like output" time="0.002">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeRT typeclass Scenario: transposing a 2d array with (0, 1) correctly flips the axes" time="0.011">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeRT typeclass Scenario: transposing a 2d array with (0, 1) correctly flips the axes" time="0.016">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeRT typeclass Scenario: transposing a 3d array with (0, 1) correctly flips the axes" time="0.001">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeRT typeclass Scenario: transposing a 3d array with (1, 2) correctly flips the axes" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeFromListInt typeclass Scenario: transposing a 2d array with List(1) returns None" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeFromListInt typeclass Scenario: transposing a 2d array with List(1) returns None" time="0.002">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeFromListInt typeclass Scenario: transposing a 2d array with List(1, 0) correctly flips the axes" time="0.001">
                                                  
@@ -40,37 +40,37 @@
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeFromListInt typeclass Scenario: transposing a 3d array with List(1, 0, 2) correctly transposes" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeFromListInt typeclass Scenario: transposing a 3d array with List(2, 0, 1) correctly transposes" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeFromListInt typeclass Scenario: transposing a 3d array with List(2, 0, 1) correctly transposes" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeFromListInt typeclass Scenario: transposing a 3d array with List(2, 1, 0) correctly transposes" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeFromListInt typeclass Scenario: transposing a 3d array with List(2, 1, 0) correctly transposes" time="0.0">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeFromListInt typeclass Scenario: transposing a 4d array with List(2, 1, 3, 0) correctly transposes" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeUsingString typeclass Scenario: transposing a 2d array with 'ac' returns None" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeUsingString typeclass Scenario: transposing a 2d array with 'ac' returns None" time="0.004">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The TransposeUsingString typeclass Scenario: transposing a 4d array with List(2, 1, 3, 0) correctly transposes" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: transposing a 2d array with AllSlice correctly flips the axes" time="0.008">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: transposing a 2d array with AllSlice correctly flips the axes" time="0.017">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: transposing a 3d array with AllSlice correctly flips the axes" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: transposing a 3d array with AllSlice correctly flips the axes" time="0.002">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: transposing a 4d array with AllSlice correctly flips the axes" time="0.003">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: transposing a 4d array with AllSlice correctly flips the axes" time="0.007">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 2d array along axes 0/1 matches with numpy" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 3d array along axes 0/1 matches with numpy" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 3d array along axes 0/1 matches with numpy" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 3d array along axes 1/2 matches with numpy" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 3d array along axes 1/2 matches with numpy" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 4d array along axes 2/3 matches with numpy" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 4d array along axes 2/3 matches with numpy" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 3d array along 1/2 then 0/1 is the same as a full transpose" time="0.002">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 3d array along 1/2 then 0/1 is the same as a full transpose" time="0.003">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 4d array 0/1, 1/2, 2/3, 0/1, 1/2, 0/1 is the same as a full transpose" time="0.002">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Transpose typeclass Scenario: Transposing a 4d array 0/1, 1/2, 2/3, 0/1, 1/2, 0/1 is the same as a full transpose" time="0.007">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ConcatenateOpt typeclass Scenario: Concatenating a 3d array along dimension 0 returns the correct result" time="0.009">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ConcatenateOpt typeclass Scenario: Concatenating a 3d array along dimension 0 returns the correct result" time="0.015">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ConcatenateOpt typeclass Scenario: Concatenating a 3d array along dimension 1 returns the correct result" time="0.009">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ConcatenateOpt typeclass Scenario: Concatenating a 3d array along dimension 1 returns the correct result" time="0.018">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ConcatenateOpt typeclass Scenario: Concatenating a 3d array along dimension 2 returns the correct result" time="0.0">
                                                  
@@ -86,31 +86,31 @@
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The AddOpt typeclass Scenario: adding a List3d to a List3d with different dim1 length returns None" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: MaskFromNumSeq typeclass Scenario: MaskDTFromNumSeq returns a correct mask for a 1d array" time="0.002">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: MaskFromNumSeq typeclass Scenario: MaskDTFromNumSeq returns a correct mask for a 1d array" time="0.006">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: MaskFromNumSeq typeclass Scenario: MaskFromNumSeq returns a correct mask for a 2d array" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: MaskFromNumSeq typeclass Scenario: MaskFromNumSeq returns a correct mask for a 2d array" time="0.003">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: MaskFromNumSeq typeclass Scenario: MaskFromNumSeq returns a correct mask for a 3d array" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Where typeclass Scenario: Where with a 1d arraylike and a masking array returns a correct result" time="0.002">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Where typeclass Scenario: Where with a 1d arraylike and a masking array returns a correct result" time="0.003">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Where typeclass Scenario: Where with a 2d arraylike and a masking array returns a correct result" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Where typeclass Scenario: Where with a 2d arraylike and a masking array returns a correct result" time="0.003">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Where typeclass Scenario: Where with a 3d arraylike and a masking array returns a correct result" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Where typeclass Scenario: Where with a 3d arraylike and a masking array returns a correct result" time="0.004">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Where typeclass Scenario: Where with a 4d arraylike and a masking array returns a correct result" time="0.002">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Where typeclass Scenario: Where with a 4d arraylike and a masking array returns a correct result" time="0.004">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Reduce typeclass Scenario: Using Reduce on a 1d arraylike does not compile" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Reduce typeclass Scenario: Using Reduce on a 1d arraylike does not compile" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Reduce typeclass Scenario: Reducing a 2d arraylike across dim0 returns a correct 1d arraylike" time="0.007">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Reduce typeclass Scenario: Reducing a 2d arraylike across dim0 returns a correct 1d arraylike" time="0.012">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Reduce typeclass Scenario: Reducing a 2d arraylike across dim1 returns a correct 1d arraylike" time="0.003">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Reduce typeclass Scenario: Reducing a 2d arraylike across dim1 returns a correct 1d arraylike" time="0.002">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Reduce typeclass Scenario: Reducing a 3d arraylike across dim1 returns a correct 2d arraylike" time="0.002">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Reduce typeclass Scenario: Reducing a 3d arraylike across dim2 returns a correct 2d arraylike" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Reduce typeclass Scenario: Reducing a 3d arraylike across dim2 returns a correct 2d arraylike" time="0.003">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: Multi-dimensional arrays Scenario: A value is returned from a 2d-dimensional array using getAtN" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: Multi-dimensional arrays Scenario: A value is returned from a 2d-dimensional array using getAtN" time="0.003">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: Multi-dimensional arrays Scenario: A value is returned from a 3d-dimensional array using getAtN" time="0.0">
                                                  
@@ -120,7 +120,7 @@
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.getEmpty[_T] Scenario: .getEmpty[_T] is used on a 1d arraylike to create a new empty arraylike" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.getEmpty[_T] Scenario: .getEmpty[_T] is used  on a 2d arraylike to create a new empty arraylike" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.getEmpty[_T] Scenario: .getEmpty[_T] is used  on a 2d arraylike to create a new empty arraylike" time="0.001">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The SubArrays typeclass Scenario: SubArrays.Out of a 1d array is an Hlist containing a 1d array" time="0.0">
                                                  
@@ -130,13 +130,13 @@
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ArraysSort typeclass Scenario: Descending should witness a descending list of arrays" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ArraysSort typeclass Scenario: Descending should not witness an ascending list of arrays" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ArraysSort typeclass Scenario: Descending should not witness an ascending list of arrays" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ArraysSort typeclass Scenario: Ascending should witness an ascending list of arrays" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ArraysSort typeclass Scenario: Ascending should witness an ascending list of arrays" time="0.0">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ArraysSort typeclass Scenario: Should not witness an disordered list of arrays" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The FromElemsAndSubArraysOpt typeclass Scenario: a List1d can be constructed from a list of Ts" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The FromElemsAndSubArraysOpt typeclass Scenario: a List1d can be constructed from a list of Ts" time="0.001">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The FromElemsAndSubArraysOpt typeclass Scenario: a List2d can be constructed from a list of Ts" time="0.0">
                                                  
@@ -146,15 +146,15 @@
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The FromElemsAndSubArraysOpt typeclass Scenario: a List2d can be constructed from a 2d array and a list of Ts" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The FromElemsAndArrayOpt typeclass Scenario: a List1d can be constructed from a list of Ts" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The FromElemsAndArrayOpt typeclass Scenario: a List1d can be constructed from a list of Ts" time="0.003">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The FromElemsAndArrayOpt typeclass Scenario: a List2d can be constructed from a list of Ts" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.map Scenario: .map on a 1d array returns a mapped 1d array" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.map Scenario: .map on a 1d array returns a mapped 1d array" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.map Scenario: .map on a 2d array returns a mapped 2d array" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.map Scenario: .map on a 2d array returns a mapped 2d array" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.map Scenario: .map on a 3d array returns a mapped 3d array" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.map Scenario: .map on a 3d array returns a mapped 3d array" time="0.001">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: IsArray.map Scenario: .map double =&gt; char on a 3d array returns a mapped 3d array" time="0.001">
                                                  
@@ -164,17 +164,17 @@
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: a Int is used to return the listed elements from a 3d array" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: a Int :: HNil is used to return T from a 1d array" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: a Int :: HNil is used to return T from a 1d array" time="0.002">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: a Int :: HNil is used to return a 2d from a 3d array" time="0.001">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: a Int :: List[Int] :: HNil is used to return a 2d from a 3d array" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: a Int :: Range :: HNil is used to return a 2d from a 3d array" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: a Int :: Range :: HNil is used to return a 2d from a 3d array" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: a List[Int] :: Int :: HNil is used to return a 2d from a 3d array" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: a List[Int] :: Int :: HNil is used to return a 2d from a 3d array" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: an HList of List[Int] is used to return the correct elements from a 3d array" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: an HList of List[Int] is used to return the correct elements from a 3d array" time="0.001">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: an HList of List[Int] :: Int is used to return the correct elements from a 3d array" time="0.0">
                                                  
@@ -182,19 +182,19 @@
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ApplyIndex typeclass Scenario: ApplyIndex with a boolean array of the same shape should return an appropriate List[T]" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The IsArray.length method returns the length of the top dimension Scenario: An 1d array of y elements should return .length of y" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The IsArray.length method returns the length of the top dimension Scenario: An 1d array of y elements should return .length of y" time="0.002">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The IsArray.length method returns the length of the top dimension Scenario: A 2d array of y elements should return .length of y" time="0.0">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The IsArray.length method returns the length of the top dimension Scenario: A 3d array of y elements should return .length of y" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Shape Typeclass Scenario: An 1d array of _ elements should return the correct shape" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Shape Typeclass Scenario: An 1d array of _ elements should return the correct shape" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Shape Typeclass Scenario: An 2d array of _ elements should return the correct shape" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Shape Typeclass Scenario: An 2d array of _ elements should return the correct shape" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Shape Typeclass Scenario: An 3d array of _ elements should return the correct shape" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Shape Typeclass Scenario: An 3d array of _ elements should return the correct shape" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The SetElem typeclass Scenario: setElem on dbl3d returns an updated array" time="0.002">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The SetElem typeclass Scenario: setElem on dbl3d returns an updated array" time="0.003">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Flatten typeclass Scenario: Flatten for a 1d array returns the correct List[T]" time="0.0">
                                                  
@@ -202,9 +202,9 @@
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Flatten typeclass Scenario: Flatten for a 3d array returns the correct List[T]" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Operate typeclass Scenario: Operate for two same-sized 1d arrays returns a correct 1d array" time="0.002">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Operate typeclass Scenario: Operate for two same-sized 1d arrays returns a correct 1d array" time="0.004">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Operate typeclass Scenario: Operate for two same-sized 3d arrays returns a correct 3d array" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Operate typeclass Scenario: Operate for two same-sized 3d arrays returns a correct 3d array" time="0.003">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The Operate typeclass Scenario: Operate for two same-sized but different data 2d arrays returns a correct 2d array" time="0.001">
                                                  
@@ -216,23 +216,23 @@
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ExpandShapeDims typeclass Scenario: ExpandShapeDims is used to convert a 1d shape into a 3d shape" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ExpandDims typeclass Scenario: Correctly inserting at dim0 into a 1d array creates a 2d array" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ExpandDims typeclass Scenario: Correctly inserting at dim0 into a 1d array creates a 2d array" time="0.004">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ExpandDims typeclass Scenario: Correctly inserting at dim2 into a 1d array creates a 2d array" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ExpandDims typeclass Scenario: Correctly inserting at dim2 into a 1d array creates a 2d array" time="0.001">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ExpandDims typeclass Scenario: Correctly inserting at dim1 into a 2d array creates a 3d array" time="0.001">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The ExpandDims typeclass Scenario: Correctly inserting at dim2 into a 3d array creates a 4d array" time="0.001">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The BroadcastShapesOpt typeclass Scenario: Broadcasting shape from smaller to larger correctly" time="0.006">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The BroadcastShapesOpt typeclass Scenario: Broadcasting shape from smaller to larger correctly" time="0.011">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The BroadcastShapesOpt typeclass Scenario: Broadcasting from equal to equal correctly" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The BroadcastShapesOpt typeclass Scenario: Broadcasting from smaller to larger incorrectly" time="0.0">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The BroadcastShapesOpt typeclass Scenario: Broadcasting from smaller to larger incorrectly" time="0.001">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The BroadcastShapesOpt typeclass Scenario: Broadcasting from equal to equal incorrectly" time="0.0">
                                                  
-                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The BroadcastOpt typeclass Scenario: Broadcasting from 1d to 1d (1, L) correctly" time="0.001">
+                                               </testcase><testcase classname="euismod.ArraySpec" name="Feature: The BroadcastOpt typeclass Scenario: Broadcasting from 1d to 1d (1, L) correctly" time="0.002">
                                                  
                                                </testcase><testcase classname="euismod.ArraySpec" name="Feature: The BroadcastOpt typeclass Scenario: Broadcasting from 1d to 1d (L, 1) correctly" time="0.0">
                                                  

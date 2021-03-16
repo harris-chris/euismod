@@ -1,4 +1,3 @@
-[warn] splain_2.13.2-0.5.7-sources.jar no longer exists at /home/chris/.cache/coursier/v1/https/repo1.maven.org/maven2/io/tryp/splain_2.13.2/0.5.7/splain_2.13.2-0.5.7-sources.jar
-[debug] "not up to date. inChanged = false, force = false
-[debug] Updating ProjectRef(uri("file:/data/vap/sport-array/"), "SportArray")...
-[debug] Done updating ProjectRef(uri("file:/data/vap/sport-array/"), "SportArray")
+[debug] "not up to date. inChanged = true, force = false
+[debug] Updating ProjectRef(uri("file:/data/vap/euismod/"), "Euismod")...
+[debug] Done updating ProjectRef(uri("file:/data/vap/euismod/"), "Euismod")
