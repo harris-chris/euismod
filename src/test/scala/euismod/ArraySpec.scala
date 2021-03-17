@@ -1067,23 +1067,6 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     }
   }
 
-  //feature("The FromElemsAndSubArraysUsingListOpt typeclass") {
-    //import ArrayDefs.IsArraySyntax._
-    //import Dummy.Types._
-    //import Dummy.Values._
-    //import Dummy.IsArrayImplicits._
-    //object FromElemsAndSubArraysUsingListOptTest extends Tag("FromElemsAndSubArraysUsingListOptTest")
-    //scenario("a List1d can be constructed from a list of Ts", FromElemsAndSubArraysUsingListOptTest) {
-      //val ts3: List[Double] = List(1.5, 2.5, 3.5)
-      //val newShape = 3 :: HNil
-      //val ga = SubArrays[List1d[Double]]
-      //val fe = FromElemsAndSubArraysUsingListOpt[ga.Out, Double]
-      //val act = fe(ts3, List(3))
-      //val exp = FromElemsAndSubArraysOpt[ga.Out, Double, Int :: HNil].apply(ts3, 3 :: HNil)
-      //assert(act.get === exp.get)
-    //}
-  //}
-
   feature("The FromElemsAndArrayOpt typeclass") {
     import ArrayDefs.IsArraySyntax._
     import Dummy.Types._
