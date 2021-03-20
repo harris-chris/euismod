@@ -154,3 +154,10 @@
 [0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: Broadcasting from 1d to 1d (1, L) correctly[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: Broadcasting from 1d to 1d (L, 1) correctly[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: Broadcasting from 2d to 3d (D0, D1, 1) correctly[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The README examples[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  Scenario: Snippet 1 *** FAILED ***[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  "...play among the stars[[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  ]" did not equal "...play among the stars[]" (ArraySpec.scala:1477)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  Analysis:[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  "...play among the stars[[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m]" -> "...play among the stars[]"[0m[0m

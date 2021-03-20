@@ -1,28 +1,17 @@
-Sport-array is a typeclass wrapper to provide a standardized, indexed, typed interface over any array-like data structure.
+Euismod provides fully-typed n-dimensional array functionality to any array-like object.
 
-_**standardized**_ - a consistent API is provided regardless of the underlying type.  
-
-_**indexed**_ - indices are stored for the array axes, providing a Pandas Dataframe-like interface
-
-_**typed**_ - the data type, index type, and dimensionality of the array is known at all times, allowing us to prevent mistakes at compile-time (eg, adding percentage weights to absolute numbers).
-
-The package's prelude includes typeclasses for array types: `Is1dIndexArr`, `Is2dIndexArr`, up to 5 dimensions.
-
-*2020/09/09*: None of the below is yet true. This project is a work-in-progress.
+A [numpy](https://numpy.org/)-like set of array methods are provided by [shapeless](https://github.com/milessabin/shapeless)-like typeclasses.
 
 For example:
-```scala
-import sportarray._
-// The UnitType trait is a way to ensure that we do not mix incompatible unit types
-trait Numbers extends UnitType { type ElemT = Int }
-trait Grams extends UnitType { type ElemT = Int }
+```
+import euismod._
 
-// a list of lists with a couple of indices can be a 2-d array...
-// an instance of the sportarray.Is2dIndexArr typeclass is already imported for list of lists
-case class ListOfListsWithIndices[T <: UnitType, Idx0, Idx1](
-  values: List[List[T#ElemT]],
-  indices: (List[Idx0], List[Idx1]),
-) 
+// a very simple array-like - a list of lists
+// an instance of the euismod.IsArray typeclass is already imported for lists of lists
+val arrayLike2d = List(List("a", "b", "c"), List("d", "e", "f"))
+
+println(arrayLike2d.shape) // (2, 3)
+println(arrayLike2d(List
 
 // and here's an instance of it.
 val numbersOfFruitIIntendToBuy = ListOfListsWithIndices[Numbers, LocalDate, String](

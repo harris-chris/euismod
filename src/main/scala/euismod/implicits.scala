@@ -5,7 +5,24 @@ import ArrayDefs._
 import shapeless._
 import shapeless.ops.hlist._
 
-object ListOfListsObj {
+object implicits {
+
+  implicit def listIsArray[T] = new IsArray[List, T] {
+    type S = T
+    def getEmpty[_T] = Nil: List[_T]
+    def getAtN(a: List[T], n: Int) = a(n)
+    def length(a: List[T]) = a.length
+    def cons(a: List[T], sub: S) = sub :: a
+  }
+
+  type LL[T] = List[List[T]]
+  implicit def listOfListsIsArray[T] = new IsArray[LL, T] {
+    type S = List[T]
+    def getEmpty[_T] = Nil: List[List[_T]]
+    def getAtN(a: List[List[T]], n: Int) = a(n)
+    def length(a: List[List[T]]) = a.length
+    def cons(a: List[List[T]], sub: S): List[List[T]] = sub :: a
+  }
 
   case class List1d[T] (
     data: List[T],
@@ -15,7 +32,7 @@ object ListOfListsObj {
     def getEmpty[_T] = List1d[_T](Nil: List[_T])
     def getAtN(a: List1d[T], n: Int) = a.data(n)
     def length(a: List1d[T]) = a.data.length
-    def cons(a: List1d[T], other: S) = List1d(other :: a.data)
+    def cons(a: List1d[T], sub: S) = List1d(sub :: a.data)
   }
 
   case class List2d[T] ( 

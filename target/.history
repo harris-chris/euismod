@@ -348,3 +348,12 @@ exit
 test
 exit
 test
+test ReadMeTest
+test
+testOnly -- -n ReadMeTest
+reload
+testOnly -- -n ReadMeTest
+reload
+testOnly -- -n ReadMeTest
+reload
+testOnly -- -n ReadMeTest

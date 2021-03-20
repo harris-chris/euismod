@@ -1,0 +1,42 @@
+[0m[[0m[0minfo[0m] [0m[0m[32mArraySpec:[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: Arraylike objects should be able to implement IsArray[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: Implicit class conversions and typeclass syntax for IsArray implementations[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Depth typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The PrettyPrint typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The TransposeRT typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The TransposeFromListInt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The TransposeUsingString typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Transpose typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ConcatenateOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The AddOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: MaskFromNumSeq typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Where typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Reduce typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: Multi-dimensional arrays[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: IsArray.getAtN[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: IsArray.cons[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: IsArray.getEmpty[_T][0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The SubArrays typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ArraysSort typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The FromElemsAndSubArraysOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The FromElemsAndArrayOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: IsArray.map[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ApplyIndex typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The IsArray.length method returns the length of the top dimension[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Shape Typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The SetElem typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Flatten typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Operate typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ExpandShapeDims typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The ExpandDims typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The BroadcastShapesOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The BroadcastOpt typeclass[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mFeature: The README examples[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  Scenario: Snippet 1 *** FAILED ***[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  "[2 :: HNil][0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  " did not equal "[(2, 3)][0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  " (ArraySpec.scala:1476)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  Analysis:[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  "[2 :: HNil][0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m" -> "[(2, 3)][0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m"[0m[0m

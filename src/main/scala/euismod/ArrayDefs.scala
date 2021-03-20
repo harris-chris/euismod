@@ -26,6 +26,7 @@ object ArrayDefs {
     def length(a: A[T]): Int
     def cons(a: A[T], sub: S): A[T]
 
+    /* Concrete methods */
     def apply[R](a: A[T], r: R)(implicit ai: ApplyIndex[A[T], R]): ai.Out = ai(a, r)
     def empty: A[T] = getEmpty[T]
     def ::(a: A[T], o: S): A[T] = cons(a, o)  
@@ -293,6 +294,11 @@ object ArrayDefs {
     })
   }
 
+  /*
+   * Goes elementwise through Arrays A and B and returns a new array on which the specified function (which takes as arguments the 
+   * 
+   */
+
   trait OperateOpt[A[_], B[_], AT, BT] {
     type Out = Option[A[AT]]
     def apply(a: A[AT], b: B[BT], op: (AT, BT) => AT): Out 
@@ -521,6 +527,23 @@ object ArrayDefs {
       ia.fromList(ia.toList(a).updated(ref.head, newS))
     })
   }
+
+  /**
+   * Reduces a copy of the original array that has been re-sized based on the IDX.
+   *
+   * The IDX is an HList of either Int or List[Int] values. It may have a length equal to or lower
+   * than the dimensionality of the array.
+   *
+   * Each IDX element corresponds to an array dimension, counting upwards from dimension zero.
+   * If the HList element is a List[Int], then the elements of this dimension corresponding to
+   * the list integers will be included in the new array.
+   *
+   * If the HList element is an Int, then only the corresponding element from that dimension will be
+   * retained, and the dimensionality of the output array will be reduced by one.
+   *
+   * If the length of the IDX HList is less than the depth of the array, then the specified IDX
+   * reductions are applied to X lowest dimensions, where X is the length of the IDX HList.
+   */
 
   trait ApplyIndex[A, IDX] {
     type Out

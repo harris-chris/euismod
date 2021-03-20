@@ -1461,4 +1461,29 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       assert(act === Some(exp))
     }
   }
+
+  feature("The README examples") {
+    import euismod._
+    import euismod.implicits._
+    //import euismod.ArrayDefs.IsArraySyntax._
+    object ReadMeTest extends Tag("ReadMeTest")
+    scenario("Snippet 1", ReadMeTest) {
+      val stream = new java.io.ByteArrayOutputStream()
+      Console.withOut(stream) {
+        val arrayLike2d = List(List('a', 'b', 'c'), List('d', 'e', 'f'))
+        assert(arrayLike2d.shape == 2 :: 3 :: HNil)
+        println(arrayLike2d.shape) // (2, 3)
+      }
+      assert(stream.toString == "2 :: 3 :: HNil\n")
+      //arrayLike2d = List(List("a", "b", "c"), List("d", "e", "f"))
+
+      //println(arrayLike2d.shape) // (2, 3)
+
+      //// As with numpy, slicing a dimension by a List reduces that dimension...
+      //println(arrayLike2d(List(0) :: List(0,1) :: HNil)  // List(List("a", "b"))
+
+      //// ... whereas slicing it by an Int eliminates that dimension
+      //println(arrayLike2d(0 :: List(0,1) :: HNil)  // List("a", "b")
+    }
+  }
 }
