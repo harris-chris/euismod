@@ -4,7 +4,6 @@
 [0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: A 2d 1dOf1d type that can implement IsArray, implements IsArray[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: A 2d list-of-list type that can implement IsArray, implements IsArray[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32mFeature: Implicit class conversions and typeclass syntax for IsArray implementations[0m[0m
-[0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: The user creates a valid arraylike and implements the typeclass; syntax should be available[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32mFeature: The Depth typeclass[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: Depth has type Out of Nat 1 for a 1d array[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: Depth has type Out of Nat 2 for a 2d array[0m[0m
@@ -156,6 +155,6 @@
 [0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: Broadcasting from 2d to 3d (D0, D1, 1) correctly[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32mFeature: The README examples[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[31m  Scenario: Snippet 1 *** FAILED ***[0m[0m
-[0m[[0m[0minfo[0m] [0m[0m[31m  2 :: HNil did not equal 2 :: 3 :: HNil (ArraySpec.scala:1476)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  2 :: HNil did not equal 2 :: 3 :: HNil (ArraySpec.scala:1445)[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[31m  Analysis:[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[31m  List(tail: HNil$(head: -> 3, tail: -> HNil))[0m[0m

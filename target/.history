@@ -360,3 +360,5 @@ testOnly -- -n ReadMeTest
 reload
 testOnly -- -n ReadMeTest
 test
+testOnly -- -n ReadMeTest
+test

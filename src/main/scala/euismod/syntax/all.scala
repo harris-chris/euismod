@@ -1,5 +1,4 @@
-package euismod
-package syntax
+package euismod.syntax
 
 trait AllSyntax 
   extends IsArraySyntax
