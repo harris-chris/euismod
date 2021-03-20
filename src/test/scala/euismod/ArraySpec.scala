@@ -1,4 +1,4 @@
-package euismod
+package tests
 
 import org.scalatest._
 import org.scalatest.matchers.should.Matchers
@@ -14,6 +14,10 @@ import TripleEquals._
 import org.scalactic.TolerantNumerics
 
 object Dummy {
+
+  import euismod._
+  import euismod.implicits._
+  import euismod.testingOneTwoThree
 
   def addEquality[A](f: (A, Any) => Boolean): Equality[A] = new Equality[A] {
     def areEqual(a: A, b: Any): Boolean = f(a, b)
@@ -164,7 +168,7 @@ object Dummy {
   
 
 class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
-  import ArrayDefs._
+  import euismod._
   object Current extends Tag("Current")
 
   feature("Arraylike objects should be able to implement IsArray") {

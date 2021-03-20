@@ -1,4 +1,4 @@
-[debug] [Euismod] Classpath dependencies List()
-[debug] [Euismod] Dependencies from configurations List()
-[debug] Bloop wrote the configuration of project 'Euismod' to '/data/vap/euismod/.bloop/Euismod.json'
-[success] Generated .bloop/Euismod.json
+[debug] [euismod] Classpath dependencies List()
+[debug] [euismod] Dependencies from configurations List()
+[debug] Bloop wrote the configuration of project 'euismod' to '/data/vap/euismod/.bloop/euismod.json'
+[success] Generated .bloop/euismod.json

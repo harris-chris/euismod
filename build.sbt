@@ -6,7 +6,7 @@ ThisBuild / version          := "0.1.0"
 
 addCompilerPlugin("io.tryp" % "splain" % "0.5.7" cross CrossVersion.patch)
 
-lazy val Euismod = (project in file("."))
+lazy val euismod = (project in file("."))
   .settings(
     libraryDependencies += scalaTest % Test,
     scalacOptions ++= Seq(

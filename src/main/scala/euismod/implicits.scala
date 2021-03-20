@@ -1,11 +1,11 @@
 package euismod
 
-import ArrayDefs._
-
 import shapeless._
 import shapeless.ops.hlist._
 
-object implicits {
+import ArrayDefs._
+
+package object implicits {
 
   implicit def listIsArray[T] = new IsArray[List, T] {
     type S = T
