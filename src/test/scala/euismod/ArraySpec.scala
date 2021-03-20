@@ -17,16 +17,15 @@ object Dummy {
 
   import euismod._
   import euismod.implicits._
-  import euismod.testingOneTwoThree
 
   def addEquality[A](f: (A, Any) => Boolean): Equality[A] = new Equality[A] {
     def areEqual(a: A, b: Any): Boolean = f(a, b)
   }
 
   implicit def arrDoubleEquality[A[_]]( implicit 
-    aIsArr: ArrayDefs.IsArray[A, Double],
-    fl: ArrayDefs.Flatten[A, Double],
-    sh: ArrayDefs.Shape[A[Double]],
+    aIsArr: IsArray[A, Double],
+    fl: Flatten[A, Double],
+    sh: Shape[A[Double]],
   ):Equality[A[Double]] = addEquality[A[Double]]((a, b) => b match {
     case p: A[Double] => {
       implicit val doubleEquality = TolerantNumerics.tolerantDoubleEquality(0.1)
@@ -133,8 +132,7 @@ object Dummy {
   object IsArrayImplicits {
     import Types._
     import Values._
-    import ArrayDefs._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     implicit def list1dIsArray[T] = new IsArray[List1d, T] {
       type S = T
       def getEmpty[_T] = List1d[_T](Nil: List[_T])
@@ -231,7 +229,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object DepthTest extends Tag("DepthTest")
     scenario("Depth has type Out of Nat 1 for a 1d array", DepthTest) {
       "implicitly[Depth[List1d[Double]] { type Out = Nat._1 }]" should compile
@@ -248,7 +246,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object PrettyPrintTest extends Tag("PrettyPrintTest")
     scenario("Pretty printing a 1d array produces numpy-like output", PrettyPrintTest) {
       val pp = PrettyPrint[List1d[Double]].apply(dbl1d)
@@ -268,7 +266,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object TransposeRTTest extends Tag("TransposeRTTest")
     scenario("transposing a 2d array with (0, 1) correctly flips the axes", TransposeRTTest) {
       val act = TransposeAxRT[List2d[Double]].apply(dbl2d, (0, 1))
@@ -291,7 +289,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object TransposeFromListIntTest extends Tag("TransposeFromListIntTest")
     scenario("transposing a 2d array with List(1) returns None", TransposeFromListIntTest) {
       val act = TransposeFromListInt[List2d[Double]].apply(dbl2d, List(1))
@@ -343,7 +341,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object TransposeUsingStringTest extends Tag("TransposeUsingStringTest")
     scenario("transposing a 2d array with 'ac' returns None", TransposeUsingStringTest) {
       val act = TransposeUsingString[List2d[Double]].apply(dbl2d, "ac")
@@ -365,7 +363,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object TransposeTest extends Tag("TransposeTest")
     scenario("transposing a 2d array with AllSlice correctly flips the axes", TransposeTest) {
       val act = Transpose[List2d[Double], AllSlice].apply(dbl2d)
@@ -608,7 +606,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object ConcatenateOptTest extends Tag("ConcatenateOptTest")
     scenario("Concatenating a 3d array along dimension 0 returns the correct result", ConcatenateOptTest) {
       val cn = ConcatenateOpt[List3d, List3d, Int]
@@ -677,7 +675,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object AddOptTest extends Tag("AddOptTest")
     scenario("adding a List1d to a List1d produces a combined array", AddOptTest) {
       val l1 = List1d[Int](List(1, 2, 3))
@@ -719,7 +717,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object MaskFromNumSeqTest extends Tag("MaskFromNumSeqTest")
     scenario("MaskDTFromNumSeq returns a correct mask for a 1d array", MaskFromNumSeqTest) {
       val allFalse = dbl1d.map(_ => false)
@@ -769,7 +767,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object WhereTest extends Tag("WhereTest")
     scenario("Where with a 1d arraylike and a masking array returns a correct result", WhereTest) {
       val mask = MaskFromNumSeq[List1d[Boolean], List[Int] :: HNil].apply(
@@ -815,7 +813,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object ReduceTest extends Tag("ReduceTest")
     scenario("Using Reduce on a 1d arraylike does not compile", ReduceTest) {
       "Reduce[List1d, Double, Nat._0].apply(dbl1d, lst => lst.foldLeft(0.0)(_ + _))" shouldNot compile
@@ -882,7 +880,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     scenario("A value is returned from a 2d-dimensional array using getAtN") {
       Given("A 1-dimensional arraylike, and a 2d list of 1d arraylike 2d array implementation")
       When("getAtN is called on a concrete instance of the 2d arraylike")
-      import ArrayDefs.IsArraySyntax._
+      import IsArraySyntax._
       val t2 = A1OfA1[Double](A1[Double](List(1.0, 2.0)) :: Nil)
       Then("the returned value should be the 1d arraylike")
       val t1: A1[Double] = t2.getAtN(0)
@@ -892,7 +890,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
       val t3 = Dummy.Types.List3d[Double](Dummy.Values.dblVals3d)
       When("getAtN is called on a concrete instance of the 3d arraylike")
       import Dummy.IsArrayImplicits._
-      import ArrayDefs.IsArraySyntax._
+      import IsArraySyntax._
       Then("the returned value should be the 1d arraylike")
       val t2: Dummy.Types.List2d[Double] = t3.getAtN(0)
     }
@@ -903,7 +901,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     scenario("getAtN is called on a 1d Array to recover its original elements") {
-      import ArrayDefs.IsArraySyntax._
+      import IsArraySyntax._
       val dbl1d = List1d[Double](dblVals1d)
       assert(dblVals1d.zipWithIndex.forall({case(x, i) => x == dbl1d.getAtN(i)}))
     }
@@ -914,7 +912,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
     scenario("IsArray objects are constructed from individual values using cons") {
-      import ArrayDefs.IsArraySyntax._
+      import IsArraySyntax._
       val lst0 = List1d[Double](Nil)
       val lst1 = dblVals1d(4) :: lst0
       val lst2 = dblVals1d(3) :: lst1
@@ -926,7 +924,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
   
   feature("IsArray.getEmpty[_T]") {
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
@@ -940,7 +938,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("The SubArrays typeclass") {
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
@@ -962,7 +960,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("The ArraysSort typeclass") {
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
@@ -985,7 +983,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("The FromElemsAndSubArraysOpt typeclass") {
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
@@ -1072,7 +1070,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("The FromElemsAndArrayOpt typeclass") {
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
@@ -1108,7 +1106,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("IsArray.map") {
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
@@ -1136,7 +1134,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   }
 
   feature("The ApplyIndex typeclass") {
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
@@ -1222,7 +1220,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     scenario("An 1d array of y elements should return .length of y")
     {
       assert(dbl1d.length == dbl1d.data.length)
@@ -1241,7 +1239,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     import Dummy.Types._
     import Dummy.Values._
     import Dummy.IsArrayImplicits._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     object ShapeTest extends Tag("ShapeTest")
     scenario("An 1d array of _ elements should return the correct shape", ShapeTest) {
       assert(Shape[List1d[Double]].apply(dbl1d) === dbl1d.length :: HNil)
@@ -1260,7 +1258,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("The SetElem typeclass") {
     import Dummy.Types._
     import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object SetElemTest extends Tag("SetElemTest")
     scenario("setElem on dbl3d returns an updated array", SetElemTest) {
@@ -1276,7 +1274,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("The Flatten typeclass") {
     import Dummy.Types._
     import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object FlattenTest extends Tag("FlattenTest")
     scenario("Flatten for a 1d array returns the correct List[T]", FlattenTest) {
@@ -1302,7 +1300,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("The Operate typeclass") {
     import Dummy.Types._
     import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object OperateTest extends Tag("OperateTest")
     scenario("Operate for two same-sized 1d arrays returns a correct 1d array", OperateTest) {
@@ -1344,7 +1342,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("The ExpandShapeDims typeclass") {
     import Dummy.Types._
     import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object ExpandShapeDimsTest extends Tag("ExpandShapeDimsTest")
     
@@ -1366,7 +1364,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("The ExpandDims typeclass") {
     import Dummy.Types._
     import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object ExpandDimsTest extends Tag("ExpandDimsTest")
     scenario("Correctly inserting at dim0 into a 1d array creates a 2d array", ExpandDimsTest) {
@@ -1398,7 +1396,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("The BroadcastShapesOpt typeclass") {
     import Dummy.Types._
     import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object BroadcastShapesOptTest extends Tag("BroadcastShapesOptTest")
     scenario("Broadcasting shape from smaller to larger correctly", BroadcastShapesOptTest) {
@@ -1434,7 +1432,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("The BroadcastOpt typeclass") {
     import Dummy.Types._
     import Dummy.Values._
-    import ArrayDefs.IsArraySyntax._
+    import IsArraySyntax._
     import Dummy.IsArrayImplicits._
     object BroadcastOptTest extends Tag("BroadcastOptTest")
     scenario("Broadcasting from 1d to 1d (1, L) correctly", BroadcastOptTest) {
@@ -1469,7 +1467,7 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
   feature("The README examples") {
     import euismod._
     import euismod.implicits._
-    //import euismod.ArrayDefs.IsArraySyntax._
+    //import euismod.IsArraySyntax._
     object ReadMeTest extends Tag("ReadMeTest")
     scenario("Snippet 1", ReadMeTest) {
       val stream = new java.io.ByteArrayOutputStream()

@@ -3,8 +3,6 @@ package euismod
 object ErrorsObj {
   trait IsError
 
-  import ArrayDefs._
-
   trait EinsumError
   type EinsumEither[A] = Either[EinsumError, A]
 

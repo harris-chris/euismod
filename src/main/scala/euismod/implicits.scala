@@ -3,8 +3,6 @@ package euismod
 import shapeless._
 import shapeless.ops.hlist._
 
-import ArrayDefs._
-
 package object implicits {
 
   implicit def listIsArray[T] = new IsArray[List, T] {
