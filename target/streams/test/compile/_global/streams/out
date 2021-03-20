@@ -1,11 +1,5 @@
-[0m[[0m[31merror[0m] [0m[0m/data/vap/euismod/src/test/scala/euismod/ArraySpec.scala:1474:28: value shape is not a member of List[List[Char]][0m
-[0m[[0m[31merror[0m] [0m[0m        assert(arrayLike2d.shape == 2 :: 3 :: HNil)[0m
-[0m[[0m[31merror[0m] [0m[0m                           ^[0m
-[0m[[0m[31merror[0m] [0m[0m/data/vap/euismod/src/test/scala/euismod/ArraySpec.scala:1475:29: value shape is not a member of List[List[Char]][0m
-[0m[[0m[31merror[0m] [0m[0m        println(arrayLike2d.shape) // (2, 3)[0m
-[0m[[0m[31merror[0m] [0m[0m                            ^[0m
-[0m[[0m[33mwarn[0m] [0m[0m/data/vap/euismod/src/test/scala/euismod/ArraySpec.scala:27:13: abstract type pattern A[Double] is unchecked since it is eliminated by erasure[0m
+[0m[[0m[33mwarn[0m] [0m[0m/data/vap/euismod/src/test/scala/euismod/ArraySpec.scala:30:13: abstract type pattern A[Double] is unchecked since it is eliminated by erasure[0m
 [0m[[0m[33mwarn[0m] [0m[0m    case p: A[Double] => {[0m
 [0m[[0m[33mwarn[0m] [0m[0m            ^[0m
-[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
-[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m
+[0m[[0m[33mwarn[0m] [0m[0m151 deprecations (since 3.1.0); re-run with -deprecation for details[0m
+[0m[[0m[33mwarn[0m] [0m[0mtwo warnings found[0m

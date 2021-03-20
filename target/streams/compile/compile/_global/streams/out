@@ -1,4 +1,5 @@
-[0m[[0m[31merror[0m] [0m[0m/data/vap/euismod/src/main/scala/euismod/Main.scala:5:8: not found: object Skeleton[0m
-[0m[[0m[31merror[0m] [0m[0mimport Skeleton._[0m
-[0m[[0m[31merror[0m] [0m[0m       ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
+[0m[[0m[33mwarn[0m] [0m[0m/data/vap/euismod/src/main/scala/euismod/ArrayDefs.scala:12:13: Generated class euismod.allSlice differs only in case from euismod.AllSlice.[0m
+[0m[[0m[33mwarn[0m] [0m[0m  Such classes will overwrite one another on case-insensitive filesystems.[0m
+[0m[[0m[33mwarn[0m] [0m[0mcase object allSlice extends AllSlice[0m
+[0m[[0m[33mwarn[0m] [0m[0m            ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
