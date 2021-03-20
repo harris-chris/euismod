@@ -1439,10 +1439,19 @@ class ArraySpec extends AnyFeatureSpec with GivenWhenThen with Matchers {
     object ReadMeTest extends Tag("ReadMeTest")
     scenario("Snippet 1", ReadMeTest) {
       val stream = new java.io.ByteArrayOutputStream()
-      val arrayLike2d = List(List('a', 'b', 'c'), List('d', 'e', 'f'))
-      println(arrayLike2d(1).shape)
-      println(arrayLike2d.shape) // (2, 3)
-      assert(arrayLike2d.shape == 2 :: 3 :: HNil)
+      val arrayLike2d: List[List[Char]] = List(List('a', 'b', 'c'), List('d', 'e', 'f'))
+      val c = implicitly[IsArray[({ type L[A] = List[List[A]] })#L, Char] { type S = List[Char] }] 
+      val d = implicitly[IsArray[List, Char] { type S = Char }]
+      val e = implicitly[IsArray[List, List[Char]] { type S = List[Char] }]
+      //val e = implicitly[IsArray[({ type L[A] = List[List[A]] })#L, Char] { type S = Char }]
+      //val e = implicitly[IsArray[
+      //val e = implicitly[IsArray[List, Char] {type S = List[Char]}]
+      //println(c.shape(arrayLike2d))
+      //println("OR THIS")
+      println(arrayLike2d.shape)
+      //val arrayLike2d = List2d[Char](List(List('a', 'b', 'c'), List('d', 'e', 'f')))
+      //println(arrayLike2d.shape) // (2, 3)
+      //assert(arrayLike2d.shape == 2 :: 3 :: HNil)
       //Console.withOut(stream) {
         //val arrayLike2d = List(List('a', 'b', 'c'), List('d', 'e', 'f'))
         //assert(arrayLike2d.shape == 2 :: 3 :: HNil)

@@ -1,24 +1,25 @@
 package euismod.instances
 
+import shapeless.<:!<
+
 import euismod._
 
 trait ListInstances {
 
-  implicit def listIsArray[T] = new IsArray[List, T] {
-    type S = T
-    def getEmpty[_T] = Nil: List[_T]
-    def getAtN(a: List[T], n: Int) = a(n)
-    def length(a: List[T]) = a.length
-    def cons(a: List[T], sub: S) = sub :: a
-  }
-
-  type LL[T] = List[List[T]]
-  implicit def listOfListsIsArray[T] = new IsArray[LL, T] {
+  implicit def listOfListsIsArray[T] = new IsArray[({ type L[A] = List[List[A]] })#L, T] {
     type S = List[T]
     def getEmpty[_T] = Nil: List[List[_T]]
     def getAtN(a: List[List[T]], n: Int) = a(n)
     def length(a: List[List[T]]) = a.length
     def cons(a: List[List[T]], sub: S): List[List[T]] = sub :: a
+  }
+
+  implicit def listIsArray[T](implicit ev: T <:!< List[_]) = new IsArray[List, T] {
+    type S = T
+    def getEmpty[_T] = Nil: List[_T]
+    def getAtN(a: List[T], n: Int) = a(n)
+    def length(a: List[T]) = a.length
+    def cons(a: List[T], sub: S) = sub :: a
   }
 
   case class List1d[T] (

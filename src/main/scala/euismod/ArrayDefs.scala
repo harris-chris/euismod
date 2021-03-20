@@ -705,20 +705,23 @@ object Shape {
       def apply(a: A, l: L): Out = f(a, l)
     }
 
-    implicit def gsIfSIsEle[A[_], T, _S, L <: HList, O <: HList](implicit 
-      ai: IsArray[A, T] { type S = T },
-      rv: Reverse[Int #: L] { type Out = O },
-    ): RecurAux[A[T], L, O] = {
-      println("gsIfSIsEle")
-      recur((a, l) => rv(ai.length(a) :: l))
-    }
-
     implicit def gsIfSIsArr[A[_], T, S0[_], L <: HList](implicit 
       ai: IsArray[A, T] { type S = S0[T] },
       gsForS: ShapeRecur[S0[T], Int #: L],
     ): RecurAux[A[T], L, gsForS.Out] = recur((a, l) => {
       println("gsIfSIsArr")
       gsForS.apply(ai.getAtN(a, 0), ai.length(a) :: l)
+    }
+    )
+
+    implicit def gsIfSIsEle[A[_], T, L <: HList, O <: HList](implicit 
+      ai: IsArray[A, T] { type S = T },
+      rv: Reverse[Int #: L] { type Out = O },
+    ): RecurAux[A[T], L, O] =  recur((a, l) => {
+      println(ai.getAtN(a, 0))
+      println("LIST SUBS")
+      println(ai.flatten(a))
+      rv(ai.length(a) :: l)
     }
     )
   }

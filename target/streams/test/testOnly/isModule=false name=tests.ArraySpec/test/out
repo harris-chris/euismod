@@ -32,7 +32,4 @@
 [0m[[0m[0minfo[0m] [0m[0m[32mFeature: The BroadcastShapesOpt typeclass[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32mFeature: The BroadcastOpt typeclass[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32mFeature: The README examples[0m[0m
-[0m[[0m[0minfo[0m] [0m[0m[31m  Scenario: Snippet 1 *** FAILED ***[0m[0m
-[0m[[0m[0minfo[0m] [0m[0m[31m  2 :: HNil did not equal 2 :: 3 :: HNil (ArraySpec.scala:1476)[0m[0m
-[0m[[0m[0minfo[0m] [0m[0m[31m  Analysis:[0m[0m
-[0m[[0m[0minfo[0m] [0m[0m[31m  List(tail: HNil$(head: -> 3, tail: -> HNil))[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m  Scenario: Snippet 1[0m[0m
